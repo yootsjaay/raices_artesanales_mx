@@ -34,6 +34,6 @@ class Categoria extends Model
 
 	public function artesanias()
 	{
-		return $this->hasMany(Artesania::class, 'categorias_id');
+		return $this->hasMany(Artesania::class, 'categoria_id');
 	}
 }

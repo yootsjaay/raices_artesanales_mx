@@ -24,7 +24,7 @@ use Illuminate\Database\Eloquent\Model;
  *
  * @package App\Models
  */
-class Ubicacione extends Model
+class Ubicacion extends Model
 {
 	protected $table = 'ubicaciones';
 
@@ -34,8 +34,16 @@ class Ubicacione extends Model
 		'descripcion'
 	];
 
-	public function artesanias()
-	{
-		return $this->hasMany(Artesania::class, 'ubucacion_id');
-	}
+	 public function artesanias()
+    {
+        // Una ubicación tiene muchas artesanías (directamente, a través de ubicacion_id en la tabla artesanias)
+        return $this->hasMany(Artesania::class, 'ubicacion_id');
+    }
+
+    // <--- ¡AÑADIR ESTA NUEVA FUNCIÓN PARA LA RELACIÓN ARTESANOS! --->
+    public function artesanos()
+    {
+        // Una ubicación tiene muchos artesanos (a través de ubicacion_id en la tabla artesanos)
+        return $this->hasMany(Artesano::class, 'ubicacion_id');
+    }
 }

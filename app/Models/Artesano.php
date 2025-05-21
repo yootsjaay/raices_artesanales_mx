@@ -27,6 +27,6 @@ class Artesano extends Model
 
 	public function artesanias()
 	{
-		return $this->hasMany(Artesania::class, 'artesanos_id');
+		return $this->hasMany(Artesania::class, 'artesano_id');
 	}
 }

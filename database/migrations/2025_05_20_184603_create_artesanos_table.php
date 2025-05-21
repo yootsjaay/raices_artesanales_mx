@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('artesanos', function (Blueprint $table) {
             $table->id();
             $table->string('nombre');
-            $table->string('biografica')->nullable;
+            $table->string('biografia')->nullable;
             $table->string('contacto_email')->unique()->nullable;
             $table->string('contacto_telefono')->nullable;
             $table->string('red_social_facebook')->nullable;

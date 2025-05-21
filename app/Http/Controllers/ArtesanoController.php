@@ -13,9 +13,9 @@ class ArtesanoController extends Controller
         return view('artesanos.index', compact('artesanos'));
     }
 
-    public function show(Artesano $artesano)
+     public function show(Artesano $artesano)
     {
-        $artesano->load(['artesanias', 'ubicacion']); // Carga sus artesanías y su ubicación
+        $artesano->load(['ubicacion', 'artesanias.categoria']); // Carga ubicación, y artesanías con sus categorías
         return view('artesanos.show', compact('artesano'));
     }
 }

@@ -15,28 +15,31 @@ return new class extends Migration
             $table->id();
             $table->string('nombre');
             $table->text('descripcion');
-            $table->decimal('precio',8,2);
+            $table->decimal('precio', 8, 2);
             $table->integer('stock')->default(0);
-            $table->string('imagen_principal')->nullable;
-            $table->string('imagen_adicionales')->nullable;
-            $table->string('materiales')->nullable;
-            $table->string('dimensiones')->nullable;
-            $table->string('historia_piezas')->nullable;
-            //Claves Foreaneas
+            $table->string('imagen_principal')->nullable(); // ¡CORREGIDO!
+            $table->string('imagen_adicionales')->nullable(); // ¡CORREGIDO!
+            $table->string('materiales')->nullable(); // ¡CORREGIDO!
+            $table->string('dimensiones')->nullable(); // ¡CORREGIDO!
+            $table->string('historia_piezas')->nullable(); // ¡CORREGIDO!
 
-            //Conexion con los artesanos 
-            $table->foreignId('artesanos_id')
-            ->constrained('artesanos')
-            ->onDelete('cascade');
-            //conexion con la categoria
-            $table->foreignId('categorias_id')
-            ->constrained('categorias')
-            ->onDelete('cascade');
+            // Claves Foráneas
+            // Conexión con los artesanos
+            $table->foreignId('artesano_id') // ¡CORREGIDO: artesanos_id a artesano_id!
+                  ->constrained('artesanos')
+                  ->onDelete('cascade'); // ¡CORREGIDO: OnDelete a onDelete!
 
-            //conexion con la ubucacion
-            $table->foreignId('ubucacion_id')
-            ->constrained('ubicaciones')
-            ->OnDelete('set null');
+            // Conexión con la categoria
+            $table->foreignId('categoria_id') // ¡CORREGIDO: categorias_id a categoria_id!
+                  ->constrained('categorias')
+                  ->onDelete('cascade'); // ¡CORREGIDO!
+
+            //conexion con la ubicacion
+            $table->foreignId('ubicacion_id')
+                  ->nullable() // <--- ¡AÑADIR ESTO!
+                  ->constrained('ubicaciones')
+                  ->onDelete('set null');
+
 
             $table->timestamps();
         });
