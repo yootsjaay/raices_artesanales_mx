@@ -29,4 +29,8 @@ class Artesano extends Model
 	{
 		return $this->hasMany(Artesania::class, 'artesano_id');
 	}
+	 public function ubicacion()
+    {
+        return $this->belongsTo(Ubicacion::class, 'ubicacion_id'); // Asegúrate que la FK sea 'ubicacion_id'
+    }
 }

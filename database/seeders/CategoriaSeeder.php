@@ -11,27 +11,30 @@ class CategoriaSeeder extends Seeder
     /**
      * Run the database seeds.
      */
-   public function run(): void
+    public function run(): void
     {
         Categoria::create([
             'nombre' => 'Alebrijes',
-            'descripcion' => 'Figuras fantásticas talladas en madera y pintadas a mano.'
+            'descripcion' => 'Figuras fantásticas talladas en madera de copal y pintadas con colores vibrantes.',
+            'imagen' => 'images/categorias/alebrijes.jpg', // Agrega la ruta aquí
         ]);
+
         Categoria::create([
-            'nombre' => 'Barro Negro',
-            'descripcion' => 'Cerámica de arcilla negra pulida, distintiva de Oaxaca.'
+            'nombre' => 'Barro Negro', // ¡NUEVA CATEGORÍA AÑADIDA!
+            'descripcion' => 'Cerámica de arcilla negra, pulida y quemada para un acabado metálico único.',
+            'imagen' => 'images/categorias/barro-negro.jpg', // Asegúrate de tener esta imagen
         ]);
+
+        Categoria::create([
+            'nombre' => 'Barro Rojo', // Asegúrate que este es el nombre que quieres usar
+            'descripcion' => 'Piezas de cerámica de San Marcos Tlapazola, ideales para cocina y decoración.',
+            'imagen' => 'images/categorias/barro-rojo.jpg', // Agrega la ruta aquí
+        ]);
+
         Categoria::create([
             'nombre' => 'Textiles',
-            'descripcion' => 'Prendas y objetos de tela bordados o tejidos artesanalmente.'
-        ]);
-        Categoria::create([
-            'nombre' => 'Joyería',
-            'descripcion' => 'Piezas únicas de plata y otros materiales con diseños tradicionales.'
-        ]);
-        Categoria::create([
-            'nombre' => 'Alfarería de Barro Rojo',
-            'descripcion' => 'Utensilios y objetos decorativos de barro cocido con acabados rústicos.'
+            'descripcion' => 'Huipiles, rebozos y tapetes tejidos a mano con diseños tradicionales y modernos.',
+            'imagen' => 'images/categorias/textiles.jpg', // Agrega la ruta aquí
         ]);
     }
 }

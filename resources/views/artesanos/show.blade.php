@@ -59,7 +59,7 @@
                             @if ($artesania->imagen_principal)
                                 <img src="{{ asset('storage/' . $artesania->imagen_principal) }}" alt="{{ $artesania->nombre }}" class="w-full h-48 object-cover object-center">
                             @else
-                                <img src="{{ asset('images/placeholder.jpg') }}" alt="Imagen no disponible" class="w-full h-48 object-cover object-center bg-gray-200">
+                                <img src="{{ asset('images/ placeholder.jpg') }}" alt="Imagen no disponible" class="w-full h-48 object-cover object-center bg-gray-200">
                             @endif
                         </a>
                         <div class="p-4">

@@ -5,6 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>@yield('title', 'Raíces Artesanales MX - Colores de Oaxaca')</title>
     <link rel="icon" href="{{ asset('favicon.ico') }}" type="image/x-icon">
+
+    {{-- Lightbox2 CSS --}}
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/lightbox2/2.11.3/css/lightbox.min.css" rel="stylesheet">
+
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @yield('styles')
 </head>
@@ -32,9 +36,9 @@
     <footer class="bg-oaxaca-navbar-blue text-oaxaca-text-white py-8 mt-12"> {{-- Fondo: Azul profundo --}}
         <div class="max-w-7xl mx-auto px-4 text-center">
             <h3 class="text-2xl font-semibold mb-4">Contáctanos</h3>
-            <p>Email: contacto@raicesartesanales.mx</p>
-            <p>Teléfono: +52 951 XXX XXXX</p>
-            <p>Visítanos: Oaxaca, México</p>
+            <p>Email: raicesartesanales@gmail.com</p>
+            <p>Teléfono: +52 951 453 7503</p>
+            <p>Visítanos: Oaxaca, México , calle humbolt 104</p>
             <div class="mt-4">
                 <a href="#" class="text-oaxaca-navbar-orange hover:text-oaxaca-text-white mx-2 transition-colors">Facebook</a> {{-- Enlaces y hover --}}
                 <a href="#" class="text-oaxaca-navbar-orange hover:text-oaxaca-text-white mx-2 transition-colors">Instagram</a>
@@ -43,6 +47,14 @@
         </div>
     </footer>
 
-    @yield('scripts')
+    {{-- Lightbox2 JavaScript y su inicialización deben ir aquí, justo antes del cierre del <body> --}}
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lightbox2/2.11.3/js/lightbox-plus-jquery.min.js"></script>
+    <script>
+        lightbox.option({
+            'resizeDuration': 200,
+            'wrapAround': true
+        })
+    </script>
+    @yield('scripts') {{-- Aquí se insertarán otros scripts específicos de las vistas --}}
 </body>
 </html>

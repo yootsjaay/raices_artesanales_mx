@@ -15,8 +15,7 @@
         <h2 class="text-4xl md:text-5xl font-bold text-center text-oaxaca-title-pink mb-10">Nuestras Artesanías</h2> {{-- Título en rosa mexicano --}}
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
             <div class="bg-oaxaca-product-turquoise-light rounded-lg shadow-lg overflow-hidden transform transition-all duration-300 hover:scale-105 border-2 border-oaxaca-detail-emerald"> {{-- Fondo turquesa suave, borde esmeralda --}}
-                <img src="{{ asset('images/alebrije_placeholder.jpg') }}" alt="Alebrije" class="gallery-img">
-                <div class="p-6">
+                <img src="{{ asset('storage/images/placeholder/placeholder-alebrije.jpg') }}" alt="Alebrije" class="gallery-img">                <div class="p-6">
                     <h3 class="text-2xl font-semibold text-oaxaca-title-pink mb-2">Alebrijes</h3> {{-- Título de tarjeta en rosa mexicano --}}
                     <p class="text-oaxaca-text-dark-gray text-md leading-relaxed">Figuras fantásticas talladas en madera de copal y pintadas con colores vibrantes, inspiradas en la tradición oaxaqueña.</p>
                     <p class="text-oaxaca-navbar-orange font-bold text-xl mt-3">$500 - $5,000 MXN</p> {{-- Precios en naranja quemado --}}
@@ -27,24 +26,24 @@
             </div>
 
             <div class="bg-oaxaca-product-turquoise-light rounded-lg shadow-lg overflow-hidden transform transition-all duration-300 hover:scale-105 border-2 border-oaxaca-detail-emerald">
-                <img src="{{ asset('images/barro_placeholder.jpg') }}" alt="Barro Rojo" class="gallery-img">
+                <img src="{{ asset('storage/images/placeholder/barros_placeholder.jpg') }}" alt="Barro Rojo" class="gallery-img">
                 <div class="p-6">
-                    <h3 class="text-2xl font-semibold text-oaxaca-title-pink mb-2">Barro Rojo</h3>
+                    <h3 class="text-2xl font-semibold text-oaxaca-title-pink mb-2">Barros</h3>
                     <p class="text-oaxaca-text-dark-gray text-md leading-relaxed">Piezas de cerámica pintadas a mano con colores vivos, reflejo de la rica herencia cultural mexicana.</p>
                     <p class="text-oaxaca-navbar-orange font-bold text-xl mt-3">$200 - $2,000 MXN</p>
-                    <a href="{{ route('categorias.show', 2) }}" class="mt-5 inline-block w-full bg-oaxaca-button-mustard text-oaxaca-text-dark-gray px-6 py-3 rounded-lg hover:bg-oaxaca-button-mustard-hover transition-colors text-center text-lg font-semibold shadow-md">
+                    <a href="{{ route('categorias.show', 3) }}" class="mt-5 inline-block w-full bg-oaxaca-button-mustard text-oaxaca-text-dark-gray px-6 py-3 rounded-lg hover:bg-oaxaca-button-mustard-hover transition-colors text-center text-lg font-semibold shadow-md">
                         Ver Más
                     </a>
                 </div>
             </div>
-
+           
             <div class="bg-oaxaca-product-turquoise-light rounded-lg shadow-lg overflow-hidden transform transition-all duration-300 hover:scale-105 border-2 border-oaxaca-detail-emerald">
-                <img src="{{ asset('images/textil_placeholder.jpg') }}" alt="Ropa Tradicional" class="gallery-img">
+                <img src="{{ asset('storage/images/placeholder/textil_placeholder.jpg') }}" alt="Ropa Tradicional" class="gallery-img">
                 <div class="p-6">
                     <h3 class="text-2xl font-semibold text-oaxaca-title-pink mb-2">Ropa Tradicional</h3>
                     <p class="text-oaxaca-text-dark-gray text-md leading-relaxed">Huipiles y rebozos bordados a mano, llenos de color y tradición, perfectos para cualquier ocasión.</p>
                     <p class="text-oaxaca-navbar-orange font-bold text-xl mt-3">$800 - $3,000 MXN</p>
-                    <a href="{{ route('categorias.show', 3) }}" class="mt-5 inline-block w-full bg-oaxaca-button-mustard text-oaxaca-text-dark-gray px-6 py-3 rounded-lg hover:bg-oaxaca-button-mustard-hover transition-colors text-center text-lg font-semibold shadow-md">
+                    <a href="{{ route('categorias.show', 4) }}" class="mt-5 inline-block w-full bg-oaxaca-button-mustard text-oaxaca-text-dark-gray px-6 py-3 rounded-lg hover:bg-oaxaca-button-mustard-hover transition-colors text-center text-lg font-semibold shadow-md">
                         Ver Más
                     </a>
                 </div>

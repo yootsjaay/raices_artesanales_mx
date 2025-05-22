@@ -12,8 +12,19 @@
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
                 @foreach ($categorias as $categoria)
                     <div class="bg-oaxaca-product-turquoise-light rounded-lg shadow-lg overflow-hidden transform transition-all duration-300 hover:scale-105 border-2 border-oaxaca-detail-emerald">
-                        {{-- Puedes añadir una imagen representativa para la categoría si tienes una --}}
-                        {{-- <img src="{{ asset('images/categorias/' . Str::slug($categoria->nombre) . '.jpg') }}" alt="{{ $categoria->nombre }}" class="gallery-img"> --}}
+                        {{-- Muestra la imagen de la categoría si existe, o el placeholder --}}
+                        @if ($categoria->imagen)
+                            {{-- Ruta corregida: $categoria->imagen ya contiene 'images/categorias/nombre.jpg' --}}
+                            <img src="{{ asset('storage/' . $categoria->imagen) }}" 
+                                 alt="{{ $categoria->nombre }}" 
+                                 class="w-full h-48 object-cover object-center">
+                        @else
+                            {{-- Usamos un placeholder genérico si la categoría no tiene imagen --}}
+                            <img src="{{ asset('storage/images/categorias/alebrijes.jpg') }}" 
+                                 alt="{{ $categoria->nombre }} (Sin imagen)" 
+                                 class="w-full h-48 object-cover object-center bg-gray-200">
+                        @endif
+
                         <div class="p-6">
                             <h2 class="text-2xl font-semibold text-oaxaca-title-pink mb-2">{{ $categoria->nombre }}</h2>
                             <p class="text-oaxaca-text-dark-gray text-md leading-relaxed mb-4">{{ $categoria->descripcion }}</p>

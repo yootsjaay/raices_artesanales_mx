@@ -29,7 +29,8 @@ class Categoria extends Model
 
 	protected $fillable = [
 		'nombre',
-		'descripcion'
+		'descripcion',
+		'imagen'
 	];
 
 	public function artesanias()

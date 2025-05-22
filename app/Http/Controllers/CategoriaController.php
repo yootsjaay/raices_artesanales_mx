@@ -9,7 +9,7 @@ class CategoriaController extends Controller
 {
     public function index()
     {
-        $categorias = Categoria::with('artesanias')->get(); // Carga las artesanías de cada categoría
+        $categorias = Categoria::with('artesanias')->paginate(9);
         return view('categorias.index', compact('categorias'));
     }
 
