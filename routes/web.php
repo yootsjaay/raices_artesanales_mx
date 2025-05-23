@@ -6,8 +6,13 @@ use App\Http\Controllers\ArtesaniaController;
 use App\Http\Controllers\ArtesanoController;
 use App\Http\Controllers\CategoriaController;
 use App\Http\Controllers\UbicacionController;
-use App\Http\Controllers\Auth\AuthenticatedSessionController; // Necesario si vas a modificar el redireccionamiento post-login de Breeze
 
+use App\Http\Controllers\Auth\AuthenticatedSessionController; // Necesario si vas a modificar el redireccionamiento post-login de Breeze
+use App\Http\Controllers\Admin\ArtesaniaController as AdminArtesaniaController; // <-- ¡Importa el nuevo controlador!
+use App\Http\Controllers\Admin\UbicacionController as AdminUbicacionController;
+use App\Http\Controllers\Admin\CategoriaController as AdminCategoriaController; // <-- ¡Añade esta línea!
+// ... (otras importaciones)
+// ... (otras importaciones)
 Route::get('/', function () {
     return view('welcome');
 });
@@ -15,6 +20,19 @@ Route::get('/', function () {
 Route::get('/dashboard', function () {
     return view('dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
+
+Route::prefix('admin')->name('admin.')->group(function(){
+     Route::get('artesanias/import', [AdminArtesaniaController::class, 'importForm'])->name('artesanias.import.form');
+    Route::post('artesanias/import', [AdminArtesaniaController::class, 'import'])->name('artesanias.import');
+
+    Route::resource('artesanias', AdminArtesaniaController::class);
+    Route::resource('ubicacion', AdminUbicacionController::class);
+    Route::resource('categorias', AdminCategoriaController::class);
+   
+
+});
+
+
 // Rutas para el Catálogo de Artesanías
 Route::get('/artesanias', [ArtesaniaController::class, 'index'])->name('artesanias.index');
 Route::get('/artesanias/{artesania}', [ArtesaniaController::class, 'show'])->name('artesanias.show');

@@ -14,19 +14,19 @@
 
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-8">
                         {{-- Tarjeta de gestión de Artesanías --}}
-                        <a href="#" class="block p-6 bg-blue-100 rounded-lg shadow-md hover:bg-blue-200 transition-colors duration-200">
+                        <a href="{{ route('admin.artesanias.index') }}" class="block p-6 bg-blue-100 rounded-lg shadow-md hover:bg-blue-200 transition-colors duration-200">
                             <h4 class="text-xl font-semibold text-blue-800 mb-2">Gestionar Artesanías</h4>
                             <p class="text-blue-700">Añade, edita o elimina productos artesanales de tu catálogo.</p>
                         </a>
 
                         {{-- Tarjeta de gestión de Categorías --}}
-                        <a href="#" class="block p-6 bg-green-100 rounded-lg shadow-md hover:bg-green-200 transition-colors duration-200">
+                        <a href="{{route('admin.categorias.index')}}" class="block p-6 bg-green-100 rounded-lg shadow-md hover:bg-green-200 transition-colors duration-200">
                             <h4 class="text-xl font-semibold text-green-800 mb-2">Gestionar Categorías</h4>
                             <p class="text-green-700">Administra las categorías para organizar tus artesanías.</p>
                         </a>
 
                         {{-- Tarjeta de gestión de Ubicaciones --}}
-                        <a href="#" class="block p-6 bg-purple-100 rounded-lg shadow-md hover:bg-purple-200 transition-colors duration-200">
+                        <a href="{{route('admin.ubicacion.index')}}" class="block p-6 bg-purple-100 rounded-lg shadow-md hover:bg-purple-200 transition-colors duration-200">
                             <h4 class="text-xl font-semibold text-purple-800 mb-2">Gestionar Ubicaciones</h4>
                             <p class="text-purple-700">Define y organiza los lugares de origen de tus artesanías.</p>
                         </a>
