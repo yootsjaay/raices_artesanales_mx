@@ -50,11 +50,7 @@ class Artesania extends Model
         'ubicacion_id'    // Asegúrate de que coincida con la migración
     ];
 
-    public function artesano()
-    {
-        return $this->belongsTo(Artesano::class, 'artesano_id'); // Asegúrate que la FK sea 'artesano_id'
-    }
-
+    
     public function categoria()
     {
         return $this->belongsTo(Categoria::class, 'categoria_id'); // Asegúrate que la FK sea 'categoria_id'

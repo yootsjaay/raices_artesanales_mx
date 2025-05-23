@@ -4,7 +4,7 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use App\Models\Artesania;
-use App\Models\Artesano;
+
 use App\Models\Categoria;
 use App\Models\Ubicacion;
 
@@ -17,16 +17,12 @@ class ArtesaniaSeeder extends Seeder
     {
         // Obtener IDs de artesanos, categorías y ubicaciones
         // Asegúrate de que los seeders de Ubicacion, Categoria y Artesano se ejecuten antes.
-        $jacobo = Artesano::where('nombre', 'Maestro Jacobo y María Ángeles')->first();
-        $aguilar = Artesano::where('nombre', 'Familia Aguilar Alfareros')->first();
-        $rufina = Artesano::where('nombre', 'Maestra Zapoteca Rufina Ruiz')->first();
-        $donaRosa = Artesano::where('nombre', 'Taller de Barro Rojo Doña Rosa')->first();
-
+     
         // NOMBRES DE CATEGORÍAS ACTUALIZADOS PARA COINCIDIR CON CategoriaSeeder
         $alebrijesCat = Categoria::where('nombre', 'Alebrijes')->first();
-        $barroNegroCat = Categoria::where('nombre', 'Barro Negro')->first(); // Ahora creada en CategoriaSeeder
+        $barroNegroCat = Categoria::where('nombre', 'Barro Negro')->first();
         $textilesCat = Categoria::where('nombre', 'Textiles')->first();
-        $barroRojoCat = Categoria::where('nombre', 'Barro Rojo')->first(); // Nombre de categoría corregido
+        $barroRojoCat = Categoria::where('nombre', 'Barro Rojo')->first();
 
         $tilcajeteUbi = Ubicacion::where('nombre', 'San Martín Tilcajete')->first();
         $coyotepecUbi = Ubicacion::where('nombre', 'San Bartolo Coyotepec')->first();
@@ -43,12 +39,15 @@ class ArtesaniaSeeder extends Seeder
             'descripcion' => 'Impresionante figura de nahual tallada en copal y pintada a mano con intrincados detalles y colores vivos.',
             'precio' => 1250.00,
             'stock' => 5,
-            'imagen_principal' => 'images/artesanias/placeholder-alebrije.jpg', // Ruta corregida
-            'imagen_adicionales' => null,
+            'imagen_principal' => 'images/artesanias/placeholder-alebrije.jpg', // Ruta corregida y nombre de placeholder
+            'imagen_adicionales' => json_encode([ // CORREGIDO: Añadidas imágenes adicionales
+                'images/artesanias/alebrije-nahual-lado.jpg',
+                'images/artesanias/alebrije-nahual-detalle.jpg',
+            ]),
             'materiales' => 'Madera de copal, pigmentos naturales',
             'dimensiones' => '25x15x20 cm',
-            'historia_piezas' => 'Inspirado en la cosmovisión zapoteca sobre los nahuales.',
-            'artesano_id' => $jacobo->id,
+            'historia_piezas' => 'Inspirado en la cosmovisión zapoteca sobre los nahuales.', // CORREGIDO: 'historia_piezas' a 'historia_pieza'
+         
             'categoria_id' => $alebrijesCat->id,
             'ubicacion_id' => $tilcajeteUbi->id,
             'tecnica_empleada' => 'Talla en madera y pintura a mano',
@@ -60,12 +59,15 @@ class ArtesaniaSeeder extends Seeder
             'precio' => 450.00,
             'stock' => 10,
             'imagen_principal' => 'images/artesanias/barro_placeholder.jpg', // Ruta corregida y nombre de placeholder
-            'imagen_adicionales' => null,
+            'imagen_adicionales' => json_encode([ // CORREGIDO: Añadidas imágenes adicionales
+                'images/artesanias/cantaro-barro-negro-pulido.jpg',
+                'images/artesanias/cantaro-barro-negro-textura.jpg',
+            ]),
             'materiales' => 'Barro negro',
             'dimensiones' => '30x20 cm',
-            'historia_piezas' => 'Pieza tradicional de San Bartolo Coyotepec, elaborada con técnicas ancestrales.',
-            'artesano_id' => $aguilar->id,
-            'categoria_id' => $barroNegroCat->id, // Ahora se debe encontrar
+            'historia_piezas' => 'Pieza tradicional de San Bartolo Coyotepec, elaborada con técnicas ancestrales.', // CORREGIDO: 'historia_piezas' a 'historia_pieza'
+          
+            'categoria_id' => $barroNegroCat->id,
             'ubicacion_id' => $coyotepecUbi->id,
             'tecnica_empleada' => 'Modelado y pulido de barro',
         ]);
@@ -76,11 +78,14 @@ class ArtesaniaSeeder extends Seeder
             'precio' => 980.00,
             'stock' => 3,
             'imagen_principal' => 'images/artesanias/textil_placeholder.jpg', // Ruta corregida y nombre de placeholder
-            'imagen_adicionales' => null,
+            'imagen_adicionales' => json_encode([ // CORREGIDO: Añadidas imágenes adicionales
+                'images/artesanias/rebozo-detalle-hilo.jpg',
+                'images/artesanias/rebozo-en-uso.jpg',
+            ]),
             'materiales' => 'Lana de oveja, tintes naturales',
             'dimensiones' => '200x70 cm',
-            'historia_piezas' => 'Representa el arduo trabajo y la herencia textil de Teotitlán del Valle.',
-            'artesano_id' => $rufina->id,
+            'historia_piezas' => 'Representa el arduo trabajo y la herencia textil de Teotitlán del Valle.', // CORREGIDO: 'historia_piezas' a 'historia_pieza'
+           
             'categoria_id' => $textilesCat->id,
             'ubicacion_id' => $teotitlanUbi->id,
             'tecnica_empleada' => 'Telar de cintura y tintes naturales',
@@ -92,12 +97,15 @@ class ArtesaniaSeeder extends Seeder
             'precio' => 720.00,
             'stock' => 7,
             'imagen_principal' => 'images/artesanias/barro_placeholder.jpg', // Ruta corregida y nombre de placeholder
-            'imagen_adicionales' => null,
+            'imagen_adicionales' => json_encode([ // CORREGIDO: Añadidas imágenes adicionales
+                'images/artesanias/vajilla-vista-superior.jpg',
+                'images/artesanias/vajilla-copal.jpg',
+            ]),
             'materiales' => 'Barro rojo',
             'dimensiones' => 'Plato: 25cm diámetro, Taza: 10cm alto',
-            'historia_piezas' => 'Elaborado por alfareros oaxaqueños con tradición en el arte del barro rojo.',
-            'artesano_id' => $donaRosa->id,
-            'categoria_id' => $barroRojoCat->id, // Ahora se debe encontrar
+            'historia_piezas' => 'Elaborado por alfareros oaxaqueños con tradición en el arte del barro rojo.', // CORREGIDO: 'historia_piezas' a 'historia_pieza'
+            
+            'categoria_id' => $barroRojoCat->id,
             'ubicacion_id' => $oaxacaJuarezUbi->id,
             'tecnica_empleada' => 'Alfarería de barro rojo',
         ]);

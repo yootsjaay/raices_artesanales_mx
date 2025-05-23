@@ -13,10 +13,9 @@
                 <div class="bg-white rounded-xl shadow-lg overflow-hidden transform transition-all duration-300 hover:scale-105 hover:shadow-xl">
                     <a href="{{ route('artesanias.show', $artesania->id) }}">
                         @if ($artesania->imagen_principal)
-                            {{-- Asegúrate de que la ruta de almacenamiento esté configurada. `php artisan storage:link` --}}
                             <img src="{{ asset('storage/' . $artesania->imagen_principal) }}" alt="{{ $artesania->nombre }}" class="w-full h-56 object-cover object-center">
                         @else
-                            <img src="{{ asset('images/placeholder.jpg') }}" alt="Imagen no disponible" class="w-full h-56 object-cover object-center bg-gray-200">
+                            <img src="{{ asset('storage/images/artesanias/placeholder-alebrije.jpg') }}" alt="Imagen no disponible" class="w-full h-56 object-cover object-center bg-gray-200">
                         @endif
                     </a>
                     <div class="p-5">
@@ -26,9 +25,7 @@
                         <p class="text-xl text-gray-700 font-semibold mb-3">${{ number_format($artesania->precio, 2) }} MXN</p>
 
                         <div class="text-sm text-gray-600 space-y-1">
-                            @if ($artesania->artesano)
-                                <p>Por: <a href="{{ route('artesanos.show', $artesania->artesano->id) }}" class="hover:underline text-blue-600">{{ $artesania->artesano->nombre }}</a></p>
-                            @endif
+                            {{-- Eliminado: @if ($artesania->artesano) <p>Por: <a href="{{ route('artesanos.show', $artesania->artesano->id) }}" class="hover:underline text-blue-600">{{ $artesania->artesano->nombre }}</a></p> @endif --}}
                             @if ($artesania->categoria)
                                 <p>Categoría: <a href="{{ route('categorias.show', $artesania->categoria->id) }}" class="hover:underline text-blue-600">{{ $artesania->categoria->nombre }}</a></p>
                             @endif

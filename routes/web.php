@@ -19,9 +19,6 @@ Route::get('/dashboard', function () {
 Route::get('/artesanias', [ArtesaniaController::class, 'index'])->name('artesanias.index');
 Route::get('/artesanias/{artesania}', [ArtesaniaController::class, 'show'])->name('artesanias.show');
 
-// Rutas para el Listado y Detalles de Artesanos
-Route::get('/artesanos', [ArtesanoController::class, 'index'])->name('artesanos.index');
-Route::get('/artesanos/{artesano}', [ArtesanoController::class, 'show'])->name('artesanos.show');
 
 // Rutas para el Listado y Detalles de Categorías
 Route::get('/categorias', [CategoriaController::class, 'index'])->name('categorias.index');

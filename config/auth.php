@@ -35,12 +35,18 @@ return [
     |
     */
 
-    'guards' => [
-        'web' => [
-            'driver' => 'session',
-            'provider' => 'users',
-        ],
+   'guards' => [
+    'web' => [
+        'driver' => 'session',
+        'provider' => 'users',
     ],
+
+    'sanctum' => [ // This might exist if you installed Sanctum, but 'web' should be the default
+        'driver' => 'sanctum',
+        'provider' => 'users',
+    ],
+],
+    
 
     /*
     |--------------------------------------------------------------------------

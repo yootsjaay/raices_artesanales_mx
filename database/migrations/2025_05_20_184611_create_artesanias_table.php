@@ -25,11 +25,7 @@ return new class extends Migration
             $table->string('tecnica_empleada')->nullable();
 
             // Claves Foráneas
-            // Conexión con los artesanos
-            $table->foreignId('artesano_id') // : artesanos_id a artesano_id!
-                  ->constrained('artesanos')
-                  ->onDelete('cascade'); // 
-
+          
             // Conexión con la categoria
             $table->foreignId('categoria_id') // categorias_id a categoria_id!
                   ->constrained('categorias')

@@ -8,6 +8,8 @@
         <p class="text-lg text-oaxaca-text-dark-gray text-center max-w-3xl mx-auto mb-4">Tipo: <span class="font-semibold">{{ $ubicacion->tipo }}</span></p>
         <p class="text-lg text-oaxaca-text-dark-gray text-center max-w-3xl mx-auto mb-10">{{ $ubicacion->descripcion }}</p>
 
+        {{-- Hemos eliminado la sección de "Artesanos de esta ubicación" --}}
+        {{--
         <h2 class="text-3xl md:text-4xl font-bold text-center text-oaxaca-navbar-blue mb-8">Artesanos de esta ubicación</h2>
         @if ($ubicacion->artesanos->isEmpty())
             <p class="text-center text-oaxaca-text-dark-gray text-lg mb-8">No hay artesanos registrados en esta ubicación por el momento.</p>
@@ -26,6 +28,7 @@
                 @endforeach
             </div>
         @endif
+        --}}
 
         <h2 class="text-3xl md:text-4xl font-bold text-center text-oaxaca-navbar-blue mb-8">Artesanías de esta ubicación</h2>
         @if ($ubicacion->artesanias->isEmpty())
@@ -34,13 +37,17 @@
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
                 @foreach ($ubicacion->artesanias as $artesania)
                     <div class="bg-oaxaca-product-turquoise-light rounded-lg shadow-lg overflow-hidden transform transition-all duration-300 hover:scale-105 border-2 border-oaxaca-detail-emerald">
-                        <img src="{{ asset($artesania->imagen_url ?? 'images/placeholder-artesania.jpg') }}" alt="{{ $artesania->nombre }}" class="gallery-img">
+                        {{-- Asegúrate que 'imagen_principal' es la columna correcta y no 'imagen_url' --}}
+                        <img src="{{ asset('storage/' . $artesania->imagen_principal) }}" alt="{{ $artesania->nombre }}" class="w-full h-56 object-cover object-center gallery-img">
                         <div class="p-6">
                             <h3 class="text-2xl font-semibold text-oaxaca-navbar-blue mb-2">{{ $artesania->nombre }}</h3>
                             <p class="text-oaxaca-text-dark-gray text-md leading-relaxed">{{ Str::limit($artesania->descripcion, 100) }}</p>
+                            {{-- Hemos eliminado la referencia al artesano --}}
+                            {{--
                             @if ($artesania->artesano)
                                 <p class="text-oaxaca-text-dark-gray text-sm mt-2">Por: <span class="font-semibold">{{ $artesania->artesano->nombre }}</span></p>
                             @endif
+                            --}}
                             @if ($artesania->categoria)
                                 <p class="text-oaxaca-text-dark-gray text-sm mt-1">Categoría: <span class="font-semibold">{{ $artesania->categoria->nombre }}</span></p>
                             @endif

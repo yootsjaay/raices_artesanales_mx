@@ -10,7 +10,8 @@ class UbicacionController extends Controller
     public function index()
     {
         // CORREGIDO: Asignar el resultado a una variable para pasarla a la vista
-        $ubicaciones = Ubicacion::with('artesanos')->get();
+        // La relación 'artesanias' está bien para precargar las artesanías de cada ubicación.
+        $ubicaciones = Ubicacion::with('artesanias')->get();
 
         // Asegúrate de que 'ubicaciones.index' existe como archivo de vista
         return view('ubicaciones.index', compact('ubicaciones'));
@@ -18,13 +19,10 @@ class UbicacionController extends Controller
 
     public function show(Ubicacion $ubicacion)
     {
-        // CORREGIDO: Asegurarse de que las relaciones anidadas existan en sus respectivos modelos
-        // Por ejemplo, 'artesanos.artesanias' significa que el modelo Artesano debe tener una relación 'artesanias()'
-        // y 'artesanias.artesano' significa que el modelo Artesania debe tener una relación 'artesano()'
-        // y 'artesanias.categoria' significa que el modelo Artesania debe tener una relación 'categoria()'
-
-        $ubicacion->load(['artesanos.artesanias', 'artesanias.artesano', 'artesanias.categoria']);
-        // ^ Este `load` parece correcto asumiendo que las relaciones anidadas también existen.
+        // CORREGIDO: Eliminamos 'artesanias.artesano' ya que el modelo Artesano fue eliminado.
+        // Ahora solo cargamos las artesanías y, para cada artesanía, su categoría.
+        // La relación 'artesanias.categoria' es correcta porque Artesania sigue teniendo una categoría.
+        $ubicacion->load(['artesanias.categoria']);
 
         // Asegúrate de que 'ubicaciones.show' existe como archivo de vista
         return view('ubicaciones.show', compact('ubicacion'));

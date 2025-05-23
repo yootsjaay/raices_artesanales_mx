@@ -40,10 +40,5 @@ class Ubicacion extends Model
         return $this->hasMany(Artesania::class, 'ubicacion_id');
     }
 
-    // <--- ¡AÑADIR ESTA NUEVA FUNCIÓN PARA LA RELACIÓN ARTESANOS! --->
-    public function artesanos()
-    {
-        // Una ubicación tiene muchos artesanos (a través de ubicacion_id en la tabla artesanos)
-        return $this->hasMany(Artesano::class, 'ubicacion_id');
-    }
+   
 }

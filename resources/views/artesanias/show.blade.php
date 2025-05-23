@@ -16,7 +16,6 @@
             <div>
                 {{-- Imagen Principal --}}
                 @if ($artesania->imagen_principal)
-                    {{-- Enlace para Lightbox de la imagen principal --}}
                     <a href="{{ asset('storage/' . $artesania->imagen_principal) }}" data-lightbox="artesania-gallery" data-title="{{ $artesania->nombre }}">
                         <img src="{{ asset('storage/' . $artesania->imagen_principal) }}" alt="{{ $artesania->nombre }}" class="w-full h-96 object-cover rounded-lg shadow-md cursor-zoom-in">
                     </a>
@@ -34,7 +33,6 @@
                     @if (is_array($imagenesAdicionales) && count($imagenesAdicionales) > 0)
                         <div class="mt-4 grid grid-cols-3 gap-2">
                             @foreach ($imagenesAdicionales as $extraImage)
-                                {{-- Enlace para Lightbox de cada imagen adicional --}}
                                 <a href="{{ asset('storage/' . $extraImage) }}" data-lightbox="artesania-gallery" data-title="{{ $artesania->nombre }} - Vista adicional">
                                     <img src="{{ asset('storage/' . $extraImage) }}" alt="Imagen adicional de {{ $artesania->nombre }}" class="w-full h-24 object-cover rounded-md shadow-sm cursor-zoom-in hover:opacity-75 transition-opacity">
                                 </a>
@@ -50,9 +48,7 @@
                 <p class="text-oaxaca-text-dark-gray text-lg mb-6 leading-relaxed">{{ $artesania->descripcion }}</p>
 
                 <div class="text-base text-oaxaca-text-dark-gray space-y-2 mb-6">
-                    @if ($artesania->artesano)
-                        <p><strong>Artesano:</strong> <a href="{{ route('artesanos.show', $artesania->artesano->id) }}" class="text-oaxaca-navbar-blue hover:underline">{{ $artesania->artesano->nombre }}</a></p>
-                    @endif
+                    {{-- Eliminado: @if ($artesania->artesano) <p><strong>Artesano:</strong> <a href="{{ route('artesanos.show', $artesania->artesano->id) }}" class="text-oaxaca-navbar-blue hover:underline">{{ $artesania->artesano->nombre }}</a></p> @endif --}}
                     @if ($artesania->categoria)
                         <p><strong>Categoría:</strong> <a href="{{ route('categorias.show', $artesania->categoria->id) }}" class="text-oaxaca-navbar-blue hover:underline">{{ $artesania->categoria->nombre }}</a></p>
                     @endif
