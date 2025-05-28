@@ -4,9 +4,32 @@ namespace App\Http\Controllers;
 
 use App\Models\Artesania; // Importa tu modelo Artesania
 use Illuminate\Http\Request;
-
+use App\Services\MercadoPagoInterface;
 class ArtesaniaController extends Controller
 {
+    protected $mp;
+    public function __contruct(MercadoPagoInterface $mp){
+        $this->mp= $mp;
+        
+    }
+
+    public function pagarArtesanias($id){
+        $artesania= Artesania::finOrFaild($id);
+
+        $datosOrden= [
+            'referencia' => 'ART'.$artesania->$id . '-' . $time(),
+            'titulo'=> $artesania->nombre,
+            'precio'=> $artesania->precio,
+            'email' => Auth()->user()->email,
+        ];
+
+        $orden = $this->mp->crearOrden($datosOrden);
+
+        return response()->json([
+            'mensaje'=> 'orden Creada',
+            'datos'=> $orden,
+        ]);
+    }
     /**
      * Muestra una lista de todas las artesanías.
      */
@@ -26,12 +49,14 @@ class ArtesaniaController extends Controller
      */
     public function show(Artesania $artesania) // Inyección de modelo: Laravel encuentra la artesanía por el ID en la URL
     {
-        // La artesanía ya viene cargada por la inyección de modelo.
-        // CORREGIDO: Hemos quitado 'artesano' de la carga perezosa (load())
-        // ya que la relación y el modelo Artesano ya no existen.
-        $artesania->load(['categoria', 'ubicacion']);
+       
+   
+        // Esto es crucial para que los comentarios aparezcan en la vista
+        $artesania->load(['comments' => function ($query) {
+            $query->where('status', 'approved')->with('user')->latest();
+        }]);
 
-        // Pasa la artesanía a la vista 'artesanias.show'
         return view('artesanias.show', compact('artesania'));
+    
     }
 }

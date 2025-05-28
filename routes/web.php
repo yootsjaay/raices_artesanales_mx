@@ -6,12 +6,17 @@ use App\Http\Controllers\ArtesaniaController;
 use App\Http\Controllers\ArtesanoController;
 use App\Http\Controllers\CategoriaController;
 use App\Http\Controllers\UbicacionController;
+use App\Http\Controllers\CommentController; // Asegúrate de importar el controlador de comentarios
+
+use App\Http\Controllers\CarritoController; // Asegúrate de importar el controlador de comentarios
+use App\Http\Middleware\FakeAuth;
 
 use App\Http\Controllers\Auth\AuthenticatedSessionController; // Necesario si vas a modificar el redireccionamiento post-login de Breeze
 use App\Http\Controllers\Admin\ArtesaniaController as AdminArtesaniaController; // <-- ¡Importa el nuevo controlador!
 use App\Http\Controllers\Admin\UbicacionController as AdminUbicacionController;
 use App\Http\Controllers\Admin\CategoriaController as AdminCategoriaController; // <-- ¡Añade esta línea!
-// ... (otras importaciones)
+use App\Http\Controllers\Admin\CommentController as AdminCommentController; // Importar el controlador de admin
+
 // ... (otras importaciones)
 Route::get('/', function () {
     return view('welcome');
@@ -24,6 +29,8 @@ Route::get('/dashboard', function () {
 Route::prefix('admin')->name('admin.')->group(function(){
      Route::get('artesanias/import', [AdminArtesaniaController::class, 'importForm'])->name('artesanias.import.form');
     Route::post('artesanias/import', [AdminArtesaniaController::class, 'import'])->name('artesanias.import');
+    
+    Route::resource('comments', AdminCommentController::class)->except(['create', 'edit', 'store']);
 
     Route::resource('artesanias', AdminArtesaniaController::class);
     Route::resource('ubicacion', AdminUbicacionController::class);
@@ -31,6 +38,22 @@ Route::prefix('admin')->name('admin.')->group(function(){
    
 
 });
+Route::get('artesanias/{artesania}', [ArtesaniaController::class, 'show'])->name('artesanias.show');
+//MERCADO PAGO
+Route::get('/pagar-artesania/{id}', [PagoController::class, 'pagarArtesania'])->name('pagar.artesania');
+
+Route::middleware([FakeAuth::class])->group(function () {
+    Route::get('/carrito', [CarritoController::class, 'index']);
+    Route::get('/carrito', [CarritoController::class, 'mostrar'])->name('carrito.mostrar');
+Route::post('/carrito/remover', [CarritoController::class, 'remover'])->name('carrito.remover');
+Route::post('/carrito/vaciar', [CarritoController::class, 'vaciar'])->name('carrito.vaciar');
+
+    // otras rutas protegidas por FakeAuth
+});
+
+// Ruta para enviar comentarios (DEBE ESTAR FUERA DEL GRUPO 'admin')
+Route::post('artesanias/{artesania}/comments', [CommentController::class, 'store'])
+    ->middleware(['auth'])->name('artesanias.comments.store');
 
 
 // Rutas para el Catálogo de Artesanías

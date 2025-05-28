@@ -5,6 +5,8 @@ namespace App\Models;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Storage; // Si ya lo tienes, déjalo
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 /**
  * Class Artesania
@@ -33,6 +35,7 @@ use Illuminate\Database\Eloquent\Model;
  */
 class Artesania extends Model
 {
+    use HasFactory;
     protected $table = 'artesanias';
 
     protected $fillable = [
@@ -59,5 +62,9 @@ class Artesania extends Model
     public function ubicacion()
     {
         return $this->belongsTo(Ubicacion::class, 'ubicacion_id'); // Asegúrate que la FK sea 'ubicacion_id'
+    }
+    public function comments()
+    {
+        return $this->hasMany(Comment::class);
     }
 }
