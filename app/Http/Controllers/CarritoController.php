@@ -4,63 +4,163 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Artesania;
-
+use App\Models\Cart;
+use App\Models\CartItem;
+use Illuminate\Support\Facades\Auth;
+// use Illuminate\Support\Str; // Ya no es necesario si no hay guest_token
 
 class CarritoController extends Controller
 {
-    //
+    // CUIDADO: Hacemos este método público para que CheckoutController pueda usarlo
+    // Si prefieres un Servicio, esa es la opción más limpia a largo plazo.
+    public function getOrCreateCart()
+    {
+        // Si el usuario no está logueado, lo redirigimos
+        if (!Auth::check()) {
+            // Podrías lanzar una excepción o redirigir directamente,
+            // pero para el contexto del carrito, es mejor manejarlo donde se llama
+            // o usar middleware para proteger las rutas.
+            return null; // Indicamos que no hay carrito si no está logueado
+        }
+
+        // Usuario logueado: buscar su carrito o crear uno
+        return Cart::firstOrCreate(['user_id' => Auth::id()]);
+    }
+
+    // Ya no necesitamos syncGuestCart() si los invitados no tienen carrito persistente
+
     public function agregar(Request $request)
-{
-    $request->validate([
-        'artesania_id' => 'required|exists:artesanias,id',
-        'cantidad' => 'required|integer|min:1',
-    ]);
+    {
+        // **Nueva validación: Requerir login antes de agregar**
+        if (!Auth::check()) {
+            return redirect()->route('login')->with('error', 'Debes iniciar sesión para añadir productos al carrito.');
+        }
 
-    $artesania = Artesania::findOrFail($request->artesania_id);
+        $request->validate([
+            'artesania_id' => 'required|exists:artesanias,id',
+            'cantidad' => 'required|integer|min:1',
+        ]);
 
-    $carrito = session()->get('carrito', []);
+        $artesania = Artesania::findOrFail($request->artesania_id);
+        $quantity = $request->cantidad;
 
-    if (isset($carrito[$artesania->id])) {
-        $carrito[$artesania->id]['cantidad'] += $request->cantidad;
-    } else {
-        $carrito[$artesania->id] = [
-            'nombre' => $artesania->nombre,
-            'precio' => $artesania->precio,
-            'cantidad' => $request->cantidad,
-            'imagen' => $artesania->imagen_principal,
-        ];
+        // Validar stock antes de añadir
+        if ($artesania->stock < $quantity) {
+            return redirect()->back()->with('error', 'Lo sentimos, solo hay ' . $artesania->stock . ' unidades disponibles de esta artesanía.');
+        }
+
+        $cart = $this->getOrCreateCart(); // Ahora garantizado que existe si el usuario está logueado
+
+        // Buscar si la artesanía ya está en el carrito
+        $cartItem = $cart->items()->where('artesania_id', $artesania->id)->first();
+
+        if ($cartItem) {
+            // Si ya existe, actualizar la cantidad
+            $newQuantity = $cartItem->quantity + $quantity;
+            if ($artesania->stock < $newQuantity) {
+                 return redirect()->back()->with('error', 'No puedes añadir más, solo hay ' . $artesania->stock . ' unidades disponibles en total.');
+            }
+            $cartItem->quantity = $newQuantity;
+            $cartItem->save();
+        } else {
+            // Si no existe, crear un nuevo ítem en el carrito
+            $cartItem = new CartItem([
+                'artesania_id' => $artesania->id,
+                'quantity' => $quantity,
+                'price' => $artesania->precio, // Guarda el precio actual de la artesanía
+            ]);
+            $cart->items()->save($cartItem);
+        }
+
+        return redirect()->route('carrito.mostrar')->with('success', 'Artesanía añadida al carrito exitosamente.');
     }
 
-    session()->put('carrito', $carrito);
+    public function mostrar()
+    {
+        // **Nueva validación: Requerir login para ver el carrito**
+        if (!Auth::check()) {
+            return redirect()->route('login')->with('error', 'Debes iniciar sesión para ver tu carrito.');
+        }
 
-    return redirect()->back()->with('success', 'Artesanía añadida al carrito.');
-}
-public function mostrar()
-{
-    $carrito = session()->get('carrito', []);
-    $total = 0;
+        $cart = $this->getOrCreateCart();
+        $cartItems = $cart->items()->with('artesania')->get();
 
-    foreach ($carrito as $item) {
-        $total += $item['precio'] * $item['cantidad'];
+        $total = $cartItems->sum(function ($item) {
+            return $item->quantity * $item->price;
+        });
+
+        return view('carrito.index', compact('cartItems', 'total'));
     }
 
-    return view('carrito.index', compact('carrito', 'total'));
-}
-public function remover(Request $request)
-{
-    $carrito = session()->get('carrito', []);
+    public function actualizar(Request $request)
+    {
+        // **Nueva validación: Requerir login para actualizar**
+        if (!Auth::check()) {
+            return redirect()->route('login')->with('error', 'Debes iniciar sesión para actualizar tu carrito.');
+        }
 
-    if (isset($carrito[$request->id])) {
-        unset($carrito[$request->id]);
-        session()->put('carrito', $carrito);
+        $request->validate([
+            'id' => 'required|exists:cart_items,id',
+            'cantidad' => 'required|integer|min:0',
+        ]);
+
+        $cart = $this->getOrCreateCart();
+        $cartItem = $cart->items()->where('id', $request->id)->first();
+
+        if (!$cartItem) {
+            return redirect()->back()->with('error', 'Ítem del carrito no encontrado o no pertenece a tu carrito.');
+        }
+
+        $artesania = $cartItem->artesania;
+
+        if ($request->cantidad == 0) {
+            $cartItem->delete();
+            return redirect()->back()->with('success', 'Producto eliminado del carrito.');
+        }
+
+        // Validar stock al actualizar
+        if ($artesania->stock < $request->cantidad) {
+            return redirect()->back()->with('error', 'Lo sentimos, solo hay ' . $artesania->stock . ' unidades disponibles de esta artesanía.');
+        }
+
+        $cartItem->quantity = $request->cantidad;
+        $cartItem->save();
+
+        return redirect()->back()->with('success', 'Cantidad del producto actualizada.');
     }
 
-    return redirect()->route('carrito.mostrar')->with('success', 'Producto eliminado del carrito.');
-}
-public function vaciar()
-{
-    session()->forget('carrito');
-    return redirect()->route('carrito.mostrar')->with('success', 'Carrito vaciado.');
-}
+    public function remover(Request $request)
+    {
+        // **Nueva validación: Requerir login para remover**
+        if (!Auth::check()) {
+            return redirect()->route('login')->with('error', 'Debes iniciar sesión para remover productos de tu carrito.');
+        }
 
+        $request->validate([
+            'id' => 'required|exists:cart_items,id',
+        ]);
+
+        $cart = $this->getOrCreateCart();
+        $cartItem = $cart->items()->where('id', $request->id)->first();
+
+        if ($cartItem) {
+            $cartItem->delete();
+            return redirect()->route('carrito.mostrar')->with('success', 'Producto eliminado del carrito.');
+        }
+
+        return redirect()->route('carrito.mostrar')->with('error', 'Producto no encontrado en el carrito.');
+    }
+
+    public function vaciar()
+    {
+        // **Nueva validación: Requerir login para vaciar**
+        if (!Auth::check()) {
+            return redirect()->route('login')->with('error', 'Debes iniciar sesión para vaciar tu carrito.');
+        }
+
+        $cart = $this->getOrCreateCart();
+        $cart->items()->delete();
+
+        return redirect()->route('carrito.mostrar')->with('success', 'Carrito vaciado.');
+    }
 }

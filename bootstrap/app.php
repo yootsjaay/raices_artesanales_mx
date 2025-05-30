@@ -12,8 +12,11 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware) {
         //
-         $middleware->append(\App\Http\Middleware\FakeAuth::class);
-    })
+        // $middleware->append(\App\Http\Middleware\FakeAuth::class);
+        
+    })->withProviders([ // <-- ESTE ES EL LUGAR
+        \App\Providers\PaymentServiceProvider::class, // <-- AÑADE ESTA LÍNEA
+    ])
     ->withExceptions(function (Exceptions $exceptions) {
         //
     })->create();

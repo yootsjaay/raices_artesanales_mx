@@ -10,6 +10,7 @@ use App\Http\Controllers\CommentController; // Asegúrate de importar el control
 
 use App\Http\Controllers\CarritoController; // Asegúrate de importar el controlador de comentarios
 use App\Http\Middleware\FakeAuth;
+use App\Http\Controllers\CheckoutController; // Si lo creas
 
 use App\Http\Controllers\Auth\AuthenticatedSessionController; // Necesario si vas a modificar el redireccionamiento post-login de Breeze
 use App\Http\Controllers\Admin\ArtesaniaController as AdminArtesaniaController; // <-- ¡Importa el nuevo controlador!
@@ -42,14 +43,18 @@ Route::get('artesanias/{artesania}', [ArtesaniaController::class, 'show'])->name
 //MERCADO PAGO
 Route::get('/pagar-artesania/{id}', [PagoController::class, 'pagarArtesania'])->name('pagar.artesania');
 
+// Carrito (protegido por FakeAuth)
 Route::middleware([FakeAuth::class])->group(function () {
-    Route::get('/carrito', [CarritoController::class, 'index']);
     Route::get('/carrito', [CarritoController::class, 'mostrar'])->name('carrito.mostrar');
-Route::post('/carrito/remover', [CarritoController::class, 'remover'])->name('carrito.remover');
-Route::post('/carrito/vaciar', [CarritoController::class, 'vaciar'])->name('carrito.vaciar');
-
-    // otras rutas protegidas por FakeAuth
+    Route::post('/carrito/actualizar', [CarritoController::class, 'actualizar'])->name('carrito.actualizar');
+    Route::post('/carrito/agregar', [CarritoController::class, 'agregar'])->name('carrito.agregar');
+    Route::post('/carrito/remover', [CarritoController::class, 'remover'])->name('carrito.remover');
+    Route::post('/carrito/vaciar', [CarritoController::class, 'vaciar'])->name('carrito.vaciar');
+    Route::get('/carrito/pagar', [CarritoController::class, 'pagarConMercadoPago'])->name('carrito.pagar');
+    Route::get('/checkout', [CheckoutController::class, 'index'])->name('checkout.inicio');
+Route::post('/checkout/process-payment', [CheckoutController::class, 'processPayment'])->name('checkout.process_payment');
 });
+
 
 // Ruta para enviar comentarios (DEBE ESTAR FUERA DEL GRUPO 'admin')
 Route::post('artesanias/{artesania}/comments', [CommentController::class, 'store'])
