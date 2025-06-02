@@ -57,11 +57,21 @@
                 <h3 class="text-2xl font-bold text-oaxaca-navbar-blue mb-3">La Historia Detrás de la Pieza</h3>
                 <p class="text-oaxaca-text-dark-gray leading-relaxed">{{ $artesania->historia_pieza ?? 'No hay una historia específica para esta pieza aún.' }}</p>
 
-                <div class="mt-8">
-                    <button class="w-full bg-oaxaca-button-mustard text-oaxaca-text-dark-gray px-6 py-3 rounded-lg hover:bg-oaxaca-button-mustard-hover transition-colors text-center text-xl font-semibold shadow-md">
-                        Añadir al Carrito
-                    </button>
-                </div>
+                <form method="POST" action="{{ route('carrito.agregar') }}" class="flex items-center gap-2">
+    @csrf
+    <input type="hidden" name="artesania_id" value="{{ $artesania->id }}">
+    
+    {{-- Selector de cantidad --}}
+    <input type="number" name="cantidad" min="1" max="{{ $artesania->stock }}" value="1"
+           class="w-20 p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-oaxaca-navbar-orange" 
+           required>
+
+    <button type="submit"
+            class="bg-oaxaca-navbar-orange hover:bg-orange-600 text-white font-semibold px-4 py-2 rounded-lg shadow transition duration-200">
+        <i class="fas fa-shopping-cart mr-1"></i> Añadir al carrito
+    </button>
+</form>
+
             </div>
         </div>
 

@@ -34,5 +34,16 @@ return [
             'channel' => env('SLACK_BOT_USER_DEFAULT_CHANNEL'),
         ],
     ],
+    'mercadopago'=>[
+        'public_key'=> 'MP_ACCESS_TOKEN'
+    ],
+    // ...
+'envia' => [
+    'api_token' => env('ENVIA_API_TOKEN'),
+    'base_url' => env('ENVIA_BASE_URL'),
+    'queries_url' => env('ENVIA_QUERIES_URL'),
+],
+// ...
+    
 
 ];

@@ -11,6 +11,7 @@ use App\Http\Controllers\CommentController; // Asegúrate de importar el control
 use App\Http\Controllers\CarritoController; // Asegúrate de importar el controlador de comentarios
 use App\Http\Middleware\FakeAuth;
 use App\Http\Controllers\CheckoutController; // Si lo creas
+use App\Http\Controllers\EnviaController; // Asegúrate de importar tu controlador
 
 use App\Http\Controllers\Auth\AuthenticatedSessionController; // Necesario si vas a modificar el redireccionamiento post-login de Breeze
 use App\Http\Controllers\Admin\ArtesaniaController as AdminArtesaniaController; // <-- ¡Importa el nuevo controlador!
@@ -44,16 +45,18 @@ Route::get('artesanias/{artesania}', [ArtesaniaController::class, 'show'])->name
 Route::get('/pagar-artesania/{id}', [PagoController::class, 'pagarArtesania'])->name('pagar.artesania');
 
 // Carrito (protegido por FakeAuth)
-Route::middleware([FakeAuth::class])->group(function () {
-    Route::get('/carrito', [CarritoController::class, 'mostrar'])->name('carrito.mostrar');
-    Route::post('/carrito/actualizar', [CarritoController::class, 'actualizar'])->name('carrito.actualizar');
-    Route::post('/carrito/agregar', [CarritoController::class, 'agregar'])->name('carrito.agregar');
-    Route::post('/carrito/remover', [CarritoController::class, 'remover'])->name('carrito.remover');
-    Route::post('/carrito/vaciar', [CarritoController::class, 'vaciar'])->name('carrito.vaciar');
-    Route::get('/carrito/pagar', [CarritoController::class, 'pagarConMercadoPago'])->name('carrito.pagar');
-    Route::get('/checkout', [CheckoutController::class, 'index'])->name('checkout.inicio');
-Route::post('/checkout/process-payment', [CheckoutController::class, 'processPayment'])->name('checkout.process_payment');
-});
+Route::get('/carrito', [CarritoController::class, 'mostrar'])->name('carrito.mostrar');
+Route::post('/carrito/agregar', [CarritoController::class, 'agregar'])->name('carrito.agregar');
+Route::put('/carrito/actualizar', [CarritoController::class, 'actualizar'])->name('carrito.actualizar');
+Route::delete('/carrito/remover', [CarritoController::class, 'remover'])->name('carrito.remover');
+Route::post('/carrito/vaciar', [CarritoController::class, 'vaciar'])->name('carrito.vaciar');
+
+//METODO PARA ENVIA
+Route::get('/cotizar-envio', [EnviaController::class, 'showQuoteForm'])->name('envia.quote.form');
+
+// 2. Ruta para procesar la solicitud de cotización
+// Cuando el usuario envía el formulario POST a /cotizar-envio, se procesarán los datos.
+Route::post('/cotizar-envio', [EnviaController::class, 'postQuote'])->name('envia.quote.post');
 
 
 // Ruta para enviar comentarios (DEBE ESTAR FUERA DEL GRUPO 'admin')

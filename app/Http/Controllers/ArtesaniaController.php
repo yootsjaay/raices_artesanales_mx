@@ -11,34 +11,9 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 class ArtesaniaController extends Controller
 {
-   protected $mpService; // <--- Nueva propiedad para tu servicio
+  
 
-    // Inyecta tu MercadoPagoInterface en el constructor
-    public function __construct(MercadoPagoInterface $mpService)
-    {
-        $this->mpService = $mpService;
-    }
-
-    public function pagarArtesanias($id){
-        $artesania= Artesania::finOrFaild($id);
-
-        $datosOrden= [
-            'referencia' => 'ART'.$artesania->$id . '-' . $time(),
-            'titulo'=> $artesania->nombre,
-            'precio'=> $artesania->precio,
-            'email' => Auth()->user()->email,
-        ];
-
-        $orden = $this->mp->crearOrden($datosOrden);
-
-        return response()->json([
-            'mensaje'=> 'orden Creada',
-            'datos'=> $orden,
-        ]);
-    }
-    /**
-     * Muestra una lista de todas las artesanías.
-     */
+ 
     public function index()
     {
         // Obtiene todas las artesanías de la base de datos
