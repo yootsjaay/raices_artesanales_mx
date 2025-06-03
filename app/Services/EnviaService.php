@@ -3,65 +3,62 @@
 namespace App\Services;
 
 use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\Log; // Importar la fachada Log
 
 class EnviaService
 {
+    protected $apiKey;
     protected $baseUrl;
-    protected $apiToken;
-    protected $queriesUrl;
 
     public function __construct()
     {
-        $this->baseUrl = config('services.envia.base_url');
-        $this->apiToken = config('services.envia.api_token');
-        $this->queriesUrl = config('services.envia.queries_url');
-
-        if (!$this->baseUrl || !$this->apiToken || !$this->queriesUrl) {
-            throw new \Exception("Envia API credentials not configured in .env or services.php");
-        }
+        $this->apiKey = config('services.envia.api_token'); // Usa .env
+        $this->baseUrl = 'https://api-test.envia.com/ship/rate'; // Ajusta si usas otro endpoint
     }
-
-    /**
-     * Cotiza opciones de envío con Envia.
-     *
-     * @param array $payload Los datos de origen, destino y paquetes siguiendo la estructura de Envia.
-     * @return array|null Las opciones de envío o null en caso de error.
-     */
-    public function getShippingQuotes(array $payload): ?array
+ public function cotizar(array $data)
     {
-        try {
-            // El endpoint de cotización según la documentación es /ship/rate/
-            $endpoint = '/ship/rate/';
+        $payload = [
+    "origin" => [
+        "postal_code" => $data['origin_postal'],
+        "country" => "MX",
+        "state" => "NL",
+        "city" => "San Pedro Garza García",
+        "street" => "Vasconcelos",
+        "number" => "1400"
+    ],
+    "destination" => [
+        "postal_code" => $data['destination_postal'],
+        "country" => "MX",
+        "state" => "NL",
+        "city" => "Monterrey",
+        "street" => "Belisario Dominguez",
+        "number" => "2470"
+    ],
+    "parcels" => [[ // aquí también cambias a 'parcels'
+        "weight" => (float) $data['weight'],
+        "height" => (int) $data['height'],
+        "width" => (int) $data['width'],
+        "length" => (int) $data['length'],
+        "declared_value" => (float) $data['declaredValue'] ?? 0
+    ]],
+    "declared_value" => (float) $data['declaredValue'] ?? 0,
+    "shipment" => [
+        "type" => 1,
+        "import" => 0
+    ]
+];
 
-            $response = Http::withToken($this->apiToken)
-                            ->timeout(30) // Opcional: define un tiempo de espera para la respuesta
-                            ->baseUrl($this->baseUrl)
-                            ->post($endpoint, $payload); // Enviar el payload completo
 
-            // Verificar si la respuesta fue exitosa (código 2xx)
-            if ($response->successful()) {
-                // La documentación muestra que el body completo es la respuesta,
-                // no necesariamente bajo una clave 'data'. Ajustamos esto.
-                return $response->json();
-            } else {
-                Log::error('Envia API Error (Quotes):', [
-                    'status' => $response->status(),
-                    'body' => $response->body(),
-                    'payload' => $payload,
-                    'endpoint' => $this->baseUrl . $endpoint // Para depuración
-                ]);
-                return null;
-            }
-        } catch (\Throwable $e) {
-            Log::error('Exception calling Envia API (Quotes):', [
-                'message' => $e->getMessage(),
-                'trace' => $e->getTraceAsString(),
-                'payload' => $payload // Incluye el payload para depuración
-            ]);
-            return null;
-        }
+        $response = Http::withHeaders([
+            'Authorization' => 'Bearer ' . $this->apiKey,
+            'Accept' => 'application/json',
+            'Content-Type' => 'application/json',
+        ])->post('https://api-test.envia.com/ship/rate', $payload);
+
+        if ($response->successful()) {
+    return $response->json();
+} else {
+    dd('Error:', $response->status(), $response->json());
+}
+
     }
-
-    // ... otros métodos como createShippingLabel, trackPackage (que ya tienes)
 }

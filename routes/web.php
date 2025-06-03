@@ -52,11 +52,10 @@ Route::delete('/carrito/remover', [CarritoController::class, 'remover'])->name('
 Route::post('/carrito/vaciar', [CarritoController::class, 'vaciar'])->name('carrito.vaciar');
 
 //METODO PARA ENVIA
-Route::get('/cotizar-envio', [EnviaController::class, 'showQuoteForm'])->name('envia.quote.form');
 
-// 2. Ruta para procesar la solicitud de cotización
-// Cuando el usuario envía el formulario POST a /cotizar-envio, se procesarán los datos.
-Route::post('/cotizar-envio', [EnviaController::class, 'postQuote'])->name('envia.quote.post');
+
+Route::get('/cotizar-envio', [EnviaController::class, 'formulario'])->name('cotizar.form');
+Route::post('/cotizar-envio', [EnviaController::class, 'cotizar'])->name('cotizar.envio');
 
 
 // Ruta para enviar comentarios (DEBE ESTAR FUERA DEL GRUPO 'admin')
