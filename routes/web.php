@@ -53,9 +53,8 @@ Route::post('/carrito/vaciar', [CarritoController::class, 'vaciar'])->name('carr
 
 //METODO PARA ENVIA
 
-
-Route::get('/cotizar-envio', [EnviaController::class, 'formulario'])->name('cotizar.form');
-Route::post('/cotizar-envio', [EnviaController::class, 'cotizar'])->name('cotizar.envio');
+Route::get('/envia', [EnviaController::class, 'index'])->name('envia.index');
+Route::post('/envia', [EnviaController::class, 'quote'])->name('envia.quote');
 
 
 // Ruta para enviar comentarios (DEBE ESTAR FUERA DEL GRUPO 'admin')
