@@ -11,6 +11,8 @@ use Illuminate\Support\Facades\Auth;
 
 class CarritoController extends Controller
 {
+
+
     // CUIDADO: Hacemos este método público para que CheckoutController pueda usarlo
     // Si prefieres un Servicio, esa es la opción más limpia a largo plazo.
     public function getOrCreateCart()

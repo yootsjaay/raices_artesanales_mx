@@ -50,7 +50,11 @@ class Artesania extends Model
         'historia_piezas',
         'artesano_id',    // Asegúrate de que coincida con la migración
         'categoria_id',   // Asegúrate de que coincida con la migración
-        'ubicacion_id'    // Asegúrate de que coincida con la migración
+        'ubicacion_id',    // Asegúrate de que coincida con la migración
+        'weight',    // Añadir estos campos
+        'length',
+        'width',
+        'height',
     ];
 
     

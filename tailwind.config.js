@@ -1,62 +1,43 @@
 import defaultTheme from 'tailwindcss/defaultTheme';
 import forms from '@tailwindcss/forms';
+import typography from '@tailwindcss/typography';
 
-/** @type {import('tailwindcss').Config} */
 /** @type {import('tailwindcss').Config} */
 export default {
-  content: [
-    "./resources/**/*.blade.php",
-    "./resources/**/*.js",
-    "./resources/**/*.vue",
-  ],
-  theme: {
-    extend: {
-      colors: {
-        // --- Paleta de Colores de Oaxaca (Propuesta) ---
+    content: [
+        "./resources/**/*.blade.php",
+        "./resources/**/*.js",
+        "./resources/**/*.vue",
+    ],
+    theme: {
+        extend: {
+            colors: {
+                // PALETA PRINCIPAL 'RAÍCES ARTESANALES MX' - INSPIRADA EN OAXACA
+                'oaxaca-primary': '#4A2328',     // Terracota Oscuro: Evoca el barro rojo de San Marcos Tlapazola o los tonos profundos de los textiles. Ideal para fondos, textos principales y elementos sólidos.
+                'oaxaca-secondary': '#A63D40',   // Rojo Grana Cochineal: Un rojo vibrante, que recuerda el tinte natural de la cochinilla usado en tapetes de Teotitlán. Excelente para acentos, botones de llamada a la acción y hovers.
+                'oaxaca-tertiary': '#F0A100',    // Amarillo Cempasúchil/Maíz: Un amarillo cálido y brillante, como las flores de Día de Muertos o el maíz de las tortillas. Perfecto para precios, highlights y elementos que necesiten destacar.
+                'oaxaca-accent': '#2C5F2D',      // Verde Agave/Jade: Un verde profundo y terroso, como los campos de agave o el jade de las piezas prehispánicas. Úsalo para enlaces, íconos o pequeños detalles.
 
-        // Fondos principales
-        'oaxaca-bg-cream': '#FDF6E3', // Crema cálido para fondo principal
-        'oaxaca-bg-white-off': '#F5F5F5', // Blanco roto (alternativa al crema si es necesario)
-
-        // Navbar y Footer
-        'oaxaca-navbar-blue': '#2A4B7C', // Azul profundo (añil) para navbar y footer
-        'oaxaca-navbar-orange': '#F05A28', // Naranja quemado para hover en navbar, íconos o detalles
-
-        // Encabezados y Títulos
-        'oaxaca-title-pink': '#E91E63', // Rosa mexicano para títulos principales
-
-        // Botones de Acción
-        'oaxaca-button-mustard': '#F4A261', // Amarillo mostaza para botones de acción
-        'oaxaca-button-mustard-hover': '#E28E4C', // Hover del amarillo mostaza
-
-        // Fondos de secciones de productos
-        'oaxaca-product-turquoise-light': '#E0F7FA', // Turquesa MUY suave para fondos de tarjetas (derivado de #26C6DA)
-        'oaxaca-product-turquoise-dark': '#26C6DA', // Turquesa vibrante (para degradado o detalles)
-
-        // Detalles y Bordes
-        'oaxaca-detail-emerald': '#2ECC71', // Verde esmeralda para bordes o detalles
-
-        // Texto
-        'oaxaca-text-dark-gray': '#333333', // Gris oscuro para texto general
-        'oaxaca-text-white': '#FFFFFF',     // Blanco para texto sobre fondos oscuros
-
-        // --- Degradados (definidos con los nuevos colores) ---
-        // Para el banner principal
-        'gradient-start-pink': '#E91E63',
-        'gradient-end-turquoise': '#26C6DA',
-
-      },
-      backgroundImage: {
-        'oaxaca-hero-gradient': 'linear-gradient(to bottom, var(--tw-gradient-stops))',
-      },
-      gradientColorStops: theme => ({
-        'gradient-start-pink': theme('colors.gradient-start-pink'),
-        'gradient-end-turquoise': theme('colors.gradient-end-turquoise'),
-      }),
-      boxShadow: {
-        'custom-lg': '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
-      },
+                // COLORES DE TEXTO Y FONDO BASE (complementarios)
+                'oaxaca-text-dark': '#1A1A1A',    // Negro Obsidiana: Para texto principal, ofreciendo alto contraste y legibilidad.
+                'oaxaca-text-light': '#F8F8F8',   // Crema de Maguey: Un blanco roto, suave, ideal para texto sobre fondos oscuros.
+                'oaxaca-bg-light': '#FCF8F5',    // Arena de Valle: Un fondo muy claro, casi blanco, que simula la tierra limpia y cálida de los valles centrales.
+                'oaxaca-card-bg': '#FEFCF0',     // Papel Amate Claro: Un tono ligeramente más cálido que 'bg-light', para dar una sensación de textura natural a las tarjetas y secciones.
+            },
+            fontFamily: {
+                'sans': ['Nunito Sans', ...defaultTheme.fontFamily.sans],
+                'display': ['Cormorant Garamond', 'serif'],
+            },
+            boxShadow: {
+                // Mantén estos si los estás usando activamente, o modifícalos para reflejar la nueva paleta
+                'custom-lg': '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
+                // Sombra sutil que podría recordar los pigmentos de tierra o un acabado artesanal
+                'artisanal': '0 4px 12px rgba(74, 35, 40, 0.15)', // Usando oaxaca-primary para la sombra
+            },
+        },
     },
-  },
-  plugins: [],
-};  
+    plugins: [
+        forms,
+        typography,
+    ],
+};

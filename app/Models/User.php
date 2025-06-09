@@ -6,6 +6,8 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens; // Esta línea ya está bien
+use App\Models\UserAddress; // Asegúrate de importar
+
 
 /**
  * Class User
@@ -45,7 +47,13 @@ class User extends Authenticatable
         'remember_token',
         // 'role', // Si agregas la columna 'role' a la migración, descomenta esta línea también.
     ];
-
-    // Si planeas usar el campo 'role', podrías añadir un accessor/mutator o simplemente
-    // asegurarte de que la columna exista en la tabla 'users' y esté en $fillable si la asignas masivamente.
+public function addresses()
+{
+    return $this->hasMany(UserAddress::class);
+}
+  public function cart()
+    {
+        return $this->hasOne(Cart::class);
+    }
+  
 }

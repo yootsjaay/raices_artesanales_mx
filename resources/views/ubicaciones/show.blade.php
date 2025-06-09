@@ -3,62 +3,57 @@
 @section('title', $ubicacion->nombre . ' - Raíces Artesanales MX')
 
 @section('content')
-    <section class="py-12 px-4 bg-oaxaca-bg-cream rounded-xl mx-auto max-w-7xl shadow-md mt-8">
-        <h1 class="text-4xl md:text-5xl font-bold text-center text-oaxaca-title-pink mb-6">{{ $ubicacion->nombre }}</h1>
-        <p class="text-lg text-oaxaca-text-dark-gray text-center max-w-3xl mx-auto mb-4">Tipo: <span class="font-semibold">{{ $ubicacion->tipo }}</span></p>
-        <p class="text-lg text-oaxaca-text-dark-gray text-center max-w-3xl mx-auto mb-10">{{ $ubicacion->descripcion }}</p>
+    <div class="container mx-auto px-4 py-8"> {{-- Contenedor principal con padding --}}
+        <section class="py-12 px-4 bg-oaxaca-bg-light rounded-xl mx-auto max-w-7xl shadow-lg mt-8 border border-oaxaca-primary border-opacity-10"> {{-- Fondo claro, sombra y borde sutil --}}
 
-        {{-- Hemos eliminado la sección de "Artesanos de esta ubicación" --}}
-        {{--
-        <h2 class="text-3xl md:text-4xl font-bold text-center text-oaxaca-navbar-blue mb-8">Artesanos de esta ubicación</h2>
-        @if ($ubicacion->artesanos->isEmpty())
-            <p class="text-center text-oaxaca-text-dark-gray text-lg mb-8">No hay artesanos registrados en esta ubicación por el momento.</p>
-        @else
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
-                @foreach ($ubicacion->artesanos as $artesano)
-                    <div class="bg-oaxaca-product-turquoise-light rounded-lg shadow-lg overflow-hidden transform transition-all duration-300 hover:scale-105 border-2 border-oaxaca-detail-emerald">
-                        <div class="p-6">
-                            <h3 class="text-2xl font-semibold text-oaxaca-title-pink mb-2">{{ $artesano->nombre }}</h3>
-                            <p class="text-oaxaca-text-dark-gray text-md leading-relaxed mb-4">{{ Str::limit($artesano->biografia, 80) }}</p>
-                            <a href="{{ route('artesanos.show', $artesano->id) }}" class="inline-block w-full bg-oaxaca-button-mustard text-oaxaca-text-dark-gray px-6 py-3 rounded-lg hover:bg-oaxaca-button-mustard-hover transition-colors text-center text-lg font-semibold shadow-md">
-                                Ver Artesano
-                            </a>
-                        </div>
-                    </div>
-                @endforeach
-            </div>
-        @endif
-        --}}
+            <a href="{{ route('ubicaciones.index') }}" class="inline-flex items-center text-oaxaca-primary hover:text-oaxaca-secondary transition-colors mb-6 font-semibold"> {{-- Color del enlace "Volver" --}}
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+                Volver a Ubicaciones
+            </a>
 
-        <h2 class="text-3xl md:text-4xl font-bold text-center text-oaxaca-navbar-blue mb-8">Artesanías de esta ubicación</h2>
-        @if ($ubicacion->artesanias->isEmpty())
-            <p class="text-center text-oaxaca-text-dark-gray text-lg">No hay artesanías directamente asociadas a esta ubicación por el momento.</p>
-        @else
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-                @foreach ($ubicacion->artesanias as $artesania)
-                    <div class="bg-oaxaca-product-turquoise-light rounded-lg shadow-lg overflow-hidden transform transition-all duration-300 hover:scale-105 border-2 border-oaxaca-detail-emerald">
-                        {{-- Asegúrate que 'imagen_principal' es la columna correcta y no 'imagen_url' --}}
-                        <img src="{{ asset('storage/' . $artesania->imagen_principal) }}" alt="{{ $artesania->nombre }}" class="w-full h-56 object-cover object-center gallery-img">
-                        <div class="p-6">
-                            <h3 class="text-2xl font-semibold text-oaxaca-navbar-blue mb-2">{{ $artesania->nombre }}</h3>
-                            <p class="text-oaxaca-text-dark-gray text-md leading-relaxed">{{ Str::limit($artesania->descripcion, 100) }}</p>
-                            {{-- Hemos eliminado la referencia al artesano --}}
-                            {{--
-                            @if ($artesania->artesano)
-                                <p class="text-oaxaca-text-dark-gray text-sm mt-2">Por: <span class="font-semibold">{{ $artesania->artesano->nombre }}</span></p>
-                            @endif
-                            --}}
-                            @if ($artesania->categoria)
-                                <p class="text-oaxaca-text-dark-gray text-sm mt-1">Categoría: <span class="font-semibold">{{ $artesania->categoria->nombre }}</span></p>
-                            @endif
-                            <p class="text-oaxaca-navbar-orange font-bold text-xl mt-3">${{ number_format($artesania->precio, 2) }} MXN</p>
-                            <a href="{{ route('artesanias.show', $artesania->id) }}" class="mt-5 inline-block w-full bg-oaxaca-button-mustard text-oaxaca-text-dark-gray px-6 py-3 rounded-lg hover:bg-oaxaca-button-mustard-hover transition-colors text-center text-lg font-semibold shadow-md">
-                                Ver Detalle
+            <h1 class="text-5xl md:text-6xl font-display font-bold text-center text-oaxaca-primary mb-4 leading-tight">{{ $ubicacion->nombre }}</h1> {{-- Título con font-display y color primario --}}
+            <p class="text-xl text-oaxaca-text-dark text-center max-w-3xl mx-auto mb-4 leading-relaxed">Tipo: <span class="font-bold text-oaxaca-secondary">{{ $ubicacion->tipo }}</span></p> {{-- Tipo con color secundario y negrita --}}
+            <p class="text-lg text-oaxaca-text-dark text-center max-w-4xl mx-auto mb-10 leading-relaxed">{{ $ubicacion->descripcion }}</p> {{-- Color y tamaño del texto --}}
+
+            {{-- Sección de Artesanías de esta Ubicación --}}
+            <h2 class="text-4xl md:text-5xl font-display font-bold text-center text-oaxaca-secondary mb-10 mt-12">Tesoros Artesanales de {{ $ubicacion->nombre }}</h2> {{-- Título secundario con font-display y color secundario --}}
+
+            @if ($ubicacion->artesanias->isEmpty())
+                <p class="text-center text-oaxaca-text-dark text-xl py-8">No hay artesanías directamente asociadas a esta ubicación por el momento. ¡Pronto tendremos más piezas únicas de esta región!</p>
+            @else
+                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8"> {{-- Grid ajustado para más columnas en pantallas grandes --}}
+                    @foreach ($ubicacion->artesanias as $artesania)
+                        <div class="bg-oaxaca-card-bg rounded-xl shadow-lg overflow-hidden transform transition-all duration-300 hover:scale-105 group border border-oaxaca-primary border-opacity-10"> {{-- Fondo de tarjeta, sombra y borde sutil --}}
+                            <a href="{{ route('artesanias.show', $artesania->id) }}">
+                                @if ($artesania->imagen_principal)
+                                    <img src="{{ asset('storage/' . $artesania->imagen_principal) }}"
+                                         alt="{{ $artesania->nombre }}"
+                                         class="w-full h-56 object-cover object-center group-hover:opacity-90 transition-opacity duration-300"> {{-- Altura ajustada y efecto hover --}}
+                                @else
+                                    <img src="{{ asset('storage/images/artesanias/placeholder-alebrije.jpg') }}" {{-- Placeholder genérico --}}
+                                         alt="Imagen no disponible"
+                                         class="w-full h-56 object-cover object-center bg-gray-200 group-hover:opacity-90 transition-opacity duration-300">
+                                @endif
                             </a>
+                            <div class="p-5"> {{-- Padding ajustado --}}
+                                <h3 class="text-2xl font-display font-semibold mb-2 text-oaxaca-primary leading-tight"> {{-- Título de artesanía con font-display y color primario --}}
+                                    <a href="{{ route('artesanias.show', $artesania->id) }}" class="hover:text-oaxaca-secondary transition-colors">{{ $artesania->nombre }}</a>
+                                </h3>
+                                <p class="text-base text-oaxaca-text-dark leading-relaxed mb-3">{{ Str::limit($artesania->descripcion, 90) }}</p> {{-- Descripción con color de texto oscuro y límite --}}
+
+                                @if ($artesania->categoria)
+                                    <p class="text-oaxaca-text-dark text-sm mt-1">Categoría: <a href="{{ route('categorias.show', $artesania->categoria->id) }}" class="font-semibold text-oaxaca-accent hover:underline">{{ $artesania->categoria->nombre }}</a></p> {{-- Categoría con enlace y color de acento --}}
+                                @endif
+                                <p class="text-2xl text-oaxaca-tertiary font-bold mt-3 mb-4">${{ number_format($artesania->precio, 2) }} MXN</p> {{-- Precio más grande y color terciario --}}
+
+                                <a href="{{ route('artesanias.show', $artesania->id) }}" class="mt-auto inline-block w-full bg-oaxaca-primary text-white px-6 py-3 rounded-lg hover:bg-oaxaca-secondary transition-colors text-center text-lg font-medium shadow-md transform hover:scale-105"> {{-- Botón con colores primarios y hover --}}
+                                    Ver Detalles
+                                </a>
+                            </div>
                         </div>
-                    </div>
-                @endforeach
-            </div>
-        @endif
-    </section>
+                    @endforeach
+                </div>
+            @endif
+        </section>
+    </div>
 @endsection

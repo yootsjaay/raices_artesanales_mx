@@ -10,8 +10,8 @@ use App\Http\Controllers\CommentController; // Asegúrate de importar el control
 
 use App\Http\Controllers\CarritoController; // Asegúrate de importar el controlador de comentarios
 use App\Http\Middleware\FakeAuth;
-use App\Http\Controllers\CheckoutController; // Si lo creas
-use App\Http\Controllers\EnviaController; // Asegúrate de importar tu controlador
+use App\Http\Controllers\CheckoutController;
+use App\Http\Controllers\ShippingController; // Asegúrate de importar tu controlador
 
 use App\Http\Controllers\Auth\AuthenticatedSessionController; // Necesario si vas a modificar el redireccionamiento post-login de Breeze
 use App\Http\Controllers\Admin\ArtesaniaController as AdminArtesaniaController; // <-- ¡Importa el nuevo controlador!
@@ -40,6 +40,25 @@ Route::prefix('admin')->name('admin.')->group(function(){
    
 
 });
+
+Route::middleware(['auth'])->group(function () {
+    Route::get('/checkout/shipping', [CheckoutController::class, 'showShippingOptions'])->name('checkout.shipping');
+    Route::post('/checkout/shipping/quotes', [CheckoutController::class, 'getShippingQuotes'])->name('checkout.get_quotes'); // Para peticiones AJAX
+    Route::post('/checkout/shipping/process', [CheckoutController::class, 'processShippingSelection'])->name('checkout.process_shipping');
+    Route::get('/checkout/payment', [CheckoutController::class, 'showPaymentForm'])->name('checkout.payment');
+    Route::post('/checkout/pay', [CheckoutController::class, 'createPreference'])->name('checkout.pay'); // Este creará la preferencia de MP
+});
+
+// Rutas para las redirecciones de Mercado Pago (pueden ser GET o POST según configuración de MP)
+Route::get('/checkout/success', [CheckoutController::class, 'paymentSuccess'])->name('checkout.success');
+Route::get('/checkout/failure', [CheckoutController::class, 'paymentFailure'])->name('checkout.failure');
+Route::get('/checkout/pending', [CheckoutController::class, 'paymentPending'])->name('checkout.pending');
+
+// Ruta para el Webhook de Mercado Pago (debe ser POST)
+Route::post('/mercadopago/webhook', [CheckoutController::class, 'handleMercadoPagoWebhook'])->name('mercadopago.webhook');
+
+
+
 Route::get('artesanias/{artesania}', [ArtesaniaController::class, 'show'])->name('artesanias.show');
 //MERCADO PAGO
 Route::get('/pagar-artesania/{id}', [PagoController::class, 'pagarArtesania'])->name('pagar.artesania');
@@ -53,9 +72,8 @@ Route::post('/carrito/vaciar', [CarritoController::class, 'vaciar'])->name('carr
 
 //METODO PARA ENVIA
 
-Route::get('/envia', [EnviaController::class, 'index'])->name('envia.index');
-Route::post('/envia', [EnviaController::class, 'quote'])->name('envia.quote');
-
+Route::get('/cotizar-envio', [ShippingController::class, 'showQuoteForm'])->name('envia.form');
+Route::post('/cotizar-envio', [ShippingController::class, 'getQuote'])->name('envia.quote');
 
 // Ruta para enviar comentarios (DEBE ESTAR FUERA DEL GRUPO 'admin')
 Route::post('artesanias/{artesania}/comments', [CommentController::class, 'store'])
