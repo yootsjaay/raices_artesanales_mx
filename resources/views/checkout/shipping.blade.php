@@ -1,4 +1,4 @@
-@extends('layouts.app') {{-- Asume que tienes un layout base llamado 'app' --}}
+@extends('layouts.public') {{-- Asume que tienes un layout base llamado 'app' --}}
 
 @section('content')
 <div class="container mx-auto px-4 py-8">

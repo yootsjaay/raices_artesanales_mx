@@ -3,7 +3,7 @@ namespace App\Services; // <--- ¡Asegúrate de que este sea el correcto!
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\ClientException;
 use Illuminate\Support\Facades\Log;
-class SkydropService {
+class SkydropxService {
     protected $client;
     protected $apiKey;
     protected $baseUrl;
