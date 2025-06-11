@@ -13,6 +13,7 @@ use App\Http\Middleware\FakeAuth;
 use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\ShippingController; // Asegúrate de importar tu controlador
 
+use App\Http\Controller\SkydropxTestController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController; // Necesario si vas a modificar el redireccionamiento post-login de Breeze
 use App\Http\Controllers\Admin\ArtesaniaController as AdminArtesaniaController; // <-- ¡Importa el nuevo controlador!
 use App\Http\Controllers\Admin\UbicacionController as AdminUbicacionController;
@@ -48,6 +49,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/checkout/payment', [CheckoutController::class, 'showPaymentForm'])->name('checkout.payment');
     Route::post('/checkout/pay', [CheckoutController::class, 'createPreference'])->name('checkout.pay'); // Este creará la preferencia de MP
 });
+Route::get('/test-skydropx-quotation', [SkydropxTestController::class, 'testQuotation']);
 
 // Rutas para las redirecciones de Mercado Pago (pueden ser GET o POST según configuración de MP)
 Route::get('/checkout/success', [CheckoutController::class, 'paymentSuccess'])->name('checkout.success');
@@ -56,7 +58,6 @@ Route::get('/checkout/pending', [CheckoutController::class, 'paymentPending'])->
 
 // Ruta para el Webhook de Mercado Pago (debe ser POST)
 Route::post('/mercadopago/webhook', [CheckoutController::class, 'handleMercadoPagoWebhook'])->name('mercadopago.webhook');
-
 
 
 Route::get('artesanias/{artesania}', [ArtesaniaController::class, 'show'])->name('artesanias.show');
