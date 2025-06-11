@@ -37,10 +37,13 @@ return [
     'mercadopago'=>[
         'public_key'=> 'MP_ACCESS_TOKEN'
     ],
-    // ...
+// config/services.php
 'skydropx' => [
-    'api_token' => env('SKYDROPX_API_TOKEN'),
-    'base_url' => env('SKYDROPX_BASE_URL'),
+    'client_id' => env('SKYDROPX_CLIENT_ID'),
+    'client_secret' => env('SKYDROPX_CLIENT_SECRET'),
+    'base_url' => env('SKYDROPX_BASE_URL', 'https://app.skydropx.com/api/v1/'), // Asegúrate de que esta URL sea la correcta para la API principal
+    'oauth_url' => env('SKYDROPX_OAUTH_URL', 'https://app.skydropx.com/api/v1/oauth/token'), // URL específica para el token
+    'ssl_verify' => env('SKYDROPX_SSL_VERIFY', true), // Deja esto en `true` para producción
 ],
 
     
