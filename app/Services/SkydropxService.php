@@ -6,26 +6,24 @@ use GuzzleHttp\Client;
 use GuzzleHttp\Exception\ClientException;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Http;
+
 
 class SkydropxService
 {
-    protected Client $client; // Corregido: tipado para GuzzleHttp\Client
-    protected string $baseUrl;
+    protected Client $client;
     protected string $clientId;
-    protected string $clientSecret; // Corregido: nombre de propiedad consistente
-    protected string $oauthUrl;
+    protected string $clientSecret;
 
     public function __construct()
     {
-        // Eliminada: $this->apiKey=config('services.skydropx.api_token'); (obsoleto con OAuth)
-        $this->baseUrl = config('services.skydropx.base_url');
         $this->clientId = config('services.skydropx.client_id');
-        $this->clientSecret = config('services.skydropx.client_secret'); // Corregido: asignación a la propiedad correcta
-        $this->oauthUrl = config('services.skydropx.oauth_url');
+        $this->clientSecret = config('services.skydropx.client_secret');
 
-        // Corregido: $this->client en lugar de $this->cliente
+        // El base_uri para el cliente Guzzle principal se puede mantener genérico o se podría omitir si todas las peticiones son con URL completa.
+        // apuntando al dominio principal sin un path específico.
         $this->client = new Client([
-            'base_uri' => $this->baseUrl,
+            'base_uri' => 'https://sb-pro.skydropx.com/',
             'verify' => config('services.skydropx.ssl_verify', true),
         ]);
     }
@@ -38,13 +36,14 @@ class SkydropxService
      */
     protected function getAccessToken(): string
     {
+        $oauthUrl = 'https://sb-pro.skydropx.com/api/v1/oauth/token'; // URL de OAuth directamente 
         $accessToken = Cache::get('skydropx_access_token');
 
         if (!$accessToken) {
             Log::info('SkydropX: Token no encontrado o expirado, solicitando nuevo token.');
             try {
                 $oauthClient = new Client([
-                    'base_uri' => $this->oauthUrl,
+                    'base_uri' => $oauthUrl,
                     'verify' => config('services.skydropx.ssl_verify', true),
                 ]);
 
@@ -57,7 +56,7 @@ class SkydropxService
                         'client_id' => $this->clientId,
                         'client_secret' => $this->clientSecret,
                         'grant_type' => 'client_credentials',
-
+                        'scope' => 'default orders.create',
                     ],
                 ]);
 
@@ -69,15 +68,14 @@ class SkydropxService
 
                 $accessToken = $data['access_token'];
                 $expiresInSeconds = $data['expires_in'] ?? 7200;
-                $cacheDuration = ($expiresInSeconds > 60) ? $expiresInSeconds - 60 : $expiresInSeconds; // Cachear por 2 horas menos 1 minuto
+                $cacheDuration = ($expiresInSeconds > 60) ? $expiresInSeconds - 60 : $expiresInSeconds;
 
                 Cache::put('skydropx_access_token', $accessToken, now()->addSeconds($cacheDuration));
                 Log::info('SkydropX: Nuevo token obtenido y cacheado con éxito.');
 
             } catch (ClientException $e) {
-                $statusCode = $e->getResponse()->getStatusCode(); // Obtener el código de estado
-                $responseBody = (string) $e->getResponse()->getBody(); // Obtener el cuerpo de la respuesta RAW
-                // Corregido: $e->getMessage() en lugar de $e->gerMessage()
+                $statusCode = $e->getResponse()->getStatusCode();
+                $responseBody = (string) $e->getResponse()->getBody();
                 $errorMessage = json_decode($responseBody, true) ?: ['message' => $e->getMessage()];
 
                 Log::error(
@@ -89,7 +87,6 @@ class SkydropxService
                         'parsed_error_message' => $errorMessage,
                     ]
                 );
-                // Mejorado: Mensaje de excepción más informativo
                 throw new \Exception(
                     'Error al obtener el token de acceso de SkydropX. Status: ' . $statusCode .
                     '. Detalles: ' . json_encode($errorMessage)
@@ -115,20 +112,20 @@ class SkydropxService
      */
     protected function request(string $method, string $uri, array $options = []): array
     {
-        $accessToken = $this->getAccessToken(); // Obtener el token (o refrescarlo si es necesario)
+        $accessToken = $this->getAccessToken();
 
-        // Añadir el encabezado de autorización a la petición
         $options['headers'] = array_merge($options['headers'] ?? [], [
             'Authorization' => 'Bearer ' . $accessToken,
-            'Content-Type' => 'application/json', // Por defecto para la API principal
+            'Content-Type' => 'application/json',
             'Accept' => 'application/json',
         ]);
 
         try {
+            // Se usa la URI completa en la llamada request para asegurar que no dependa del base_uri del cliente
             $response = $this->client->request($method, $uri, $options);
             return json_decode($response->getBody()->getContents(), true);
         } catch (ClientException $e) {
-            $responseBody = $e->getResponse()->getBody(true);
+            $responseBody = $e->getResponse()->getBody()->getContents();
             $errorMessage = json_decode($responseBody, true) ?: ['message' => $e->getMessage()];
             Log::error("SkydropX Client Error ({$method} {$uri}): " . $e->getMessage() . ' - Response: ' . $responseBody);
             throw $e;
@@ -139,39 +136,107 @@ class SkydropxService
     }
 
     /**
+     * Crea una orden con SkydropX.
+     * Endpoint: POST /api/v1/orders
+     *
+     * @param array $orderData Datos de la orden a crear.
+     * @return array Retorna la respuesta de la API.
+     * @throws \Exception Si ocurre un error al crear la orden.
+     */
+    public function createOrder(array $orderData): array
+    {
+        try {
+            $token = $this->getAccessToken();
+            $ordersUrl = 'https://sb-pro.skydropx.com/api/v1/orders'; // URL de órdenes directamente aquí
+
+            $response = Http::withToken($token)
+                ->acceptJson()
+                ->timeout(10)
+                ->post($ordersUrl, $orderData);
+
+            if (!$response->successful()) {
+                $status = $response->status();
+                $body = $response->body();
+                Log::error('Error al crear orden SkydropX', [
+                    'status' => $status,
+                    'body' => $body,
+                    'orderData' => $orderData,
+                ]);
+                $message = "Error al crear orden. HTTP status: $status. Response: " . ($body ?: 'Sin contenido');
+                throw new \Exception($message);
+            }
+
+            return $response->json();
+
+        } catch (\Exception $e) {
+            Log::error('Excepción al crear orden SkydropX', [
+                'message' => $e->getMessage(),
+                'orderData' => $orderData,
+            ]);
+            throw $e;
+        }
+    }
+
+    /**
+     * Introspecta un token de SkydropX.
+     * Endpoint: POST /api/v1/oauth/introspect
+     *
+     * @param string $token El token a introspectar.
+     * @return array Retorna la respuesta de la API de introspección.
+     * @throws \Exception Si ocurre un error al introspectar el token.
+     */
+    public function introspectToken(string $token): array
+    {
+        $introspectUrl = 'https://sb-pro.skydropx.com/api/v1/oauth/introspect'; // URL de introspección directamente aquí
+        $clientId = config('services.skydropx.client_id');
+        $clientSecret = config('services.skydropx.client_secret');
+
+        $response = Http::asForm()->post($introspectUrl, [
+            'client_id' => $clientId,
+            'client_secret' => $clientSecret,
+            'token' => $token,
+            'token_type_hint' => 'access_token',
+        ]);
+
+        if (!$response->successful()) {
+            Log::error('Error introspectando token SkydropX', [
+                'status' => $response->status(),
+                'body' => $response->body(),
+            ]);
+            throw new \Exception("Error al introspectar token: HTTP {$response->status()}");
+        }
+
+        return $response->json();
+    }
+
+    /**
      * Crea una cotización con SkydropX.
      * Endpoint: POST /api/v1/quotations
      *
-     * @param array $addressFrom Datos de la dirección de origen.
-     * @param array $addressTo Datos de la dirección de destino.
-     * @param array $parcel Datos del paquete (length, width, height, weight).
-     * @param string|null $orderId ID de la orden interna para referenciar la cotización.
-     * @param array $requestedCarriers Lista de paqueterías a cotizar (opcional).
+     * @param array $data Datos para la cotización (order_id, address_from, address_to, parcel, requested_carriers).
      * @return array Retorna la respuesta de la API.
      * @throws ClientException|\Exception Si ocurre un error al crear la cotización.
      */
-    public function createQuotation(
-        array $addressFrom,
-        array $addressTo,
-        array $parcel,
-        ?string $orderId = null,
-        array $requestedCarriers = []
-    ): array {
-        $data = [
-            'address_from' => $addressFrom,
-            'address_to' => $addressTo,
-            'parcel' => $parcel,
+    public function cotizar(array $data): array
+    {    $orderId = $data['quotation']['order_id']; // ← acceso correcto
+
+        $quotationsUrl = "https://sb-pro.skydropx.com/api/v1/quotations/{$orderId}";
+
+        $body = [
+            'quotation' => [
+                'order_id' => $data['order_id'],
+                'address_from' => $data['address_from'],
+                'address_to' => $data['address_to'],
+                'parcel' => $data['parcel'],
+                'requested_carriers' => $data['requested_carriers'] ?? [],
+            ],
         ];
 
-        if ($orderId) {
-            $data['order_id'] = $orderId;
-        }
-        if (!empty($requestedCarriers)) {
-            $data['requested_carriers'] = $requestedCarriers;
-        }
-
-        return $this->request('POST', 'quotations', [
-            'json' => $data,
+        // Se pasa la URL completa al método request
+        return $this->request('GET', $quotationsUrl, [
+            'json' => $body,
         ]);
-    }
+    
+}
+
 }
