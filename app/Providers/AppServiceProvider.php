@@ -4,7 +4,7 @@ namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
 
-use App\Services\SkydropxService;
+use App\Services\EnviaService;
 class AppServiceProvider extends ServiceProvider
 {
     /**
@@ -12,7 +12,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        $this->app->bind(SkydropxService::class, SkydropxService::class);
+        $this->app->bind(EnviaService::class, EnviaService::class);
        // $this->app->bind(MercadoPagoInterface::class, MercadoPagoServices::class);
        //$this->app->bind(EnviaService::class);
 

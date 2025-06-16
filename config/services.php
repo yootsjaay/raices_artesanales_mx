@@ -37,14 +37,11 @@ return [
     'mercadopago'=>[
         'public_key'=> 'MP_ACCESS_TOKEN'
     ],
-// config/services.php
-'skydropx' => [
-    'client_id' => env('SKYDROPX_CLIENT_ID'),
-    'client_secret' => env('SKYDROPX_CLIENT_SECRET'),
-    'base_url' => env('SKYDROPX_BASE_URL'),   // <--- NO second parameter here!
-    'oauth_url' => env('SKYDROPX_OAUTH_URL'), // <--- NO second parameter here!
-    'ssl_verify' => env('SKYDROPX_SSL_VERIFY', true),
+'envia' => [
+    'base_url' => env('ENVIA_BASE_URL'),
+    'api_key' => env('ENVIA_API_KEY'),
 ],
+
     
 
 ];
