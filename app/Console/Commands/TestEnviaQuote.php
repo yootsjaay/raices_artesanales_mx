@@ -5,9 +5,8 @@ namespace App\Console\Commands;
 use Illuminate\Console\Command;
 use App\Services\EnviaService;
 
-class TestSkydropxQuotation extends Command
-{
-    protected $signature = 'envia:test-quote';
+class TestEnviaQuote extends Command
+{protected $signature = 'envia:test-quote';
     protected $description = 'Tests the Envia.com shipping quotation API with a predefined payload.';
     protected $enviaService;
 
@@ -98,7 +97,7 @@ class TestSkydropxQuotation extends Command
             "shipment" => [
                 "type" => 1,
                 "import" => 0,
-                 "carrier" => "fedex", 
+                 "carrier" => "dhl", 
             ]
         ];
 
