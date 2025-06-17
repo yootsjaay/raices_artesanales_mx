@@ -55,18 +55,18 @@ class EnviaService
      * @param array $data Los datos para crear la guía
      * @return array|null
      */
-    public function createShipment(array $data)
+   public function createShipment(array $data)
     {
         try {
             $response = Http::withHeaders([
                 'Content-Type' => 'application/json',
                 'Authorization' => 'Bearer ' . $this->apiKey,
-            ])->post("{$this->baseUrl}/ship/generate/", $data); // Asumiendo esta es la URL para generar la guía
+            ])->post("{$this->baseUrl}/ship/generate/", $data); // This is the correct endpoint for label generation
 
             if ($response->successful()) {
                 return $response->json();
             } else {
-                Log::error('Error al crear envío con Envia.com:', [
+                Log::error('Error creating shipment with Envia.com:', [
                     'status' => $response->status(),
                     'body' => $response->body(),
                     'request_data' => $data
@@ -74,7 +74,7 @@ class EnviaService
                 return null;
             }
         } catch (\Exception $e) {
-            Log::error('Excepción al crear envío con Envia.com: ' . $e->getMessage(), [
+            Log::error('Exception creating shipment with Envia.com: ' . $e->getMessage(), [
                 'trace' => $e->getTraceAsString()
             ]);
             return null;
