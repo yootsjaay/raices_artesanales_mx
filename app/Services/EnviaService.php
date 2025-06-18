@@ -48,38 +48,48 @@ class EnviaService
             return null;
         }
     }
+/**
+ * Crea una guía de envío.
+ *
+ * @param array $data Los datos para crear la guía
+ * @return array|null
+ */
+public function createShipment(array $data)
+{
+    try {
+        // Log para verificar el payload antes de enviarlo
+        Log::debug('Payload enviado a Envia.com:', $data);
 
-    /**
-     * Crea una guía de envío.
-     *
-     * @param array $data Los datos para crear la guía
-     * @return array|null
-     */
-   public function createShipment(array $data)
-    {
-        try {
-            $response = Http::withHeaders([
-                'Content-Type' => 'application/json',
-                'Authorization' => 'Bearer ' . $this->apiKey,
-            ])->post("{$this->baseUrl}/ship/generate/", $data); // This is the correct endpoint for label generation
+        $response = Http::withHeaders([
+            'Content-Type'  => 'application/json',
+            'Accept'        => 'application/json',
+            'Authorization' => 'Bearer ' . $this->apiKey,
+        ])->post("{$this->baseUrl}/ship/generate/", $data);
 
-            if ($response->successful()) {
-                return $response->json();
-            } else {
-                Log::error('Error creating shipment with Envia.com:', [
-                    'status' => $response->status(),
-                    'body' => $response->body(),
-                    'request_data' => $data
-                ]);
-                return null;
-            }
-        } catch (\Exception $e) {
-            Log::error('Exception creating shipment with Envia.com: ' . $e->getMessage(), [
-                'trace' => $e->getTraceAsString()
+        if ($response->successful()) {
+            Log::info('Etiqueta generada correctamente desde Envia.com');
+            return $response->json(); // Devuelve el contenido JSON decodificado
+        } else {
+            Log::error('Error al generar la guía con Envia.com:', [
+                'status'       => $response->status(),
+                'error_body'   => $response->json(),  // o usa ->body() si el JSON falla
+                'request_data' => $data,
             ]);
-            return null;
+            return [
+                'status' => $response->status(),
+                'error'  => $response->json(), // Mejor para ver desde consola
+            ];
         }
+    } catch (\Exception $e) {
+        Log::critical('Excepción al crear la guía con Envia.com: ' . $e->getMessage(), [
+            'trace' => $e->getTraceAsString(),
+        ]);
+        return [
+            'error' => 'Exception',
+            'message' => $e->getMessage()
+        ];
     }
+}
 
     // Puedes agregar más métodos según las funcionalidades que necesites, siguiendo la misma estructura.
 }
