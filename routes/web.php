@@ -43,18 +43,12 @@ Route::prefix('admin')->name('admin.')->group(function(){
 });
 
 Route::middleware(['auth'])->group(function () {
-    Route::get('/checkout/shipping', [CheckoutController::class, 'showShippingOptions'])->name('checkout.shipping');
-    Route::post('/checkout/shipping/quotes', [CheckoutController::class, 'getShippingQuotes'])->name('checkout.get_quotes'); // Para peticiones AJAX
-    Route::post('/checkout/shipping/process', [CheckoutController::class, 'processShippingSelection'])->name('checkout.process_shipping');
-    Route::get('/checkout/payment', [CheckoutController::class, 'showPaymentForm'])->name('checkout.payment');
-    Route::post('/checkout/pay', [CheckoutController::class, 'createPreference'])->name('checkout.pay'); // Este creará la preferencia de MP
-});
-Route::get('/test-skydropx-quotation', [SkydropxTestController::class, 'testQuotation']);
+     Route::get('/checkout', [CheckoutController::class, 'show'])->name('checkout.show');
+    Route::post('/checkout', [CheckoutController::class, 'checkout'])->name('checkout.process');
+    Route::get('/checkout/success', [CheckoutController::class, 'success'])->name('checkout.success');
 
-// Rutas para las redirecciones de Mercado Pago (pueden ser GET o POST según configuración de MP)
-Route::get('/checkout/success', [CheckoutController::class, 'paymentSuccess'])->name('checkout.success');
-Route::get('/checkout/failure', [CheckoutController::class, 'paymentFailure'])->name('checkout.failure');
-Route::get('/checkout/pending', [CheckoutController::class, 'paymentPending'])->name('checkout.pending');
+});
+
 
 // Ruta para el Webhook de Mercado Pago (debe ser POST)
 Route::post('/mercadopago/webhook', [CheckoutController::class, 'handleMercadoPagoWebhook'])->name('mercadopago.webhook');

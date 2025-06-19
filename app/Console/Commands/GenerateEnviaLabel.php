@@ -73,7 +73,7 @@ class GenerateEnviaLabel extends Command
                 ]
             ],
             "shipment" => [
-                "carrier" => "fedex",
+                "carrier" => "dhl",
                 "service" => "ground",
                 "type" => 1,
                 "currency" => "MXN"

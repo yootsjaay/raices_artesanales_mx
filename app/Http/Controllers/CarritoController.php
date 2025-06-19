@@ -165,4 +165,31 @@ class CarritoController extends Controller
 
         return redirect()->route('carrito.mostrar')->with('success', 'Carrito vaciado.');
     }
+
+    
+    private function calculateTotalPackage($items)
+{
+    $length = $width = $height = $weight = 0;
+
+    foreach ($items as $item) {
+        $art = $item->artesania;
+        $length += $art->length;
+        $width = max($width, $art->width);
+        $height = max($height, $art->height);
+        $weight += $art->weight * $item->quantity;
+    }
+
+    return [
+        'length' => $length,
+        'width' => $width,
+        'height' => $height,
+        'weight' => $weight,
+    ];
+}
+
+private function calculateCartValue($cart)
+{
+    return $cart->items->sum(fn ($item) => $item->subtotal);
+}
+
 }

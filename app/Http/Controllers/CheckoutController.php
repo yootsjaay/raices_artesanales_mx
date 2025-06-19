@@ -3,343 +3,117 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Services\SkydropxService; // <--- ¡Asegúrate de que esta línea esté presente y sea correcta!
-use App\Models\CartItem; // Asumo que tienes un modelo para los ítems del carrito
-use App\Models\Product; // O Artesania, para obtener detalles del producto
-use App\Models\UserAddress; // Asumo que los usuarios pueden tener direcciones guardadas
+use App\Models\Cart;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Session; // Para manejar datos en la sesión
+use App\Services\EnviaService;
 class CheckoutController extends Controller
 {
-     protected $skydropxService;
-    protected $oaxacaOriginAddress; // Para la dirección de origen predefinida
+    protected $enviaService;
 
-    public function __construct(SkydropxService $skydropxService)
-    {
-        $this->skydropxService = $skydropxService;
+public function __construct(EnviaService $enviaService){
+    $this->enviaService = $enviaService;
+}
 
-        // Definir la dirección de origen para SkydropX (tu ubicación en Oaxaca)
-        // Puedes poner esto en un archivo de configuración si prefieres
-        $this->oaxacaOriginAddress = [
-            'country_code' => 'MX',
-            'postal_code' => '68000', // Código postal central de Oaxaca de Juárez
-            'area_level1' => 'Oaxaca', // Estado
-            'area_level2' => 'Oaxaca de Juárez', // Ciudad/Municipio
-            'area_level3' => 'Centro', // Colonia/Barrio (puedes ajustar esto o dejarlo más general)
-            'name' => 'Raices Artesanales MX',
-            'address1' => 'Calle Reforma 123', // Dirección de tu tienda/almacén en Oaxaca
-            'phone' => '9511234567', // Tu número de teléfono
-            'company' => 'Raices Artesanales MX',
-            'reference' => 'Frente al templo de Santo Domingo', // Referencia opcional
-        ];
-    }
+public function checkout(Request $request)
+{
+    $cart = Cart::with('items.artesania')
+                ->where('user_id', Auth::id())
+                ->firstOrFail();
 
-     /**
-     * Muestra la página donde el usuario puede seleccionar/ingresar su dirección
-     * y ver las opciones de envío.
-     */
-public function showShippingOptions(Request $request)
-    {
-    
-        if (!Auth::check()) {
-            return redirect()->route('login')->with('info', 'Por favor, inicia sesión para continuar con tu compra.');
-        }
+    $validated = $request->validate([
+        'name' => 'required|string',
+        'company' => 'nullable|string',
+        'email' => 'required|email',
+        'phone' => 'required|string',
+        'street' => 'required|string',
+        'number' => 'required|string',
+        'district' => 'nullable|string',
+        'city' => 'required|string',
+        'state' => 'required|string',
+        'postal_code' => 'required|string',
+        'reference' => 'nullable|string',
+    ]);
 
-        // Paso 1: Obtener el carrito del usuario autenticado
-        // Asumiendo que tu modelo User tiene una relación 'cart()' (hasOne)
-        $cart = Auth::user()->cart;
+    $dimensions = $this->calculateTotalPackage($cart->items);
 
-        // Paso 2: Verificar si el usuario tiene un carrito o si está vacío
-        if (!$cart || $cart->items->isEmpty()) { // Si no hay carrito O el carrito no tiene ítems
-            return redirect()->route('carrito.index')->with('error', 'Tu carrito está vacío.');
-        }
+    $envioPayload = [
+        "origin" => config('envia.origin'),
+        "destination" => array_merge($validated, [
+            "type" => "destination",
+            "country" => "MX",
+            "phone_code" => "MX"
+        ]),
+        "packages" => [[
+            "content" => "Compra de artesanías",
+            "amount" => 1,
+            "type" => "box",
+            "dimensions" => [
+                'length' => $dimensions['length'],
+                'width'  => $dimensions['width'],
+                'height' => $dimensions['height'],
+            ],
+            "weight" => $dimensions['weight'],
+            "declaredValue" => $this->calculateCartValue($cart),
+            "weightUnit" => "KG",
+            "lengthUnit" => "CM",
+        ]],
+        "shipment" => [
+            "carrier" => "fedex",
+            "service" => "ground",
+            "type" => 1,
+            "currency" => "MXN",
+        ],
+        "settings" => [
+            "printFormat" => "PDF",
+            "printSize" => "STOCK_4X6",
+            "comments" => "Envío desde Raíces Artesanales"
+        ]
+    ];
 
-        // Paso 3: Obtener los ítems del carrito (ya cargados si usas eager loading en la relación Cart->items)
-        // O cargar la relación 'artesania' directamente en los items del carrito.
-        // Si ya usas with('items.artesania') en la relación del User, podrías no necesitar este with
-        // Pero para seguridad, lo pondremos aquí:
-        $cartItems = $cart->items()->with('artesania')->get();
+    $enviaResponse = $this->enviaService->createShipment($envioPayload);
 
-    
-        // Verificar si el carrito está vacío (de nuevo, por si la relación items no trajo nada con artesania, aunque es menos probable)
-        if ($cartItems->isEmpty()) {
-            return redirect()->route('carrito.index')->with('error', 'Tu carrito está vacío.');
-        }
+    $shipmentData = $enviaResponse['data'][0] ?? [];
 
-        // Calcular el peso y las dimensiones totales del carrito
-        $totalWeight = 0;
-        $totalLength = 0;
-        $totalWidth = 0;
-        $totalHeight = 0;
-        $subtotal = 0;
+    $shipment = Shipment::create([
+        'cart_id' => $cart->id,
+        'destination_name' => $validated['name'],
+        'destination_company' => $validated['company'],
+        'destination_email' => $validated['email'],
+        'destination_phone' => $validated['phone'],
+        'destination_street' => $validated['street'],
+        'destination_number' => $validated['number'],
+        'destination_district' => $validated['district'],
+        'destination_city' => $validated['city'],
+        'destination_state' => $validated['state'],
+        'destination_postal_code' => $validated['postal_code'],
+        'destination_country' => 'MX',
+        'destination_reference' => $validated['reference'],
+        'carrier' => 'fedex',
+        'service' => 'ground',
+        'order_id' => $shipmentData['shipmentId'] ?? null,
+        'tracking_number' => $shipmentData['trackingNumber'] ?? null,
+        'label_url' => $shipmentData['additionalFiles']['pdf'] ?? null,
+        'status' => 'generado',
+        'total_weight' => $dimensions['weight'],
+        'length' => $dimensions['length'],
+        'width' => $dimensions['width'],
+        'height' => $dimensions['height'],
+    ]);
 
-        foreach ($cartItems as $item) {
-            $artesania = $item->artesania; // Acceder a la artesanía a través del ítem del carrito
-            $totalWeight += ($artesania->weight ?? 0.1) * $item->quantity;
-            $totalLength = max($totalLength, $artesania->length ?? 10);
-            $totalWidth = max($totalWidth, $artesania->width ?? 10);
-            $totalHeight = max($totalHeight, $artesania->height ?? 10);
-            $subtotal += $item->quantity * $artesania->precio;
-        }
+    return redirect()->route('checkout.success')->with('shipment_id', $shipment->id);
+}
 
-        // Establecer un peso/dimensiones mínimos si el total es muy bajo
-        $totalWeight = max($totalWeight, 0.1); // Mínimo 100g
-        $totalLength = max($totalLength, 10);
-        $totalWidth = max($totalWidth, 10);
-        $totalHeight = max($totalHeight, 10);
+public function show()
+{
+    $cart = Cart::with('items.artesania')
+                ->where('user_id', Auth::id())
+                ->firstOrFail();
 
-        $parcel = [
-            'weight' => (float)number_format($totalWeight, 2), // SkydropX espera float
-            'distance_unit' => 'CM',
-            'width' => (int)ceil($totalWidth), // SkydropX espera enteros
-            'height' => (int)ceil($totalHeight),
-            'length' => (int)ceil($totalLength),
-            'mass_unit' => 'KG'
-        ];
+    return view('checkout', compact('cart'));
+}
 
-        // 4. Obtener direcciones guardadas del usuario (si existen)
-        $userAddresses = Auth::user()->addresses; // Asumo que el modelo User tiene relación hasMany con UserAddress
-
-        // Pre-cargar la dirección del usuario si tiene una "principal" o la más reciente
-        $defaultAddress = $userAddresses->first();
-
-        // Intentar obtener las cotizaciones si ya hay una dirección por defecto
-        $shippingOptions = [];
-        $quotationId = null;
-        
-        if ($defaultAddress) {
-            $addressTo = [
-                'country_code' => $defaultAddress->country_code,
-                'postal_code' => $defaultAddress->postal_code,
-                'area_level1' => $defaultAddress->state,
-                'area_level2' => $defaultAddress->city,
-                'area_level3' => $defaultAddress->colony,
-            ];
-
-            $quotationResult = $this->skydropxService->createQuotation(
-                $this->oaxacaOriginAddress,
-                $addressTo,
-                $parcel,
-                'order_temp_' . Auth::id() . '_' . time()
-            );
-            if (isset($quotationResult['rates']) && !empty($quotationResult['rates'])) {
-                $shippingOptions = collect($quotationResult['rates'])
-                                    ->filter(function($rate) {
-                                        return $rate['success'] && in_array($rate['status'], ['approved', 'price_found_internal', 'price_found_external']);
-                                    })
-                                    ->sortBy('total')
-                                    ->values()
-                                    ->all();
-                $quotationId = $quotationResult['id'];
-                Session::put('skydropx_quotation_id', $quotationId);
-                Session::put('skydropx_parcel_data', $parcel);
-                Session::put('skydropx_address_from', $this->oaxacaOriginAddress);
-                Session::put('skydropx_address_to', $addressTo);
-
-            } elseif (isset($quotationResult['error'])) {
-                Log::error("SkydropX Quotation Error for user " . Auth::id() . ": " . json_encode($quotationResult['error']));
-                Session::flash('error', 'No fue posible cotizar el envío a tu dirección actual. Por favor, revisa tus datos o intenta más tarde.');
-            } else {
-                 Session::flash('info', 'No se encontraron opciones de envío para la dirección predeterminada. Ingresa una nueva dirección o ajusta la existente.');
-            }
-        }
-
-        return view('checkout.shipping', compact(
-            'cartItems',
-            'subtotal',
-            'userAddresses',
-            'defaultAddress',
-            'shippingOptions',
-            'quotationId',
-            'parcel'
-        ));
-    }
-
-    /**
-     * Procesa el envío de la dirección y cotiza las opciones.
-     * Esto se llamaría vía AJAX o un submit de formulario desde la vista de shipping.
-     */
-    public function getShippingQuotes(Request $request)
-    {
-        $request->validate([
-            'country_code' => 'required|string|max:2',
-            'postal_code' => 'required|string|max:10',
-            'state' => 'required|string|max:255', // area_level1
-            'city' => 'required|string|max:255', // area_level2
-            'colony' => 'required|string|max:255', // area_level3
-            // No se necesitan address1, phone, name para la cotización inicial, pero sí para crear el envío
-        ]);
-
-        $cartItems = CartItem::where('user_id', Auth::id())->with('artesania')->get();
-        if ($cartItems->isEmpty()) {
-            return response()->json(['error' => 'Tu carrito está vacío.'], 400);
-        }
-
-        $totalWeight = 0;
-        $totalLength = 0;
-        $totalWidth = 0;
-        $totalHeight = 0;
-
-        foreach ($cartItems as $item) {
-            $artesania = $item->artesania;
-            $totalWeight += ($artesania->weight ?? 0.1) * $item->quantity;
-            $totalLength = max($totalLength, $artesania->length ?? 10);
-            $totalWidth = max($totalWidth, $artesania->width ?? 10);
-            $totalHeight = max($totalHeight, $artesania->height ?? 10);
-        }
-
-        $totalWeight = max($totalWeight, 0.1);
-        $totalLength = max($totalLength, 10);
-        $totalWidth = max($totalWidth, 10);
-        $totalHeight = max($totalHeight, 10);
-
-        $parcel = [
-            'weight' => (float)number_format($totalWeight, 2),
-            'distance_unit' => 'CM',
-            'width' => (int)ceil($totalWidth),
-            'height' => (int)ceil($totalHeight),
-            'length' => (int)ceil($totalLength),
-            'mass_unit' => 'KG'
-        ];
-
-        $addressTo = [
-            'country_code' => $request->country_code,
-            'postal_code' => $request->postal_code,
-            'area_level1' => $request->state,
-            'area_level2' => $request->city,
-            'area_level3' => $request->colony,
-        ];
-
-        $quotationResult = $this->skydropxService->createQuotation(
-            $this->oaxacaOriginAddress,
-            $addressTo,
-            $parcel,
-            'order_temp_' . Auth::id() . '_' . time()
-        );
-        dd($quotationResult); // <--- Añade esta línea aquí temporalmente
-
-
-        if (isset($quotationResult['rates'])) {
-            $shippingOptions = collect($quotationResult['rates'])
-                                ->filter(function($rate) {
-                                    return $rate['success'] && in_array($rate['status'], ['approved', 'price_found_internal', 'price_found_external']);
-                                })
-                                ->sortBy('total')
-                                ->values()
-                                ->all();
-            $quotationId = $quotationResult['id'];
-
-            // Guardar el quotation_id y datos del paquete en la sesión
-            Session::put('skydropx_quotation_id', $quotationId);
-            Session::put('skydropx_parcel_data', $parcel);
-            Session::put('skydropx_address_from', $this->oaxacaOriginAddress);
-            Session::put('skydropx_address_to', $addressTo); // Solo los datos de cotización
-
-            return response()->json([
-                'success' => true,
-                'shippingOptions' => $shippingOptions,
-                'quotationId' => $quotationId,
-                'parcel' => $parcel // Devolver también el paquete calculado
-            ]);
-        } elseif (isset($quotationResult['error'])) {
-            Log::error("SkydropX Quotation Error in getShippingQuotes: " . json_encode($quotationResult['error']));
-            return response()->json([
-                'success' => false,
-                'message' => 'No fue posible cotizar el envío a esta dirección. Por favor, revisa tus datos o intenta más tarde.',
-                'errors' => $quotationResult['error']
-            ], 500);
-        } else {
-             return response()->json([
-                'success' => false,
-                'message' => 'No se encontraron opciones de envío para la dirección proporcionada. Intenta con otra o ajusta los detalles.',
-            ], 404);
-        }
-    }
-
-
-    /**
-     * Almacena la dirección completa del usuario y la tarifa de envío seleccionada
-     * y redirige a la página de pago.
-     */
-    public function processShippingSelection(Request $request)
-    {
-        $request->validate([
-            'selected_shipping_rate_id' => 'required|string',
-            'full_address1' => 'required|string|max:255',
-            'full_address2' => 'nullable|string|max:255', // Opcional
-            'phone' => 'required|string|max:20',
-            'name' => 'required|string|max:255',
-            'company' => 'nullable|string|max:255',
-            'reference' => 'nullable|string|max:255',
-            'save_address' => 'boolean', // Checkbox para guardar dirección
-        ]);
-
-        $quotationId = Session::get('skydropx_quotation_id');
-        $skydropxAddressTo = Session::get('skydropx_address_to'); // Esto tiene area_level1, area_level2, etc.
-
-        if (!$quotationId || !$skydropxAddressTo) {
-            return redirect()->route('checkout.shipping')->with('error', 'No se pudo recuperar la cotización de envío. Por favor, intenta de nuevo.');
-        }
-
-        // Obtener la cotización completa desde SkydropX para validar la tarifa
-        $quotationDetails = $this->skydropxService->getQuotation($quotationId);
-
-        if (!isset($quotationDetails['rates'])) {
-             return redirect()->route('checkout.shipping')->with('error', 'La cotización de envío no es válida o expiró. Por favor, vuelve a seleccionar una opción.');
-        }
-
-        $selectedRate = collect($quotationDetails['rates'])->firstWhere('id', $request->selected_shipping_rate_id);
-
-        if (!$selectedRate) {
-            return redirect()->route('checkout.shipping')->with('error', 'La opción de envío seleccionada no es válida.');
-        }
-
-        // Combinar los datos de address_to de la sesión con los detalles completos del formulario
-        $finalAddressTo = array_merge($skydropxAddressTo, [
-            'name' => $request->name,
-            'address1' => $request->full_address1,
-            'address2' => $request->full_address2,
-            'phone' => $request->phone,
-            'company' => $request->company,
-            'reference' => $request->reference,
-        ]);
-
-
-        // Guardar la dirección del usuario si lo marcó
-        if ($request->save_address) {
-            Auth::user()->addresses()->updateOrCreate(
-                [
-                    'user_id' => Auth::id(),
-                    'full_address1' => $request->full_address1, // Considera un identificador único para la dirección
-                ],
-                [
-                    'name' => $request->name,
-                    'phone' => $request->phone,
-                    'address1' => $request->full_address1,
-                    'address2' => $request->full_address2,
-                    'country_code' => $finalAddressTo['country_code'],
-                    'postal_code' => $finalAddressTo['postal_code'],
-                    'state' => $finalAddressTo['area_level1'],
-                    'city' => $finalAddressTo['area_level2'],
-                    'colony' => $finalAddressTo['area_level3'],
-                    // Otros campos que guardes
-                ]
-            );
-        }
-
-        // Guardar la información de envío en la sesión para el pago
-        Session::put('checkout_shipping_info', [
-            'selected_rate' => $selectedRate,
-            'quotation_id' => $quotationId,
-            'address_to_details' => $finalAddressTo, // Detalles completos de la dirección del cliente
-        ]);
-
-        return redirect()->route('checkout.payment');
-    }
-
-
-    }
-    
+}    
 
 
