@@ -7,6 +7,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens; // Esta línea ya está bien
 use App\Models\UserAddress; // Asegúrate de importar
+use Spatie\Permission\Traits\HasRoles;
 
 
 /**
@@ -26,7 +27,7 @@ use App\Models\UserAddress; // Asegúrate de importar
  */
 class User extends Authenticatable
 {
-    use HasFactory, Notifiable, HasApiTokens; // <--- ¡AQUÍ ESTÁ EL CAMBIO CLAVE! Agregamos HasApiTokens
+    use HasFactory, Notifiable, HasApiTokens,  HasRoles; // <--- ¡AQUÍ ESTÁ EL CAMBIO CLAVE! Agregamos HasApiTokens
 
     protected $table = 'users';
 

@@ -43,9 +43,9 @@ public function checkout(Request $request)
         'reference' => 'nullable|string',
     ]);
 
-    $dimensions = $this->calculateTotalPackage($cart->items);
+    $dimensions = $this->enviaService->quoteShipping($cart->$items);
 
-   $destination = [
+    $destination = [
     "number"     => $validated['number'],
     "postalCode" => $validated['postal_code'],
     "type"       => "destination",

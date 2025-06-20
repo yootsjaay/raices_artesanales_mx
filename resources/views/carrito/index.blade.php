@@ -1,6 +1,8 @@
 @extends('layouts.public')
 
 @section('content')
+@unlessrole('vendedor')
+
 <div class="container mx-auto py-8 px-4 max-w-7xl"> {{-- Padding y ancho máximo --}}
     <h1 class="text-5xl md:text-6xl font-display font-bold text-oaxaca-primary mb-10 text-center animate-fade-in">Tu Carrito de Compras</h1> {{-- Título con font-display y color primario --}}
 
@@ -107,9 +109,7 @@
                     <ul class="divide-y divide-oaxaca-primary divide-opacity-10 mb-6"> {{-- Divisores de lista --}}
                         @foreach($cartItems as $item)
                         <li class="py-3 flex items-center gap-4">
-                            @if($item->artesania->imagen_principal) {{-- Usar imagen_principal --}}
-                                <img src="{{ asset('storage/' . $item->artesania->imagen_principal) }}" alt="{{ $item->artesania->nombre }}" class="w-16 h-16 object-cover rounded-md border border-oaxaca-accent border-opacity-20"> {{-- Imagen de resumen --}}
-                            @endif
+                            {{-- Se eliminó la imagen aquí para evitar la duplicación --}}
                             <div class="flex-grow">
                                 <p class="font-semibold text-oaxaca-text-dark">{{ $item->artesania->nombre }}</p>
                                 <p class="text-oaxaca-text-dark text-sm">Cantidad: {{ $item->quantity }}</p>
@@ -139,4 +139,6 @@
         </div>
     @endif
 </div>
+@endunlessrole
+
 @endsection

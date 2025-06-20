@@ -1,3 +1,4 @@
+@role('vendedor')
 <x-app-layout>
     <x-slot name="header">
         <h2 class="font-semibold text-xl text-gray-800 leading-tight">
@@ -30,9 +31,7 @@
                             <h4 class="text-xl font-semibold text-purple-800 mb-2">Gestionar Ubicaciones</h4>
                             <p class="text-purple-700">Define y organiza los lugares de origen de tus artesanías.</p>
                         </a>
-                                        <x-nav-link :href="route('admin.comments.index')" :active="request()->routeIs('admin.comments.*')">
-                    {{ __('Gestión de Comentarios') }}
-                </x-nav-link>
+                          
 
                         {{-- Puedes agregar más tarjetas aquí para otras funcionalidades --}}
                     </div>
@@ -41,3 +40,9 @@
         </div>
     </div>
 </x-app-layout>
+@else
+    {{-- Opcional: mensaje para quien no tenga permiso --}}
+    <div class="p-8 text-red-600 font-bold">
+        No tienes permiso para acceder a esta sección.
+    </div>
+@endrole

@@ -11,10 +11,15 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
-        //
+        // Middleware global si quieres
         // $middleware->append(\App\Http\Middleware\FakeAuth::class);
-        
+
+        // Alias personalizados (como 'role' de Spatie)
+        $middleware->alias([
+        'role' => \Spatie\Permission\Middleware\RoleMiddleware::class,
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //
-    })->create();
+    })
+    ->create();
