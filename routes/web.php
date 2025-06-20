@@ -48,6 +48,8 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/checkout/success', [CheckoutController::class, 'success'])->name('checkout.success');
 
 });
+Route::get('/checkout/form', [CheckoutController::class, 'checkoutForm'])->name('checkout.form');
+Route::post('/checkout', [CheckoutController::class, 'checkout'])->name('checkout');
 
 
 // Ruta para el Webhook de Mercado Pago (debe ser POST)

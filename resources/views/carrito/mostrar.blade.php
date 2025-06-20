@@ -43,11 +43,14 @@
             </tbody>
         </table>
 
-        <div class="mt-6">
-            <a href="{{ route('checkout.iniciar') }}" class="bg-green-500 text-white px-6 py-3 rounded hover:bg-green-600">
-                Proceder al Pago
-            </a>
-        </div>
+       @if(count($cartItems) > 0)
+    <div class="text-right mt-4">
+        <a href="{{ route('checkout') }}" class="btn btn-primary">
+            Finalizar compra / Checkout
+        </a>
+    </div>
+@endif
+
 
     @else
         <p>Tu carrito está vacío.</p>

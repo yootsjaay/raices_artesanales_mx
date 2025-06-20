@@ -15,6 +15,13 @@ class CheckoutController extends Controller
 public function __construct(EnviaService $enviaService){
     $this->enviaService = $enviaService;
 }
+public function checkoutForm()
+{
+    $cart = Cart::with('items.artesania')->where('user_id', auth()->id())->firstOrFail();
+    $total = $cart->items->sum(fn($item) => $item->subtotal);
+
+    return view('checkout.form', compact('cart', 'total'));
+}
 
 public function checkout(Request $request)
 {
@@ -38,39 +45,57 @@ public function checkout(Request $request)
 
     $dimensions = $this->calculateTotalPackage($cart->items);
 
-    $envioPayload = [
-        "origin" => config('envia.origin'),
-        "destination" => array_merge($validated, [
-            "type" => "destination",
-            "country" => "MX",
-            "phone_code" => "MX"
-        ]),
-        "packages" => [[
-            "content" => "Compra de artesanías",
-            "amount" => 1,
-            "type" => "box",
-            "dimensions" => [
-                'length' => $dimensions['length'],
-                'width'  => $dimensions['width'],
-                'height' => $dimensions['height'],
-            ],
-            "weight" => $dimensions['weight'],
-            "declaredValue" => $this->calculateCartValue($cart),
-            "weightUnit" => "KG",
-            "lengthUnit" => "CM",
-        ]],
-        "shipment" => [
-            "carrier" => "fedex",
-            "service" => "ground",
-            "type" => 1,
-            "currency" => "MXN",
+   $destination = [
+    "number"     => $validated['number'],
+    "postalCode" => $validated['postal_code'],
+    "type"       => "destination",
+    "company"    => $validated['company'] ?? '', // opcional
+    "name"       => $validated['name'],
+    "email"      => $validated['email'],
+    "phone"      => $validated['phone'],
+    "country"    => "MX",
+    "street"     => $validated['street'],
+    "district"   => $validated['district'] ?? '',
+    "city"       => $validated['city'],
+    "state"      => $validated['state'],
+    "phone_code" => "MX",
+    "reference"  => $validated['reference'] ?? '',
+];
+
+$envioPayload = [
+    "origin" => config('envia.origin'), // asegúrate de que esté bien configurado en config/envia.php
+
+    "destination" => $destination,
+
+    "packages" => [[
+        "content"       => "Compra de artesanías",
+        "amount"        => 1,
+        "type"          => "box",
+        "dimensions"    => [
+            "length" => $dimensions['length'],
+            "width"  => $dimensions['width'],
+            "height" => $dimensions['height'],
         ],
-        "settings" => [
-            "printFormat" => "PDF",
-            "printSize" => "STOCK_4X6",
-            "comments" => "Envío desde Raíces Artesanales"
-        ]
-    ];
+        "weight"        => $dimensions['weight'],
+        "insurance"     => $this->calculateCartValue($cart), // opcional si quieres asegurar
+        "declaredValue" => $this->calculateCartValue($cart),
+        "weightUnit"    => "KG",
+        "lengthUnit"    => "CM",
+    ]],
+
+    "shipment" => [
+        "carrier"  => "fedex",  // puedes hacerlo dinámico después
+        "service"  => "ground",
+        "type"     => 1,
+        "currency" => "MXN",
+    ],
+
+    "settings" => [
+        "printFormat" => "PDF",
+        "printSize"   => "STOCK_4X6",
+        "comments"    => "Envío desde Raíces Artesanales",
+    ],
+];
 
     $enviaResponse = $this->enviaService->createShipment($envioPayload);
 
@@ -111,7 +136,7 @@ public function show()
                 ->where('user_id', Auth::id())
                 ->firstOrFail();
 
-    return view('checkout', compact('cart'));
+    return view('checkout.shipping', compact('cart'));
 }
 
 }    

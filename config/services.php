@@ -40,7 +40,7 @@ return [
 'envia' => [
     'base_url' => env('ENVIA_BASE_URL'),
     'api_key' => env('ENVIA_API_KEY'),
-    'origin' => env('ENVIA_ORIGIN'),
+    'origin' => env('ENVIA_ORIGIN', true),
 ],
 
     

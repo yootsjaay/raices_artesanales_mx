@@ -12,6 +12,17 @@ use Illuminate\Support\Facades\Auth;
 class CarritoController extends Controller
 {
 
+    public function checkoutForm()
+{
+    $cart = app(CarritoController::class)->getOrCreateCart();
+
+    if (!$cart || $cart->items->isEmpty()) {
+        return redirect()->route('carrito.mostrar')->with('error', 'Tu carrito está vacío.');
+    }
+
+    return view('checkout.form', compact('cart'));
+}
+
 
     // CUIDADO: Hacemos este método público para que CheckoutController pueda usarlo
     // Si prefieres un Servicio, esa es la opción más limpia a largo plazo.
