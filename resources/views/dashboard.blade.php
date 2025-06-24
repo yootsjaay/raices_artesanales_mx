@@ -31,6 +31,12 @@
                             <h4 class="text-xl font-semibold text-purple-800 mb-2">Gestionar Ubicaciones</h4>
                             <p class="text-purple-700">Define y organiza los lugares de origen de tus artesanías.</p>
                         </a>
+
+                         {{-- Tarjeta de gestión de Usuarios --}}
+                        <a href="{{route('admin.usuarios.index')}}" class="block p-6 bg-purple-100 rounded-lg shadow-md hover:bg-purple-200 transition-colors duration-200">
+                            <h4 class="text-xl font-semibold text-purple-800 mb-2">Gestionar Usuarios</h4>
+                            <p class="text-purple-700">Administra los usuarios para mejor uso del sistema.</p>
+                        </a>
                           
 
                         {{-- Puedes agregar más tarjetas aquí para otras funcionalidades --}}

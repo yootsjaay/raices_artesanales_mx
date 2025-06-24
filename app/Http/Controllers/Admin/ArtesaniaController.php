@@ -11,6 +11,8 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 use Maatwebsite\Excel\Facades\Excel; // <-- ¡Asegúrate de que esta línea esté presente!
 use App\Imports\ArtesaniasImport;
+use Spatie\Activitylog\Models\Activity; // Importa Activitylog
+use Spatie\Permission\Exceptions\UnauthorizedException;
 use Maatwebsite\Excel\Validators\ValidationException;
 //
 
@@ -19,6 +21,13 @@ class ArtesaniaController extends Controller
     /**
      * Display a listing of the resource.
      */
+    public function __contruct(){
+        // Protege el controlador con permisos específicos
+       /* $this->middleware('permission:crear artesanias')->only(['create', 'store']);
+        $this->middleware('permission:editar artesanias')->only(['edit', 'update']);
+        $this->middleware('permission:eliminar artesanias')->only(['destroy']);*/
+
+        }
     public function index()
     {
         $artesanias=Artesania::with('categoria','ubicacion')->get();
