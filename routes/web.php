@@ -49,7 +49,7 @@ Route::middleware(['role:vendedor'])->prefix('admin')->name('admin.')->group(fun
 
 
 // =================== COMPRADOR - CARRITO, CHECKOUT, COMENTARIOS ===================
-Route::middleware(['auth', 'role:vendedor'])->group(function () {
+Route::middleware(['auth', 'role:comprador'])->group(function () {
     // Carrito
     Route::get('/carrito', [CarritoController::class, 'mostrar'])->name('carrito.mostrar');
     Route::post('/carrito/agregar', [CarritoController::class, 'agregar'])->name('carrito.agregar');
