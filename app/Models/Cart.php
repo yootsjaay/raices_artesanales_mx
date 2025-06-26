@@ -1,33 +1,59 @@
 <?php
 
-namespace App\Models;
+/**
+ * Created by Reliese Model.
+ */
+
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * Class Cart
+ * 
+ * @property int $id
+ * @property int|null $user_id
+ * @property int|null $shipping_service_id
+ * @property float $shipping_cost
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
+ * 
+ * @property ShippingService|null $shipping_service
+ * @property User|null $user
+ * @property Collection|CartItem[] $cart_items
+ *
+ * @package App\Models
+ */
 class Cart extends Model
 {
-    use HasFactory;
+	protected $table = 'carts';
 
-    protected $fillable = [
-        'user_id',
-        'guest_token',
-        'shipping_service_id', // ✅ importante
-    ];
+	protected $casts = [
+		'user_id' => 'int',
+		'shipping_service_id' => 'int',
+		'shipping_cost' => 'float'
+	];
 
-    public function user()
-    {
-        return $this->belongsTo(User::class);
-    }
+	protected $fillable = [
+		'user_id',
+		'shipping_service_id',
+		'shipping_cost'
+	];
 
-    public function items()
-    {
-        return $this->hasMany(CartItem::class);
-    }
+	public function shipping_service()
+	{
+		return $this->belongsTo(ShippingService::class);
+	}
 
-    public function shippingService()
-    {
-        return $this->belongsTo(ShippingService::class);
-    }
+	public function user()
+	{
+		return $this->belongsTo(User::class);
+	}
+
+	public function cart_items()
+	{
+		return $this->hasMany(CartItem::class);
+	}
 }

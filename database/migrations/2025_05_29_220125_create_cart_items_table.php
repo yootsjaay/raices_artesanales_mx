@@ -11,16 +11,14 @@ return new class extends Migration
      */
     public function up(): void
     {
-       Schema::create('cart_items', function (Blueprint $table) {
+         Schema::create('cart_items', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('cart_id')->constrained('carts')->onDelete('cascade');
-            $table->foreignId('artesania_id')->constrained('artesanias')->onDelete('cascade');
+            $table->foreignId('cart_id')->constrained()->onDelete('cascade');
+            $table->foreignId('artesania_id')->constrained()->onDelete('cascade');
             $table->integer('quantity');
-            $table->decimal('price', 10, 2); // Precio al momento de añadir, para evitar problemas si el precio de la artesanía cambia
+            $table->decimal('price', 10, 2); // Precio al momento de añadir al carrito
+           $table->foreignId('artesania_variant_id')->nullable()->constrained('artesania_variants')->onDelete('set null');
             $table->timestamps();
-
-            // Asegura que no se dupliquen items de la misma artesanía en el mismo carrito
-            $table->unique(['cart_id', 'artesania_id']);
         });
     }
 

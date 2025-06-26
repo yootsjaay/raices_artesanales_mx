@@ -65,7 +65,7 @@ class CarritoController extends Controller
         $cart = $this->getOrCreateCart(); // Ahora garantizado que existe si el usuario está logueado
 
         // Buscar si la artesanía ya está en el carrito
-        $cartItem = $cart->items()->where('artesania_id', $artesania->id)->first();
+        $cartItem = $cart->cart_items()->where('artesania_id', $artesania->id)->first();
 
         if ($cartItem) {
             // Si ya existe, actualizar la cantidad
@@ -82,7 +82,7 @@ class CarritoController extends Controller
                 'quantity' => $quantity,
                 'price' => $artesania->precio, // Guarda el precio actual de la artesanía
             ]);
-            $cart->items()->save($cartItem);
+            $cart->cart_items()->save($cartItem);
         }
 
         return redirect()->route('carrito.mostrar')->with('success', 'Artesanía añadida al carrito exitosamente.');
@@ -96,7 +96,7 @@ class CarritoController extends Controller
         }
 
         $cart = $this->getOrCreateCart();
-        $cartItems = $cart->items()->with('artesania')->get();
+        $cartItems = $cart->cart_items()->with('artesania')->get();
 
         $total = $cartItems->sum(function ($item) {
             return $item->quantity * $item->price;
@@ -118,7 +118,7 @@ class CarritoController extends Controller
         ]);
 
         $cart = $this->getOrCreateCart();
-        $cartItem = $cart->items()->where('id', $request->id)->first();
+        $cartItem = $cart->cart_items()->where('id', $request->id)->first();
 
         if (!$cartItem) {
             return redirect()->back()->with('error', 'Ítem del carrito no encontrado o no pertenece a tu carrito.');
@@ -154,7 +154,7 @@ class CarritoController extends Controller
         ]);
 
         $cart = $this->getOrCreateCart();
-        $cartItem = $cart->items()->where('id', $request->id)->first();
+        $cartItem = $cart->cart_items()->where('id', $request->id)->first();
 
         if ($cartItem) {
             $cartItem->delete();
@@ -172,7 +172,7 @@ class CarritoController extends Controller
         }
 
         $cart = $this->getOrCreateCart();
-        $cart->items()->delete();
+        $cart->cart_items()->delete();
 
         return redirect()->route('carrito.mostrar')->with('success', 'Carrito vaciado.');
     }

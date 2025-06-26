@@ -16,6 +16,7 @@ use Illuminate\Database\Eloquent\Model;
  * @property int $id
  * @property string $nombre
  * @property string $descripcion
+ * @property string $imagen
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  * 
@@ -35,6 +36,6 @@ class Categoria extends Model
 
 	public function artesanias()
 	{
-		return $this->hasMany(Artesania::class, 'categoria_id');
+		return $this->hasMany(Artesania::class);
 	}
 }

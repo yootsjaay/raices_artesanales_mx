@@ -36,5 +36,10 @@ class CategoriaSeeder extends Seeder
             'descripcion' => 'Huipiles, rebozos y tapetes tejidos a mano con diseños tradicionales y modernos.',
             'imagen' => 'images/categorias/textiles.jpg', // Agrega la ruta aquí
         ]);
+        Categoria::create([
+            'nombre'=> 'Calzados',
+            'descripcion'=> 'Huraches, sandalias con bordados tradicionales de la region',
+            'imagen' =>'images/categorias/calzados.jpg',
+        ]);
     }
 }

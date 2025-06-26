@@ -30,12 +30,8 @@ class ArtesaniaController extends Controller
      */
     public function show(Artesania $artesania) // Inyección de modelo: Laravel encuentra la artesanía por el ID en la URL
     {
-       
-   
         // Esto es crucial para que los comentarios aparezcan en la vista
-        $artesania->load(['comments' => function ($query) {
-            $query->where('status', 'approved')->with('user')->latest();
-        }]);
+      
 
         return view('artesanias.show', compact('artesania'));
     

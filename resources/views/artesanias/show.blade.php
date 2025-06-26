@@ -25,7 +25,9 @@
                     @endif
 
                     @if ($artesania->imagen_adicionales)
-                        @php $imagenesAdicionales = json_decode($artesania->imagen_adicionales, true); @endphp
+                        @php
+                         $imagenesAdicionales = $artesania->imagen_adicionales; 
+                        @endphp
                         @if (is_array($imagenesAdicionales) && count($imagenesAdicionales) > 0)
                             <div class="mt-4 grid grid-cols-3 gap-2">
                                 @foreach ($imagenesAdicionales as $extraImage)

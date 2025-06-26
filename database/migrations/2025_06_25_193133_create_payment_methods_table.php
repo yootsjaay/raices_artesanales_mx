@@ -28,9 +28,9 @@ return new class extends Migration
             $table->boolean('is_default')->default(false); // Marca como método de pago predeterminado
             $table->timestamps();
 
-            // Índices
-            $table->index('customer_id_mp'); // Para búsquedas rápidas por el ID del cliente de MP
-            $table->index('card_id_mp');    // Para búsquedas rápidas por el ID de la tarjeta de MP
+            // Índices para búsquedas rápidas
+            $table->index('customer_id_mp');
+            $table->index('card_id_mp');
         });
     }
 

@@ -13,10 +13,12 @@ return new class extends Migration
     {
         Schema::create('carts', function (Blueprint $table) {
             $table->id();
-            // Si permites carritos para invitados, 'user_id' puede ser nullable.
-            // Si solo usuarios logueados tienen carrito, no lo hagas nullable.
-            $table->foreignId('user_id')->nullable()->constrained('users')->onDelete('cascade');
-            $table->string('guest_token')->nullable()->unique(); // Para identificar carritos de invitados
+            $table->foreignId('user_id')->nullable()->constrained()->onDelete('cascade'); // Puede ser nulo para invitados
+            // --- CAMPOS AGREGADOS/AJUSTADOS PARA ENVÍO ---
+            $table->foreignId('shipping_service_id')->nullable()->constrained('shipping_services')->onDelete('set null');
+            $table->decimal('shipping_cost', 10, 2)->default(0.00);
+            // ---------------------------------------------
+
             $table->timestamps();
         });
     }

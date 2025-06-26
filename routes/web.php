@@ -31,7 +31,7 @@ Route::get('/dashboard', function () {
 
 
 // =================== ADMIN - SOLO VENDEDOR ===================
-Route::middleware(['role:vendedor'])->prefix('admin')->name('admin.')->group(function () {
+Route::middleware(['role:admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('artesanias', [AdminArtesaniaController::class, 'index'])->name('artesanias.index');
     Route::get('categorias', [AdminCategoriaController::class, 'index'])->name('categorias.index');
     Route::get('ubicacion', [AdminUbicacionController::class, 'index'])->name('ubicacion.index');
@@ -49,7 +49,7 @@ Route::middleware(['role:vendedor'])->prefix('admin')->name('admin.')->group(fun
 
 
 // =================== COMPRADOR - CARRITO, CHECKOUT, COMENTARIOS ===================
-Route::middleware(['auth', 'role:comprador'])->group(function () {
+Route::middleware(['auth', 'role:admin'])->group(function () {
     // Carrito
     Route::get('/carrito', [CarritoController::class, 'mostrar'])->name('carrito.mostrar');
     Route::post('/carrito/agregar', [CarritoController::class, 'agregar'])->name('carrito.agregar');

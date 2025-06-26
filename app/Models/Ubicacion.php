@@ -34,11 +34,8 @@ class Ubicacion extends Model
 		'descripcion'
 	];
 
-	 public function artesanias()
-    {
-        // Una ubicación tiene muchas artesanías (directamente, a través de ubicacion_id en la tabla artesanias)
-        return $this->hasMany(Artesania::class, 'ubicacion_id');
-    }
-
-   
+	public function artesanias()
+	{
+		return $this->hasMany(Artesania::class, 'ubicacion_id');
+	}
 }

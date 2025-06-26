@@ -30,7 +30,7 @@ return new class extends Migration
             // Copia de la dirección de facturación al momento del pedido (JSON), si es diferente
             $table->json('billing_address_snapshot')->nullable();
             // Copia de los detalles del servicio de envío (JSON)
-            $table->json('shipping_details_snapshot')->nullable()->comment('Snapshot de carrier, service, tracking, label, etc.');
+            $table->json('shipping_details_snapshot')->nullable()->comment('Snapshot de carrier, service, tracking, label_url, etc.');
 
             $table->timestamps();
 

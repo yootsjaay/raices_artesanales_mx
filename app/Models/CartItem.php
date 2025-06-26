@@ -1,36 +1,64 @@
 <?php
 
+/**
+ * Created by Reliese Model.
+ */
+
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * Class CartItem
+ * 
+ * @property int $id
+ * @property int $cart_id
+ * @property int $artesania_id
+ * @property int $quantity
+ * @property float $price
+ * @property int|null $artesania_variant_id
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
+ * 
+ * @property Artesania $artesania
+ * @property ArtesaniaVariant|null $artesania_variant
+ * @property Cart $cart
+ *
+ * @package App\Models
+ */
 class CartItem extends Model
 {
-    use HasFactory;
+	protected $table = 'cart_items';
 
-    protected $fillable = [
-        'cart_id',
-        'artesania_id',
-        'quantity',
-        'price',
-    ];
+	protected $casts = [
+		'cart_id' => 'int',
+		'artesania_id' => 'int',
+		'quantity' => 'int',
+		'price' => 'float',
+		'artesania_variant_id' => 'int'
+	];
 
-    // Un ítem del carrito pertenece a un carrito
-    public function cart()
-    {
-        return $this->belongsTo(Cart::class);
-    }
+	protected $fillable = [
+		'cart_id',
+		'artesania_id',
+		'quantity',
+		'price',
+		'artesania_variant_id'
+	];
 
-    // Un ítem del carrito está relacionado con una artesanía
-    public function artesania()
-    {
-        return $this->belongsTo(Artesania::class);
-    }
+	public function artesania()
+	{
+		return $this->belongsTo(Artesania::class);
+	}
 
-    // Atributo accesor para calcular el subtotal de este ítem
-    public function getSubtotalAttribute()
-    {
-        return $this->quantity * $this->price;
-    }
+	public function artesania_variant()
+	{
+		return $this->belongsTo(ArtesaniaVariant::class);
+	}
+
+	public function cart()
+	{
+		return $this->belongsTo(Cart::class);
+	}
 }
