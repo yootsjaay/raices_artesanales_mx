@@ -9,6 +9,7 @@ namespace App\Models;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory; // ¡Añade esta línea si falta o está incorrecta!
 
 /**
  * Class Cart
@@ -28,6 +29,8 @@ use Illuminate\Database\Eloquent\Model;
  */
 class Cart extends Model
 {
+	    use HasFactory; // Asegúrate de que esta línea exista también
+
 	protected $table = 'carts';
 
 	protected $casts = [

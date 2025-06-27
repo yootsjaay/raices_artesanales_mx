@@ -8,10 +8,14 @@ namespace App\Models;
 
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Notifications\Notifiable;
+use Laravel\Sanctum\HasApiTokens;
+use Spatie\Permission\Traits\HasRoles;
+use Illuminate\Database\Eloquent\Factories\HasFactory; // ¡¡¡AÑADE ESTA LÍNEA!!!
 
 /**
  * Class Address
- * 
+ *
  * @property int $id
  * @property int $user_id
  * @property string|null $company
@@ -34,45 +38,46 @@ use Illuminate\Database\Eloquent\Model;
  * @property bool $is_default
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
- * 
+ *
  * @property User $user
  *
  * @package App\Models
  */
 class Address extends Model
 {
-	protected $table = 'addresses';
+    use HasFactory, Notifiable, HasApiTokens, HasRoles; // Esta línea ya está bien, siempre que HasFactory esté importado arriba
+    protected $table = 'addresses';
 
-	protected $casts = [
-		'user_id' => 'int',
-		'category' => 'int',
-		'is_default' => 'bool'
-	];
+    protected $casts = [
+        'user_id' => 'int',
+        'category' => 'int',
+        'is_default' => 'bool'
+    ];
 
-	protected $fillable = [
-		'user_id',
-		'company',
-		'name',
-		'email',
-		'phone',
-		'street',
-		'number',
-		'internal_number',
-		'district',
-		'city',
-		'state',
-		'postal_code',
-		'country',
-		'phone_code',
-		'category',
-		'identification_number',
-		'reference',
-		'type_address',
-		'is_default'
-	];
+    protected $fillable = [
+        'user_id',
+        'company',
+        'name',
+        'email',
+        'phone',
+        'street',
+        'number',
+        'internal_number',
+        'district',
+        'city',
+        'state',
+        'postal_code',
+        'country',
+        'phone_code',
+        'category',
+        'identification_number',
+        'reference',
+        'type_address',
+        'is_default'
+    ];
 
-	public function user()
-	{
-		return $this->belongsTo(User::class);
-	}
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
 }

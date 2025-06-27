@@ -127,14 +127,13 @@
                     </div>
                 </div>
 
-                <div class="flex flex-col gap-3">
-                    <a href=""
-   class="w-full bg-oaxaca-tertiary hover:bg-oaxaca-secondary text-oaxaca-primary hover:text-white font-semibold px-6 py-3 rounded-lg flex justify-center items-center gap-2 transition-colors duration-300 shadow-md transform hover:scale-105">
-   <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M4 4h16c1.11 0 2 .89 2 2v12c0 1.11-.89 2-2 2H4c-1.11 0-2-.89-2-2V6c0-1.11.89-2 2-2zm0 2v2h16V6H4zm0 12h16v-6H4v6zm2-3c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1z"></path></svg>
-   Proceder al Pago
-</a>
-
-                </div>
+               <div class="flex flex-col gap-3">
+    <a href="{{ route('checkout.shipping') }}"
+       class="w-full bg-oaxaca-tertiary hover:bg-oaxaca-secondary text-oaxaca-primary hover:text-white font-semibold px-6 py-3 rounded-lg flex justify-center items-center gap-2 transition-colors duration-300 shadow-md transform hover:scale-105">
+       <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M4 4h16c1.11 0 2 .89 2 2v12c0 1.11-.89 2-2 2H4c-1.11 0-2-.89-2-2V6c0-1.11.89-2 2-2zm0 2v2h16V6H4zm0 12h16v-6H4v6zm2-3c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1z"></path></svg>
+       Proceder al Pago
+    </a>
+</div>
             </div>
         </div>
     @endif

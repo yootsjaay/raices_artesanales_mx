@@ -2,143 +2,432 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Models\Cart;
+use App\Models\Order;
+use App\Models\OrderItem;
+use App\Models\Address; // ¡Asegúrate de que este sea tu modelo de dirección!
+use App\Models\Artesania; // ¡Importa tu modelo Artesania!
+use App\Models\CartItem; // ¡Importa tu modelo CartItem!
+use App\Models\User; // Asegúrate de importar User si lo usas directamente
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Session; // Para manejar datos en la sesión
+use Illuminate\Support\Facades\DB;
 use App\Services\EnviaService;
+
 class CheckoutController extends Controller
 {
     protected $enviaService;
 
-public function __construct(EnviaService $enviaService){
-    $this->enviaService = $enviaService;
+    public function __construct(EnviaService $enviaService)
+    {
+        $this->enviaService = $enviaService;
+    }
+
+    /**
+     * Muestra el formulario para ingresar una nueva dirección de envío.
+     */
+    public function showShippingForm()
+    {
+        $user = Auth::user();
+        // Carga la relación 'cart_items' en lugar de 'items'
+        // y dentro de 'cart_items', carga 'artesania' en lugar de 'product'
+        $cart = $user->cart()->with('cart_items.artesania')->first();
+
+        if (!$cart || $cart->cart_items->isEmpty()) { // Usamos 'cart_items' aquí también
+            return redirect()->route('cart.index')->with('error', 'Tu carrito está vacío. No puedes proceder al checkout.');
+        }
+
+        return view('checkout.shipping', compact('cart'));
+    }
+
+    /**
+     * Procesa la dirección de envío enviada y la guarda como un nuevo registro.
+     */
+    public function processShipping(Request $request)
+    {
+        $user = Auth::user();
+
+        $request->validate([
+            'company' => 'nullable|string|max:255',
+            'name' => 'required|string|max:255',
+            'email' => 'nullable|email|max:255',
+            'phone' => 'required|string|max:255',
+            'street' => 'required|string|max:255',
+            'number' => 'required|string|max:255',
+            'internal_number' => 'nullable|string|max:255',
+            'district' => 'required|string|max:255',
+            'city' => 'required|string|max:255',
+            'state' => 'required|string|max:255',
+            'postal_code' => 'required|string|max:255',
+            'country' => 'required|string|max:255',
+            'phone_code' => 'nullable|string|max:255',
+            'category' => 'nullable|integer',
+            'identification_number' => 'nullable|string|max:255',
+            'reference' => 'nullable|string|max:255',
+        ]);
+
+        $shippingAddress = $user->addresses()->create([
+            'company' => $request->company,
+            'name' => $request->name,
+            'email' => $request->email,
+            'phone' => $request->phone,
+            'street' => $request->street,
+            'number' => $request->number,
+            'internal_number' => $request->internal_number,
+            'district' => $request->district,
+            'city' => $request->city,
+            'state' => $request->state,
+            'postal_code' => $request->postal_code,
+            'country' => $request->country,
+            'phone_code' => $request->phone_code ?? 'MX',
+            'category' => $request->category ?? 1,
+            'identification_number' => $request->identification_number,
+            'reference' => $request->reference,
+            'type_address' => 'shipping',
+            'is_default' => false,
+        ]);
+
+        session(['checkout.shipping_address_id' => $shippingAddress->id]);
+
+        return redirect()->route('checkout.shipping_method');
+    }
+
+    /**
+     * Muestra las opciones de envío obtenidas de Envia.com.
+     */
+    public function showShippingMethodForm()
+    {
+        $user = Auth::user();
+        // Carga la relación 'cart_items' y dentro de ella 'artesania'
+        $cart = $user->cart()->with('cart_items.artesania')->first();
+
+        if (!$cart || $cart->cart_items->isEmpty()) { // Usamos 'cart_items' aquí
+            return redirect()->route('cart.index')->with('error', 'Tu carrito está vacío, no puedes proceder al checkout.');
+        }
+        $shippingAddressId = session('checkout.shipping_address_id');
+        if (!$shippingAddressId) {
+            return redirect()->route('checkout.shipping')->with('error', 'Por favor, selecciona una dirección de envío primero.');
+        }
+        $shippingAddress = Address::find($shippingAddressId);
+
+
+        // --- PREPARAR EL PAYLOAD PARA ENVIA.COM ---
+        $originAddress = [
+            "id" => config('envia.origin_address_id')
+        ];
+
+        $destinationAddress = [
+            "company" => $shippingAddress->company,
+            "name" => $shippingAddress->name,
+            "email" => $shippingAddress->email ?? $user->email,
+            "phone" => $shippingAddress->phone,
+            "street" => $shippingAddress->street,
+            "number" => $shippingAddress->number,
+            "internal_number" => $shippingAddress->internal_number,
+            "district" => $shippingAddress->district,
+            "city" => $shippingAddress->city,
+            "state" => $shippingAddress->state,
+            "postalCode" => $shippingAddress->postal_code,
+            "country" => $shippingAddress->country,
+            "phone_code" => $shippingAddress->phone_code,
+            "category" => $shippingAddress->category,
+            "identificationNumber" => $shippingAddress->identification_number,
+            "reference" => $shippingAddress->reference,
+            "type" => "destination",
+        ];
+
+        // Preparar los paquetes (ítems del carrito)
+        $packages = [];
+        foreach ($cart->cart_items as $cartItem) { // ¡Cambiado a 'cart_items'!
+            $artesania = $cartItem->artesania; // ¡Cambiado a 'artesania'!
+
+            // Asegúrate de que tus productos (artesanías) tengan peso y dimensiones (length, width, height)
+            if (!$artesania || !$artesania->weight || !$artesania->length || !$artesania->width || !$artesania->height) {
+                return redirect()->back()->with('error', 'Algunas artesanías no tienen la información completa de peso/dimensiones para el envío.');
+            }
+
+            $packages[] = [
+                "type" => "package",
+                "content" => $artesania->name, // Usa el nombre de la artesanía
+                "amount" => $cartItem->quantity,
+                "name" => $artesania->name,
+                "declaredValue" => $cartItem->quantity * $cartItem->price,
+                "lengthUnit" => "CM",
+                "weightUnit" => "KG",
+                "weight" => $artesania->weight * $cartItem->quantity,
+                "dimensions" => [
+                    "length" => $artesania->length,
+                    "width" => $artesania->width,
+                    "height" => $artesania->height,
+                ],
+                "additionalServices" => []
+            ];
+        }
+
+        $payload = [
+            "origin" => $originAddress,
+            "destination" => $destinationAddress,
+            "packages" => $packages,
+            "settings" => [
+                "printFormat" => "PDF",
+                "printSize" => "STOCK_4X6",
+                "currency" => "MXN",
+                "comments" => "Cotización para pedido de artesanías"
+            ],
+            "shipment" => [
+                "type" => 1,
+                "import" => 0,
+            ]
+        ];
+
+        $quotes = $this->enviaService->quoteShipping($payload);
+        $shippingOptions = [];
+
+        if ($quotes && isset($quotes['data']) && is_array($quotes['data'])) {
+            $shippingOptions = $quotes['data'];
+        } else {
+            session()->flash('error', 'No se pudieron obtener opciones de envío para la dirección o las artesanías seleccionadas. Por favor, verifica tu dirección e intenta de nuevo.');
+            return redirect()->route('checkout.shipping');
+        }
+
+        usort($shippingOptions, fn($a, $b) => ($a['totalPrice'] ?? PHP_INT_MAX) <=> ($b['totalPrice'] ?? PHP_INT_MAX));
+
+
+        return view('checkout.shipping_method', compact('cart', 'shippingAddress', 'shippingOptions'));
+    }
+
+    /**
+     * Procesa la selección del método de envío y guarda en sesión.
+     */
+    public function processShippingMethod(Request $request)
+    {
+        $request->validate([
+            'shipping_option' => 'required|json',
+        ]);
+
+        $selectedShippingOption = json_decode($request->input('shipping_option'), true);
+
+        session([
+            'checkout.shipping_method_description' => $selectedShippingOption['serviceDescription'],
+            'checkout.shipping_cost' => $selectedShippingOption['totalPrice'],
+            'checkout.carrier_name' => $selectedShippingOption['carrier'],
+            'checkout.carrier_service_id' => $selectedShippingOption['serviceId'],
+            'checkout.delivery_estimate' => $selectedShippingOption['deliveryEstimate'],
+        ]);
+
+        return redirect()->route('checkout.payment');
+    }
+
+    /**
+     * Muestra el formulario de pago y el resumen del pedido.
+     */
+    public function showPaymentForm()
+    {
+        $user = Auth::user();
+        // Carga la relación 'cart_items' y dentro de ella 'artesania'
+        $cart = $user->cart()->with('cart_items.artesania')->first();
+
+        if (!$cart || $cart->cart_items->isEmpty()) { // Usamos 'cart_items' aquí
+            return redirect()->route('cart.index')->with('error', 'Tu carrito está vacío.');
+        }
+
+        $shippingAddressId = session('checkout.shipping_address_id');
+        $shippingMethodDetails = session('checkout.shipping_method_description');
+        $shippingCost = session('checkout.shipping_cost', 0);
+        $carrierName = session('checkout.carrier_name');
+        $deliveryEstimate = session('checkout.delivery_estimate');
+
+
+        if (!$shippingAddressId || !$shippingMethodDetails || $shippingCost === null) {
+            return redirect()->route('checkout.shipping')->with('error', 'Por favor, completa los pasos anteriores del checkout.');
+        }
+        $shippingAddress = Address::find($shippingAddressId); // Usamos el modelo Address
+
+        // Sumamos los precios de las artesanías en el carrito
+        $subtotal = $cart->cart_items->sum(fn($item) => $item->quantity * $item->price);
+        $totalAmount = $subtotal + $shippingCost;
+
+        return view('checkout.payment', compact(
+            'cart',
+            'shippingAddress',
+            'shippingMethodDetails',
+            'shippingCost',
+            'subtotal',
+            'totalAmount',
+            'carrierName',
+            'deliveryEstimate'
+        ));
+    }
+
+    /**
+     * Procesa el pago y crea el pedido.
+     */
+    public function processPayment(Request $request)
+    {
+        $user = Auth::user();
+        // Carga la relación 'cart_items' y dentro de ella 'artesania'
+        $cart = $user->cart()->with('cart_items.artesania')->first();
+
+        if (!$cart || $cart->cart_items->isEmpty()) { // Usamos 'cart_items' aquí
+            return redirect()->route('cart.index')->with('error', 'Tu carrito está vacío.');
+        }
+
+        $shippingAddressId = session('checkout.shipping_address_id');
+        $shippingMethodDescription = session('checkout.shipping_method_description');
+        $shippingCost = session('checkout.shipping_cost');
+        $carrierName = session('checkout.carrier_name');
+        $carrierServiceId = session('checkout.carrier_service_id');
+        $deliveryEstimate = session('checkout.delivery_estimate');
+
+
+        if (!$shippingAddressId || !$shippingMethodDescription || $shippingCost === null || !$carrierName || !$carrierServiceId) {
+            return redirect()->route('checkout.shipping')->with('error', 'Información de envío incompleta. Por favor, selecciona un método de envío.');
+        }
+        $shippingAddress = Address::find($shippingAddressId); // Usamos el modelo Address
+
+        $subtotal = $cart->cart_items->sum(fn($item) => $item->quantity * $item->price);
+        $totalAmount = $subtotal + $shippingCost;
+
+        // --- LÓGICA DE INTEGRACIÓN CON PASARELA DE PAGO ---
+        try {
+            $paymentStatus = 'paid';
+            $transactionId = 'TXN_'. uniqid() . '_' . time();
+
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Error al procesar el pago: ' . $e->getMessage());
+        }
+
+        // --- CREACIÓN DEL PEDIDO Y ENVÍO DENTRO DE UNA TRANSACCIÓN DE BD ---
+        DB::beginTransaction();
+        try {
+            $order = Order::create([
+                'user_id' => $user->id,
+                'status' => 'pending',
+                'total_amount' => $totalAmount,
+                'shipping_cost' => $shippingCost,
+                'tax_amount' => 0,
+                'shipping_method' => $shippingMethodDescription,
+                'payment_method' => 'card',
+                'payment_status' => $paymentStatus,
+                'transaction_id' => $transactionId,
+                'shipping_address_id' => $shippingAddress->id,
+                'billing_address_id' => $shippingAddress->id,
+                'carrier_name' => $carrierName,
+                'carrier_service_id' => $carrierServiceId,
+                'delivery_estimate' => $deliveryEstimate,
+            ]);
+
+            foreach ($cart->cart_items as $cartItem) { // ¡Cambiado a 'cart_items'!
+                OrderItem::create([
+                    'order_id' => $order->id,
+                    'product_id' => $cartItem->artesania_id, // Usamos 'artesania_id'
+                    'product_name' => $cartItem->artesania->name ?? 'Artesanía Eliminada', // Usamos 'artesania'
+                    'quantity' => $cartItem->quantity,
+                    'price' => $cartItem->price,
+                ]);
+
+                if ($cartItem->artesania) { // Usamos 'artesania'
+                    $cartItem->artesania->decrement('stock', $cartItem->quantity);
+                }
+            }
+
+            // --- CONSTRUIR EL PAYLOAD PARA CREAR EL ENVÍO (SHIPMENT) EN ENVIA.COM ---
+            $originAddressPayload = [
+                "id" => config('envia.origin_address_id')
+            ];
+
+            $destinationAddressPayload = [
+                "company" => $shippingAddress->company,
+                "name" => $shippingAddress->name,
+                "email" => $shippingAddress->email ?? $user->email,
+                "phone" => $shippingAddress->phone,
+                "street" => $shippingAddress->street,
+                "number" => $shippingAddress->number,
+                "internal_number" => $shippingAddress->internal_number,
+                "district" => $shippingAddress->district,
+                "city" => $shippingAddress->city,
+                "state" => $shippingAddress->state,
+                "postalCode" => $shippingAddress->postal_code,
+                "country" => $shippingAddress->country,
+                "phone_code" => $shippingAddress->phone_code,
+                "category" => $shippingAddress->category,
+                "identificationNumber" => $shippingAddress->identification_number,
+                "reference" => $shippingAddress->reference,
+                "type" => "destination",
+            ];
+
+            $packagesPayload = [];
+            foreach ($cart->cart_items as $cartItem) { // ¡Cambiado a 'cart_items'!
+                $artesania = $cartItem->artesania; // ¡Cambiado a 'artesania'!
+                $packagesPayload[] = [
+                    "type" => "package",
+                    "content" => $artesania->name,
+                    "amount" => $cartItem->quantity,
+                    "name" => $artesania->name,
+                    "declaredValue" => $cartItem->quantity * $cartItem->price,
+                    "lengthUnit" => "CM",
+                    "weightUnit" => "KG",
+                    "weight" => $artesania->weight * $cartItem->quantity,
+                    "dimensions" => [
+                        "length" => $artesania->length,
+                        "width" => $artesania->width,
+                        "height" => $artesania->height,
+                    ],
+                    "additionalServices" => []
+                ];
+            }
+
+            $shipmentPayload = [
+                "origin" => $originAddressPayload,
+                "destination" => $destinationAddressPayload,
+                "packages" => $packagesPayload,
+                "settings" => [
+                    "printFormat" => "PDF",
+                    "printSize" => "STOCK_4X6",
+                    "currency" => "MXN",
+                    "comments" => "Pedido #" . $order->id,
+                ],
+                "shipment" => [
+                    "type" => 1,
+                    "import" => 0,
+                    "carrier" => $carrierName,
+                    "service" => $carrierServiceId,
+                ]
+            ];
+
+            $enviaShipment = $this->enviaService->createShipment($shipmentPayload);
+
+            if ($enviaShipment && isset($enviaShipment['data']['id']) && isset($enviaShipment['data']['label'])) {
+                $order->envia_shipment_id = $enviaShipment['data']['id'];
+                $order->tracking_number = $enviaShipment['data']['trackingNumber'] ?? null;
+                $order->label_url = $enviaShipment['data']['label'] ?? null;
+                $order->status = 'processing';
+                $order->save();
+            } else {
+                Log::error("Fallo al crear la guía de envío en Envia.com para el pedido #{$order->id}.", ['response' => $enviaShipment]);
+                throw new \Exception('Error al generar la guía de envío. Por favor, contacta a soporte.');
+            }
+
+            $cart->status = 'ordered';
+            $cart->save();
+            $cart->cart_items()->delete(); // ¡Cambiado a 'cart_items'!
+
+            DB::commit();
+
+            session()->forget([
+                'checkout.shipping_address_id',
+                'checkout.shipping_method_description',
+                'checkout.shipping_cost',
+                'checkout.carrier_name',
+                'checkout.carrier_service_id',
+                'checkout.delivery_estimate'
+            ]);
+
+            return redirect()->route('order.confirmation', $order)->with('success', '¡Tu pedido ha sido realizado con éxito y la guía de envío generada!');
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->back()->with('error', 'Ocurrió un error al procesar tu pedido: ' . $e->getMessage());
+        }
+    }
 }
-public function checkoutForm()
-{
-    $cart = Cart::with('items.artesania')->where('user_id', auth()->id())->firstOrFail();
-    $total = $cart->items->sum(fn($item) => $item->subtotal);
-
-    return view('checkout.form', compact('cart', 'total'));
-}
-
-public function checkout(Request $request)
-{
-    $cart = Cart::with('items.artesania')
-                ->where('user_id', Auth::id())
-                ->firstOrFail();
-
-    $validated = $request->validate([
-        'name' => 'required|string',
-        'company' => 'nullable|string',
-        'email' => 'required|email',
-        'phone' => 'required|string',
-        'street' => 'required|string',
-        'number' => 'required|string',
-        'district' => 'nullable|string',
-        'city' => 'required|string',
-        'state' => 'required|string',
-        'postal_code' => 'required|string',
-        'reference' => 'nullable|string',
-    ]);
-
-    $dimensions = $this->enviaService->quoteShipping($cart->$items);
-
-    $destination = [
-    "number"     => $validated['number'],
-    "postalCode" => $validated['postal_code'],
-    "type"       => "destination",
-    "company"    => $validated['company'] ?? '', // opcional
-    "name"       => $validated['name'],
-    "email"      => $validated['email'],
-    "phone"      => $validated['phone'],
-    "country"    => "MX",
-    "street"     => $validated['street'],
-    "district"   => $validated['district'] ?? '',
-    "city"       => $validated['city'],
-    "state"      => $validated['state'],
-    "phone_code" => "MX",
-    "reference"  => $validated['reference'] ?? '',
-];
-
-$envioPayload = [
-    "origin" => config('envia.origin'), // asegúrate de que esté bien configurado en config/envia.php
-
-    "destination" => $destination,
-
-    "packages" => [[
-        "content"       => "Compra de artesanías",
-        "amount"        => 1,
-        "type"          => "box",
-        "dimensions"    => [
-            "length" => $dimensions['length'],
-            "width"  => $dimensions['width'],
-            "height" => $dimensions['height'],
-        ],
-        "weight"        => $dimensions['weight'],
-        "insurance"     => $this->calculateCartValue($cart), // opcional si quieres asegurar
-        "declaredValue" => $this->calculateCartValue($cart),
-        "weightUnit"    => "KG",
-        "lengthUnit"    => "CM",
-    ]],
-
-    "shipment" => [
-        "carrier"  => "fedex",  // puedes hacerlo dinámico después
-        "service"  => "ground",
-        "type"     => 1,
-        "currency" => "MXN",
-    ],
-
-    "settings" => [
-        "printFormat" => "PDF",
-        "printSize"   => "STOCK_4X6",
-        "comments"    => "Envío desde Raíces Artesanales",
-    ],
-];
-
-    $enviaResponse = $this->enviaService->createShipment($envioPayload);
-
-    $shipmentData = $enviaResponse['data'][0] ?? [];
-
-    $shipment = Shipment::create([
-        'cart_id' => $cart->id,
-        'destination_name' => $validated['name'],
-        'destination_company' => $validated['company'],
-        'destination_email' => $validated['email'],
-        'destination_phone' => $validated['phone'],
-        'destination_street' => $validated['street'],
-        'destination_number' => $validated['number'],
-        'destination_district' => $validated['district'],
-        'destination_city' => $validated['city'],
-        'destination_state' => $validated['state'],
-        'destination_postal_code' => $validated['postal_code'],
-        'destination_country' => 'MX',
-        'destination_reference' => $validated['reference'],
-        'carrier' => 'fedex',
-        'service' => 'ground',
-        'order_id' => $shipmentData['shipmentId'] ?? null,
-        'tracking_number' => $shipmentData['trackingNumber'] ?? null,
-        'label_url' => $shipmentData['additionalFiles']['pdf'] ?? null,
-        'status' => 'generado',
-        'total_weight' => $dimensions['weight'],
-        'length' => $dimensions['length'],
-        'width' => $dimensions['width'],
-        'height' => $dimensions['height'],
-    ]);
-
-    return redirect()->route('checkout.success')->with('shipment_id', $shipment->id);
-}
-
-public function show()
-{
-    $cart = Cart::with('items.artesania')
-                ->where('user_id', Auth::id())
-                ->firstOrFail();
-
-    return view('checkout.shipping', compact('cart'));
-}
-
-}    
-
-
