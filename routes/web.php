@@ -11,6 +11,8 @@ use App\Http\Controllers\CarritoController;
 use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\ShippingController;
 use App\Http\Controllers\Admin\AdminController;
+use App\Http\Controllers\AddressController;
+
 use App\Http\Controllers\Admin\ArtesaniaController as AdminArtesaniaController;
 use App\Http\Controllers\Admin\UbicacionController as AdminUbicacionController;
 use App\Http\Controllers\Admin\CategoriaController as AdminCategoriaController;
@@ -124,6 +126,17 @@ Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+
+    // Rutas para direcciones dentro del perfil
+    Route::prefix('profile/addresses')->name('profile.addresses.')->group(function () {
+        Route::get('/', [AddressController::class, 'index'])->name('index');
+        Route::get('/create', [AddressController::class, 'create'])->name('create');
+        Route::post('/', [AddressController::class, 'store'])->name('store');
+        Route::get('/{address}/edit', [AddressController::class, 'edit'])->name('edit');
+        Route::put('/{address}', [AddressController::class, 'update'])->name('update');
+        Route::delete('/{address}', [AddressController::class, 'destroy'])->name('destroy');
+    });
 });
+
 
 require __DIR__.'/auth.php';
