@@ -82,12 +82,18 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::get('/checkout/shipping-method', [CheckoutController::class, 'showShippingMethodForm'])->name('checkout.shipping_method');
     // Procesa la selección del método de envío por parte del cliente
     Route::post('/checkout/shipping-method', [CheckoutController::class, 'processShippingMethod'])->name('checkout.process_shipping_method');
+        Route::post('/checkout/shipping', [CheckoutController::class, 'storeShippingAddress'])->name('checkout.storeShippingAddress');
+
+    Route::post('/checkout/shipping', [CheckoutController::class, 'processShipping'])->name('checkout.process_shipping');
 
     // Paso 3: Resumen del Pedido y Pago
     // Muestra el resumen final del pedido antes del pago
     Route::get('/checkout/payment', [CheckoutController::class, 'showPaymentForm'])->name('checkout.payment');
     // Procesa el pago y finaliza el pedido
     Route::post('/checkout/payment', [CheckoutController::class, 'processPayment'])->name('checkout.process_payment');
+     Route::get('/checkout/review', function() {
+        return view('checkout.review'); // Create this view next
+    })->name('checkout.review');
 
     // Paso 4: Confirmación del Pedido
     // Muestra la página de confirmación después de un pedido exitoso

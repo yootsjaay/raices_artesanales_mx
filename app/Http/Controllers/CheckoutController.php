@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log; 
 use App\Services\EnviaService;
+use App\Models\State;
 
 class CheckoutController extends Controller
 {
@@ -29,70 +30,107 @@ class CheckoutController extends Controller
      * Muestra el formulario para ingresar una nueva dirección de envío.
      */
     public function showShippingForm()
-    {
-        $user = Auth::user();
-        // Carga la relación 'cart_items' en lugar de 'items'
-        // y dentro de 'cart_items', carga 'artesania' en lugar de 'product'
-        $cart = $user->cart()->with('cart_items.artesania')->first();
+{
+    $user = Auth::user();
+    $states = State::orderBy('name')->get();
+    $cartItems = Cart::where('user_id', $user->id)->get();
 
-        if (!$cart || $cart->cart_items->isEmpty()) { // Usamos 'cart_items' aquí también
-            return redirect()->route('cart.index')->with('error', 'Tu carrito está vacío. No puedes proceder al checkout.');
-        }
-
-        return view('checkout.shipping', compact('cart'));
+    if ($cartItems->isEmpty()) {
+        return redirect()->route('carrito.mostrar')->with('error', 'Tu carrito está vacío. Agrega productos antes de continuar.');
     }
+
+    // Intentar obtener la dirección de sesión
+    $shippingAddressId = session('checkout.shipping_address_id');
+    $shippingAddress = $shippingAddressId ? Address::find($shippingAddressId) : null;
+
+    // Si no existe o no es válida, buscar la predeterminada del usuario
+    if (
+        !$shippingAddress ||
+        $shippingAddress->user_id !== $user->id ||
+        $shippingAddress->type_address !== 'shipping'
+    ) {
+        // Limpiar sesión si la dirección no es válida
+        session()->forget('checkout.shipping_address_id');
+
+        // Buscar todas las direcciones de envío del usuario
+        $userShippingAddresses = Address::where('user_id', $user->id)
+            ->where('type_address', 'shipping')
+            ->orderByDesc('is_default')
+            ->get();
+
+        // Si hay alguna, usar la primera (prioriza la predeterminada)
+        if ($userShippingAddresses->isNotEmpty()) {
+            $shippingAddress = $userShippingAddresses->first();
+            session(['checkout.shipping_address_id' => $shippingAddress->id]);
+        }
+    } else {
+        // Si la dirección de sesión es válida, cargar todas las demás para la lista
+        $userShippingAddresses = Address::where('user_id', $user->id)
+            ->where('type_address', 'shipping')
+            ->get();
+    }
+
+    return view('checkout.shipping', compact(
+        'cartItems',
+        'states',
+        'shippingAddress',
+        'userShippingAddresses'
+    ));
+}
+
+
 
     /**
      * Procesa la dirección de envío enviada y la guarda como un nuevo registro.
      */
     public function processShipping(Request $request)
-    {
-        $user = Auth::user();
+{
+    $user = Auth::user();
+    $selectedId = $request->input('selected_address_id');
 
-        $request->validate([
-            'company' => 'nullable|string|max:255',
+    if ($selectedId === 'new') {
+        // Validación para nueva dirección
+        $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'email' => 'nullable|email|max:255',
-            'phone' => 'required|string|max:255',
+            'phone' => 'required|string|max:20',
             'street' => 'required|string|max:255',
-            'number' => 'required|string|max:255',
-            'internal_number' => 'nullable|string|max:255',
+            'number' => 'required|string|max:20',
             'district' => 'required|string|max:255',
             'city' => 'required|string|max:255',
             'state' => 'required|string|max:255',
-            'postal_code' => 'required|string|max:255',
+            'postal_code' => 'required|string|max:10',
             'country' => 'required|string|max:255',
-            'phone_code' => 'nullable|string|max:255',
-            'category' => 'nullable|integer',
-            'identification_number' => 'nullable|string|max:255',
             'reference' => 'nullable|string|max:255',
+           // 'identification_number' => 'required|string|max:20', // ajusta max según necesites
         ]);
 
-        $shippingAddress = $user->addresses()->create([
-            'company' => $request->company,
-            'name' => $request->name,
-            'email' => $request->email,
-            'phone' => $request->phone,
-            'street' => $request->street,
-            'number' => $request->number,
-            'internal_number' => $request->internal_number,
-            'district' => $request->district,
-            'city' => $request->city,
-            'state' => $request->state,
-            'postal_code' => $request->postal_code,
-            'country' => $request->country,
-            'phone_code' => $request->phone_code ?? 'MX',
-            'category' => $request->category ?? 1,
-            'identification_number' => $request->identification_number,
-            'reference' => $request->reference,
-            'type_address' => 'shipping',
-            'is_default' => false,
-        ]);
+        // Guardar dirección
+        $address = new Address($validated);
+        $address->user_id = $user->id;
+        $address->type_address = 'shipping';
+        $address->save();
 
-        session(['checkout.shipping_address_id' => $shippingAddress->id]);
+        // Guardar en sesión
+        session(['checkout.shipping_address_id' => $address->id]);
 
-        return redirect()->route('checkout.shipping_method');
+    } else {
+        // Validar que la dirección seleccionada le pertenezca
+        $address = Address::where('user_id', $user->id)
+                          ->where('type_address', 'shipping')
+                          ->where('id', $selectedId)
+                          ->first();
+
+        if (!$address) {
+            return redirect()->back()->with('error', 'La dirección seleccionada no es válida.');
+        }
+
+        // Guardar en sesión
+        session(['checkout.shipping_address_id' => $address->id]);
     }
+
+    return redirect()->route('checkout.shipping_method');
+}
+
 
     /**
      * Muestra las opciones de envío obtenidas de Envia.com.
@@ -147,7 +185,7 @@ class CheckoutController extends Controller
         "country" => $shippingAddress->country,
         "phone_code" => $shippingAddress->phone_code,
         "category" => $shippingAddress->category,
-        "identificationNumber" => $shippingAddress->identification_number,
+        "identificationNumber" => $shippingAddress->identification_number ?? "N/A",  // <--- Aquí
         "reference" => $shippingAddress->reference,
         "type" => "destination",
     ];
