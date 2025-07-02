@@ -1,4 +1,4 @@
-@extends('layouts.public')
+@extends('comprador.layouts.public')
 
 @section('title', 'Raíces Artesanales MX - Tesoros de Oaxaca')
 

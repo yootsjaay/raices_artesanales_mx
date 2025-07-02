@@ -1,4 +1,4 @@
-@extends('layouts.app')
+@extends('comprador.layouts.app')
 
 @section('content')
 <div class="container text-center py-5">

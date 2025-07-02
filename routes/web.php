@@ -12,6 +12,7 @@ use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\ShippingController;
 use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\AddressController;
+use App\Http\Controllers\CompradorController;
 
 use App\Http\Controllers\Admin\ArtesaniaController as AdminArtesaniaController;
 use App\Http\Controllers\Admin\UbicacionController as AdminUbicacionController;
@@ -55,7 +56,7 @@ Route::middleware(['role:admin'])->prefix('admin')->name('admin.')->group(functi
 
 
 // =================== COMPRADOR - CARRITO, CHECKOUT, COMENTARIOS ===================
-Route::middleware(['auth', 'role:admin'])->group(function () {
+Route::middleware(['auth', 'role:comprador'])->group(function () {
     // Carrito
     Route::get('/carrito', [CarritoController::class, 'mostrar'])->name('carrito.mostrar');
     Route::post('/carrito/agregar', [CarritoController::class, 'agregar'])->name('carrito.agregar');
@@ -85,7 +86,6 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
         Route::post('/checkout/shipping', [CheckoutController::class, 'storeShippingAddress'])->name('checkout.storeShippingAddress');
 
     Route::post('/checkout/shipping', [CheckoutController::class, 'processShipping'])->name('checkout.process_shipping');
-
     // Paso 3: Resumen del Pedido y Pago
     // Muestra el resumen final del pedido antes del pago
     Route::get('/checkout/payment', [CheckoutController::class, 'showPaymentForm'])->name('checkout.payment');
@@ -142,7 +142,16 @@ Route::middleware('auth')->group(function () {
         Route::put('/{address}', [AddressController::class, 'update'])->name('update');
         Route::delete('/{address}', [AddressController::class, 'destroy'])->name('destroy');
     });
+   // =================== PANEL DE COMPRADOR ===================
+Route::middleware(['auth', 'role:comprador'])->prefix('comprador')->name('comprador.')->group(function () {
+    Route::get('/dashboard', [CompradorController::class, 'dashboard'])->name('dashboard');
+
+    // Direcciones del comprador (si quieres separarlas de /profile/addresses)
+    Route::get('/direcciones', [AddressController::class, 'index'])->name('direcciones.index');
 });
+
+    });
+
 
 
 require __DIR__.'/auth.php';

@@ -1,7 +1,7 @@
-@extends('layouts.public')
+@extends('comprador.layouts.public')
 
 @section('content')
-@role('admin')
+@role('comprador')
 
 <div class="container mx-auto py-8 px-4 max-w-7xl"> {{-- Padding y ancho máximo --}}
     <h1 class="text-5xl md:text-6xl font-display font-bold text-oaxaca-primary mb-10 text-center animate-fade-in">Tu Carrito de Compras</h1> {{-- Título con font-display y color primario --}}

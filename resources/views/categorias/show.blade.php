@@ -1,4 +1,4 @@
-@extends('layouts.public')
+@extends('comprador.layouts.public')
 
 @section('title', $categoria->nombre . ' - Raíces Artesanales MX')
 
