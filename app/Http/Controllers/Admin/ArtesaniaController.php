@@ -135,45 +135,49 @@ class ArtesaniaController extends Controller
 
     // 2. Manejo de la IMAGEN PRINCIPAL
     if ($request->hasFile('imagen_principal')) {
-        // Eliminar la imagen principal antigua si existe
+        // Elimina la imagen principal antigua si existe
         if ($artesania->imagen_principal && Storage::disk('public')->exists($artesania->imagen_principal)) {
             Storage::disk('public')->delete($artesania->imagen_principal);
         }
-        // Almacenar la nueva imagen principal
+        // Almacena la nueva imagen principal
         $validatedData['imagen_principal'] = $request->file('imagen_principal')->store('images/artesanias', 'public');
     } else {
         // Si no se sube una nueva imagen principal, mantener la existente
         $validatedData['imagen_principal'] = $artesania->imagen_principal;
     }
 
-    // 3. Manejo de las IMÁGENES ADICIONALES
-    if ($request->hasFile('imagen_adicionales')) {
-        $newAdditionalImagesPaths = [];
-        // Eliminar todas las imágenes adicionales antiguas asociadas a esta artesanía
-        // ¡AHORA $artesania->imagen_adicionales YA ES UN ARRAY GRACIAS AL CASTING DEL MODELO!
-        // No necesitamos json_decode() ni is_array() aquí.
-        if ($artesania->imagen_adicionales) { // Esto verifica que no sea null o un array vacío
-            foreach ($artesania->imagen_adicionales as $oldPath) { // Accede directamente como array
-                if (Storage::disk('public')->exists($oldPath)) {
-                    Storage::disk('public')->delete($oldPath);
-                }
+  // 3. Manejo de las IMÁGENES ADICIONALES
+if ($request->hasFile('imagen_adicionales')) {
+    $newAdditionalImagesPaths = [];
+    // Eliminar todas las imágenes adicionales antiguas asociadas a esta artesanía
+    // ¡AHORA $artesania->imagen_adicionales YA ES UN ARRAY GRACIAS AL CASTING DEL MODELO!
+    // No necesitamos json_decode() ni is_array() aquí.
+
+    // Aseguramos que sea un array, incluso si es null en la DB.
+    $existingImages = (array) $artesania->imagen_adicionales; // <--- Cambio aquí
+
+    if (!empty($existingImages)) { // Ahora verificamos que el array no esté vacío
+        foreach ($existingImages as $oldPath) {
+            if (Storage::disk('public')->exists($oldPath)) {
+                Storage::disk('public')->delete($oldPath);
             }
         }
-        // Almacenar las nuevas imágenes adicionales
-        foreach ($request->file('imagen_adicionales') as $file) {
-            $newAdditionalImagesPaths[] = $file->store('images/artesanias/additional', 'public');
-        }
-        $validatedData['imagen_adicionales'] = $newAdditionalImagesPaths;
-    } else {
-        // Si no se suben nuevas imágenes adicionales, mantener las existentes
-        $validatedData['imagen_adicionales'] = $artesania->imagen_adicionales;
     }
-
-    $artesania->update($validatedData);
-
-    return redirect()->route('admin.artesanias.index')->with('success', 'Artesanía actualizada correctamente.');
+    // Almacenar las nuevas imágenes adicionales
+    foreach ($request->file('imagen_adicionales') as $file) {
+        $newAdditionalImagesPaths[] = $file->store('images/artesanias/additional', 'public');
+    }
+    $validatedData['imagen_adicionales'] = $newAdditionalImagesPaths;
+} else {
+    // Si no se suben nuevas imágenes adicionales, mantener las existentes
+    // También asegúrate de que esto sea siempre un array para la DB.
+    $validatedData['imagen_adicionales'] = (array) $artesania->imagen_adicionales; // <--- Posible cambio aquí también
 }
 
+        $artesania->update($validatedData);
+
+        return redirect()->route('admin.artesanias.index')->with('success', 'Artesanía actualizada correctamente.');
+        }
     /**
      * Remove the specified resource from storage.
      */

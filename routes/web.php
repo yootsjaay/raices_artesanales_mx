@@ -18,8 +18,9 @@ use App\Http\Controllers\Admin\ArtesaniaController as AdminArtesaniaController;
 use App\Http\Controllers\Admin\UbicacionController as AdminUbicacionController;
 use App\Http\Controllers\Admin\CategoriaController as AdminCategoriaController;
 use App\Http\Controllers\Admin\UserController as AdminUserController;
+use App\Http\Controllers\Admin\DashboardController;
 
-
+use Illuminate\Support\Facades\Auth;
 
 use App\Http\Controllers\Admin\CommentController as AdminCommentController;
 use App\Http\Controllers\PagoController;
@@ -28,9 +29,7 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-Route::get('/dashboard', function () {
-    return view('dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
+Auth::routes(['verify' => true]); // Esto habilita las rutas para la verificación de correo
 
 
 // =================== ADMIN - SOLO VENDEDOR ===================
@@ -50,6 +49,7 @@ Route::middleware(['role:admin'])->prefix('admin')->name('admin.')->group(functi
     
     Route::get('/checkout/shipping', [CheckoutController::class, 'showShippingForm'])->name('checkout.shipping');
     Route::post('/checkout/shipping', [CheckoutController::class, 'processShipping'])->name('checkout.process_shipping');
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
 });
 
@@ -128,7 +128,7 @@ Route::get('/ubicaciones/{ubicacion}', [UbicacionController::class, 'show'])->na
 
 
 // =================== PERFIL DE USUARIO ===================
-Route::middleware('auth')->group(function () {
+Route::middleware('auth', 'verified')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');

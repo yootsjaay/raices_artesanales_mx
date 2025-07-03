@@ -82,24 +82,52 @@
             </div>
 
             {{-- ICONOS USUARIO/CARRITO --}}
-            <div class="mt-4 md:mt-0 flex items-center space-x-4">
-                <a href="{{ route('carrito.mostrar') }}" class="relative p-2 hover:text-oaxaca-primary transition-colors">
-                    <svg class="w-6 h-6 text-oaxaca-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path>
-                    </svg>
-                    <span class="absolute -top-1 -right-1 bg-oaxaca-primary text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
-                        {{-- Aquí iría la lógica para el contador del carrito, e.g., \Cart::count() --}}
-                        3
-                    </span>
-                </a>
-                <a href="{{ route('login') }}" class="bg-oaxaca-tertiary text-white px-4 py-2 rounded-lg flex items-center hover:bg-oaxaca-primary transition-colors shadow-sm">
-                    <svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
-                    </svg>
-                    Ingresar
-                </a>
-            </div>
-        </div>
+<div class="mt-4 md:mt-0 flex items-center space-x-4">
+    <a href="{{ route('carrito.mostrar') }}" class="relative p-2 hover:text-oaxaca-primary transition-colors">
+        <svg class="w-6 h-6 text-oaxaca-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path>
+        </svg>
+        <span class="absolute -top-1 -right-1 bg-oaxaca-primary text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
+            {{-- Aquí iría la lógica para el contador del carrito, e.g., \Cart::count() --}}
+            3
+        </span>
+    </a>
+
+    {{-- Menú Desplegable de Usuario --}}
+    <div class="relative">
+        @auth
+            <button class="bg-oaxaca-tertiary text-white px-4 py-2 rounded-lg flex items-center hover:bg-oaxaca-primary transition-colors shadow-sm focus:outline-none" id="dropdown-user-button">
+                <svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                </svg>
+                {{ Auth::user()->name }} <span class="ml-2 text-sm">&#9662;</span>
+            </button>
+            <ul id="dropdown-user-menu" class="absolute hidden bg-white rounded-md shadow-lg py-2 w-48 text-oaxaca-text-dark z-20 right-0 border border-oaxaca-primary border-opacity-10">
+                <li><a href="{{ route('profile.edit') }}" class="block px-4 py-2 hover:bg-oaxaca-bg-light hover:text-oaxaca-primary transition-colors">Mi Perfil</a></li>
+                <li><a href="{{ route('comprador.dashboard') }}" class="block px-4 py-2 hover:bg-oaxaca-bg-light hover:text-oaxaca-primary transition-colors">Mis Compras</a></li>
+                <li><a href="{{ route('profile.addresses.index') }}" class="block px-4 py-2 hover:bg-oaxaca-bg-light hover:text-oaxaca-primary transition-colors">Mis Direcciones</a></li>
+                <li><hr class="border-t border-oaxaca-secondary border-opacity-10 my-1"></li>
+                <li>
+                    <form method="POST" action="{{ route('logout') }}">
+                        @csrf
+                        <button type="submit" class="block w-full text-left px-4 py-2 text-red-600 hover:bg-red-50 hover:text-red-800 transition-colors">
+                            Cerrar sesión
+                        </button>
+                    </form>
+                </li>
+            </ul>
+        @endauth
+
+        @guest
+            <a href="{{ route('login') }}" class="bg-oaxaca-tertiary text-white px-4 py-2 rounded-lg flex items-center hover:bg-oaxaca-primary transition-colors shadow-sm">
+                <svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                </svg>
+                Ingresar
+            </a>
+        @endguest
+    </div>
+</div>
     </header>
 
     <main class="py-6">
@@ -246,7 +274,26 @@
                 }
             });
         }
+
+        // Lógica para el menú desplegable de USUARIO (NUEVO)
+        const dropdownUserButton = document.getElementById('dropdown-user-button');
+        const dropdownUserMenu = document.getElementById('dropdown-user-menu');
+
+        if (dropdownUserButton && dropdownUserMenu) {
+            dropdownUserButton.addEventListener('click', (event) => {
+                event.stopPropagation(); // Evita que el clic se propague al document y cierre el menú inmediatamente
+                dropdownUserMenu.classList.toggle('hidden');
+            });
+
+            // Cierra el menú si se hace clic fuera de él
+            document.addEventListener('click', (event) => {
+                if (!dropdownUserButton.contains(event.target) && !dropdownUserMenu.contains(event.target)) {
+                    dropdownUserMenu.classList.add('hidden');
+                }
+            });
+        }
     </script>
+  
     @yield('scripts')
 </body>
 </html>

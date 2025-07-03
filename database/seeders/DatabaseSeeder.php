@@ -55,6 +55,6 @@ class DatabaseSeeder extends Seeder
         );
         $buyer2->assignRole('comprador'); // Le asignamos el rol 'comprador'
 
-       
+      
     }
 }

@@ -4,7 +4,14 @@
             {{ __('Panel del Comprador') }}
         </h2>
     </x-slot>
-
+ <div class="py-10">
+        <div class="mx-auto max-w-7xl sm:px-6 lg:px-8">
+            <div class="overflow-hidden bg-white shadow-xl sm:rounded-lg p-6">
+                <h1 class="text-2xl font-bold">¡Bienvenido, {{ Auth::user()->name }}!</h1>
+                <p class="mt-4">Aquí puedes ver tus compras, pedidos y más.</p>
+            </div>
+        </div>
+    </div>
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">

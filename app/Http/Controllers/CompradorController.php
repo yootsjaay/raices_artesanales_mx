@@ -8,10 +8,9 @@ use Illuminate\Support\Facades\Auth;
 
 class CompradorController extends Controller
 {
-   public function dashboard()
-{
-    $user = Auth::user();
-    return view('comprador.dashboard');
-}
+    public function dashboard()
+    {
+        return view('comprador.dashboard');
+    }
 
 }
