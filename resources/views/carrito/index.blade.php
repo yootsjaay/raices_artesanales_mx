@@ -42,7 +42,7 @@
                                 <th class="px-6 py-3 text-left text-sm font-semibold text-oaxaca-primary uppercase tracking-wider">Producto</th> {{-- Texto de cabecera --}}
                                 <th class="px-6 py-3 text-left text-sm font-semibold text-oaxaca-primary uppercase tracking-wider">Precio</th>
                                 <th class="px-6 py-3 text-left text-sm font-semibold text-oaxaca-primary uppercase tracking-wider">Cantidad</th>
-                                <th class="px-6 py-3 text-left text-sm font-semibold text-oaxaca-primary uppercase tracking-wider">Subtotal</th>
+                               
                                 <th class="px-6 py-3 relative"><span class="sr-only">Acciones</span></th>
                             </tr>
                         </thead>
@@ -74,9 +74,7 @@
                                             onchange="this.form.submit()">
                                     </form>
                                     </td>
-                                    <td class="px-6 py-4 text-base text-oaxaca-text-dark font-medium">
-                                        ${{ number_format($item->subtotal, 2) }}
-                                    </td>
+                                   
                                     <td class="px-6 py-4 text-right text-base font-medium">
                                        <form action="{{ route('carrito.remover') }}" method="POST">
                                         @csrf

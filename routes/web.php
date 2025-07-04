@@ -145,6 +145,7 @@ Route::middleware('auth', 'verified')->group(function () {
    // =================== PANEL DE COMPRADOR ===================
 Route::middleware(['auth', 'role:comprador'])->prefix('comprador')->name('comprador.')->group(function () {
     Route::get('/dashboard', [CompradorController::class, 'dashboard'])->name('dashboard');
+    Route::get('/carrito', [CarritoController::class, 'mostrar'])->name('carrito.mostrar');
 
     // Direcciones del comprador (si quieres separarlas de /profile/addresses)
     Route::get('/direcciones', [AddressController::class, 'index'])->name('direcciones.index');

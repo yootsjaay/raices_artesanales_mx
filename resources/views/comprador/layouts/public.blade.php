@@ -81,17 +81,44 @@
                 </div>
             </div>
 
-            {{-- ICONOS USUARIO/CARRITO --}}
+         {{-- ICONOS USUARIO/CARRITO --}}
 <div class="mt-4 md:mt-0 flex items-center space-x-4">
-    <a href="{{ route('carrito.mostrar') }}" class="relative p-2 hover:text-oaxaca-primary transition-colors">
-        <svg class="w-6 h-6 text-oaxaca-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path>
-        </svg>
-        <span class="absolute -top-1 -right-1 bg-oaxaca-primary text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
-            {{-- Aquí iría la lógica para el contador del carrito, e.g., \Cart::count() --}}
-            3
-        </span>
-    </a>
+    @auth
+        <a href="{{ route('carrito.mostrar') }}"
+           class="relative p-2 hover:text-oaxaca-primary transition-colors group"
+           title="Ver carrito">
+            <svg class="w-6 h-6 text-oaxaca-accent group-hover:text-oaxaca-primary transition-colors"
+                 fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0
+                           0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z">
+                </path>
+            </svg>
+
+            {{-- Indicador de cantidad, puedes usar session o un helper --}}
+            @php
+                $cantidad = session('carrito') ? count(session('carrito')) : 0;
+            @endphp
+            @if($cantidad > 0)
+                <span class="absolute -top-1 -right-1 bg-red-600 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
+                    {{ $cantidad }}
+                </span>
+            @endif
+        </a>
+    @else
+        <a href="{{ route('login', ['redirect' => route('carrito.mostrar')]) }}"
+           class="relative p-2 hover:text-oaxaca-primary transition-colors"
+           title="Ingresar para ver carrito">
+            <svg class="w-6 h-6 text-oaxaca-accent hover:text-oaxaca-primary transition-colors"
+                 fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0
+                           0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z">
+                </path>
+            </svg>
+        </a>
+    @endauth
+</div>
 
     {{-- Menú Desplegable de Usuario --}}
     <div class="relative">

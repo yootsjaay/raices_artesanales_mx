@@ -14,22 +14,32 @@ class AuthenticatedSessionController extends Controller
     /**
      * Display the login view.
      */
-    public function create(): View
+        public function create(): View
     {
+        if (request()->has('redirect')) {
+            session(['url.intended' => request('redirect')]);
+        }
+
         return view('auth.login');
     }
+
 
     /**
      * Handle an incoming authentication request.
      */
-   public function store(LoginRequest $request): RedirectResponse
+ public function store(LoginRequest $request): RedirectResponse
 {
     $request->authenticate();
     $request->session()->regenerate();
 
     $user = Auth::user();
 
-    // Redirección según el rol
+    // 👉 Si hay una URL previa (como /carrito), redirige ahí
+    if (session()->has('url.intended')) {
+        return redirect()->intended();
+    }
+
+    // 👉 Si no, redirige por rol
     if ($user->hasRole('admin')) {
         return redirect()->route('admin.dashboard');
     }
@@ -42,7 +52,6 @@ class AuthenticatedSessionController extends Controller
         return redirect()->route('comprador.dashboard');
     }
 
-    // Redirección por defecto si no tiene ningún rol
     return redirect('/');
 }
 
