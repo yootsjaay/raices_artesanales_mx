@@ -139,6 +139,7 @@
                                     <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                                 @enderror
                             </div>
+                            
                         </div>
                     </div> {{-- Fin de la sección de dimensiones --}}
 
@@ -153,15 +154,18 @@
                         @enderror
                     </div>
 
-                    {{-- Campo Historia de la Pieza --}}
-                    <div class="mt-6">
-                        <label for="historia_piezas" class="block text-sm font-medium text-gray-700">Historia de la Pieza:</label>
-                        <textarea name="historia_piezas" id="historia_piezas" rows="4"
-                                  class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 @error('historia_piezas') border-red-500 @enderror">{{ old('historia_piezas') }}</textarea>
-                        @error('historia_piezas')
-                            <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
-                        @enderror
+                    {{-- Variantes --}}
+            <div class="mb-6">
+                <label class="block font-semibold mb-2">Variantes (Tallas / Colores):</label>
+
+                <div id="variants-container">
+                    <div class="variant-item grid grid-cols-4 gap-2 mb-2">
+                        <input type="text" name="variants[0][color]" placeholder="Color" class="border p-2 rounded" required>
+                        <input type="text" name="variants[0][size]" placeholder="Talla" class="border p-2 rounded" required>
+                        <input type="number" name="variants[0][stock]" placeholder="Stock" class="border p-2 rounded" required>
+                        <input type="number" name="variants[0][price_adjustment]" placeholder="Ajuste $" step="0.01" class="border p-2 rounded">
                     </div>
+                </div>
 
                     {{-- Campo Imagen Principal --}}
                     <div class="mt-6">

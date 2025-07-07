@@ -34,7 +34,8 @@ Auth::routes(['verify' => true]); // Esto habilita las rutas para la verificaci�
 
 // =================== ADMIN - SOLO VENDEDOR ===================
 Route::middleware(['role:admin'])->prefix('admin')->name('admin.')->group(function () {
-    Route::get('artesanias', [AdminArtesaniaController::class, 'index'])->name('artesanias.index');
+Route::get('artesanias', [AdminArtesaniaController::class, 'index'])->name('artesanias.index');
+Route::resource('artesanias', AdminArtesaniaController::class);
     Route::get('categorias', [AdminCategoriaController::class, 'index'])->name('categorias.index');
     Route::get('ubicacion', [AdminUbicacionController::class, 'index'])->name('ubicacion.index');
 
@@ -116,7 +117,7 @@ Route::post('/cotizar-envio', [ShippingController::class, 'getQuote'])->name('en
 
 // =================== CATÁLOGO ARTESANÍAS (PÚBLICO) ===================
 Route::get('/artesanias', [ArtesaniaController::class, 'index'])->name('artesanias.index');
-Route::get('/artesanias/{artesania}', [ArtesaniaController::class, 'show'])->name('artesanias.show');
+Route::get('/artesanias/{slug}', [ArtesaniaController::class, 'show'])->name('artesanias.show');
 
 
 // =================== CATEGORÍAS Y UBICACIONES (PÚBLICO) ===================

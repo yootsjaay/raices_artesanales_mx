@@ -76,6 +76,35 @@
                             {{ $artesania->stock > 0 ? 'Añadir al Carrito' : 'Agotado' }}
                         </button>
                     </form>
+                    @php
+    $tallas = $artesania->artesania_variants->pluck('size')->unique();
+    $colores = $artesania->artesania_variants->pluck('color')->unique();
+@endphp
+
+{{-- Selector de Talla --}}
+<div class="mb-4">
+    <label for="size" class="block font-semibold text-oaxaca-primary mb-1">Talla:</label>
+    <select name="size" id="size" class="w-full rounded-lg border border-oaxaca-primary border-opacity-30 p-2 text-oaxaca-text-dark">
+        <option value="">Selecciona una talla</option>
+        @foreach ($tallas as $talla)
+            <option value="{{ $talla }}">{{ $talla }}</option>
+        @endforeach
+    </select>
+</div>
+
+{{-- Selector de Color --}}
+<div class="mb-4">
+    <label for="color" class="block font-semibold text-oaxaca-primary mb-1">Color:</label>
+    <select name="color" id="color" class="w-full rounded-lg border border-oaxaca-primary border-opacity-30 p-2 text-oaxaca-text-dark">
+        <option value="">Selecciona un color</option>
+        @foreach ($colores as $color)
+            <option value="{{ $color }}">{{ $color }}</option>
+        @endforeach
+    </select>
+</div>
+
+
+
 
                 </div>
             </div>
@@ -151,4 +180,38 @@
             </div>
         </div>
     </div>
+@endsection
+@section('js')
+
+{{-- SCRIPT para actualizar el ID de la variante según selección --}}
+<script>
+    const variants = @json($artesania->artesania_variants);
+    const sizeSelect = document.getElementById('size');
+    const colorSelect = document.getElementById('color');
+    const variantInput = document.getElementById('variant_id');
+    const addToCartBtn = document.getElementById('add-to-cart-btn');
+    const errorMsg = document.getElementById('variant-error');
+
+    function updateVariantSelection() {
+        const size = sizeSelect.value;
+        const color = colorSelect.value;
+
+        const variant = variants.find(v => v.size === size && v.color === color);
+
+        if (variant) {
+            variantInput.value = variant.id;
+            addToCartBtn.disabled = false;
+            errorMsg.classList.add('hidden');
+        } else {
+            variantInput.value = '';
+            addToCartBtn.disabled = true;
+            errorMsg.classList.remove('hidden');
+        }
+    }
+
+    sizeSelect.addEventListener('change', updateVariantSelection);
+    colorSelect.addEventListener('change', updateVariantSelection);
+</script>
+
+
 @endsection

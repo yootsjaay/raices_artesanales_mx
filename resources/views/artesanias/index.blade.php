@@ -57,7 +57,7 @@
                                 @endif
                             </div>
 
-                            <a href="{{ route('artesanias.show', $artesania->id) }}"
+                            <a href="{{ route('artesanias.show', $artesania->slug) }}"
                                class="mt-6 inline-block bg-oaxaca-primary text-white px-8 py-3 rounded-full hover:bg-oaxaca-secondary transition-colors text-center text-lg font-medium shadow-md">
                                 Ver Detalles
                             </a>

@@ -9,6 +9,7 @@ use App\Models\Order;
 use App\Models\OrderItem;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
+use App\Models\ArtesaniaVariant;
 class ArtesaniaController extends Controller
 {
   
@@ -28,13 +29,17 @@ class ArtesaniaController extends Controller
     /**
      * Muestra los detalles de una artesanía específica.
      */
-    public function show(Artesania $artesania) // Inyección de modelo: Laravel encuentra la artesanía por el ID en la URL
+    public function show($slug)
     {
-        // Esto es crucial para que los comentarios aparezcan en la vista
-      
+        $artesania = Artesania::with(['categoria', 'ubicacion', 'artesania_variants'])
+            ->where('slug', $slug)
+            ->firstOrFail();
 
         return view('artesanias.show', compact('artesania'));
-    
     }
-    
+
+   
+
+
+   
 }

@@ -9,6 +9,7 @@ namespace App\Models;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Str;
 
 /**
  * Class Artesania
@@ -102,4 +103,18 @@ class Artesania extends Model
 	{
 		return $this->hasMany(OrderItem::class);
 	}
+	public function getRouteKeyName()
+	{
+		return 'slug'; // esto le dice a Laravel que use el slug en vez del id
+	}
+protected static function booted()
+{
+    static::creating(function ($artesania) {
+        if (empty($artesania->slug)) {
+            $artesania->slug = Str::slug($artesania->nombre);
+        }
+    });
+}
+
+
 }

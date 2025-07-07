@@ -88,7 +88,7 @@
                                                 {{ $artesania->ubicacion->nombre ?? 'N/A' }}
                                             </td>
                                             <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                                <a href="{{ route('admin.artesanias.edit', $artesania->id) }}" class="text-indigo-600 hover:text-indigo-900 mr-4">Editar</a>
+                                                <a href="{{ route('admin.artesanias.edit', $artesania->slug) }}" class="text-indigo-600 hover:text-indigo-900 mr-4">Editar</a>
                                                 <form action="{{ route('admin.artesanias.destroy', $artesania->id) }}" method="POST" class="inline-block" onsubmit="return confirm('¿Estás seguro de que quieres eliminar esta artesanía?');">
                                                     @csrf
                                                     @method('DELETE')
