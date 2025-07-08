@@ -9,6 +9,8 @@ namespace App\Models;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Str;
+
 
 /**
  * Class Categoria
@@ -38,4 +40,27 @@ class Categoria extends Model
 	{
 		return $this->hasMany(Artesania::class);
 	}
+		public function getRouteKeyName()
+	{
+		return 'slug';
+	}
+	 protected static function booted()
+    {
+        static::creating(function ($categoria) {
+            if (empty($categoria->slug)) {
+                $baseSlug = Str::slug($categoria->nombre);
+                $slug = $baseSlug;
+                $count = 1;
+
+                while (static::where('slug', $slug)->exists()) {
+                    $slug = $baseSlug . '-' . $count;
+                    $count++;
+                }
+
+                $categoria->slug = $slug;
+            }
+        });
+    }
+
+	
 }

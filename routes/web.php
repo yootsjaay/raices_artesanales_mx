@@ -69,6 +69,8 @@ Route::middleware(['auth', 'role:comprador'])->group(function () {
     Route::get('/checkout', [CheckoutController::class, 'show'])->name('checkout.show');
     Route::post('/checkout', [CheckoutController::class, 'checkout'])->name('checkout.process');
     Route::get('/checkout/success', [CheckoutController::class, 'success'])->name('checkout.success');
+    //slug
+    
 
     // Comentarios
     Route::post('artesanias/{artesania}/comments', [CommentController::class, 'store'])->name('artesanias.comments.store');
@@ -117,12 +119,13 @@ Route::post('/cotizar-envio', [ShippingController::class, 'getQuote'])->name('en
 
 // =================== CATÁLOGO ARTESANÍAS (PÚBLICO) ===================
 Route::get('/artesanias', [ArtesaniaController::class, 'index'])->name('artesanias.index');
-Route::get('/artesanias/{slug}', [ArtesaniaController::class, 'show'])->name('artesanias.show');
+Route::get('artesanias/{slug}', [ArtesaniaController::class, 'show'])->name('artesanias.show');
 
 
 // =================== CATEGORÍAS Y UBICACIONES (PÚBLICO) ===================
 Route::get('/categorias', [CategoriaController::class, 'index'])->name('categorias.index');
-Route::get('/categorias/{categoria}', [CategoriaController::class, 'show'])->name('categorias.show');
+Route::get('categorias/{categoria}', [CategoriaController::class, 'show'])->name('categorias.show');
+
 
 Route::get('/ubicaciones', [UbicacionController::class, 'index'])->name('ubicaciones.index');
 Route::get('/ubicaciones/{ubicacion}', [UbicacionController::class, 'show'])->name('ubicaciones.show');

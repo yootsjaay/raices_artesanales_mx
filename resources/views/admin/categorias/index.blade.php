@@ -71,8 +71,8 @@
                                                 @endif
                                             </td>
                                             <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                                <a href="{{ route('admin.categorias.edit', $categoria->id) }}" class="text-indigo-600 hover:text-indigo-900 mr-4">Editar</a>
-                                                <form action="{{ route('admin.categorias.destroy', $categoria->id) }}" method="POST" class="inline-block" onsubmit="return confirm('¿Estás seguro de que quieres eliminar esta categoría? Esto eliminará la imagen asociada y podría afectar a las artesanías.');">
+                                                <a href="{{ route('admin.categorias.edit', $categoria->slug) }}" class="text-indigo-600 hover:text-indigo-900 mr-4">Editar</a>
+                                                <form action="{{ route('admin.categorias.destroy', $categoria->slug) }}" method="POST" class="inline-block" onsubmit="return confirm('¿Estás seguro de que quieres eliminar esta categoría? Esto eliminará la imagen asociada y podría afectar a las artesanías.');">
                                                     @csrf
                                                     @method('DELETE')
                                                     <button type="submit" class="text-red-600 hover:text-red-900">Eliminar</button>

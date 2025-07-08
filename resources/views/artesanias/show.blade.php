@@ -46,7 +46,7 @@
 
                     <div class="text-base text-oaxaca-text-dark space-y-3 mb-6"> {{-- Texto oscuro y más espaciado --}}
                         @if ($artesania->categoria)
-                            <p><strong>Categoría:</strong> <a href="{{ route('categorias.show', $artesania->categoria->id) }}" class="text-oaxaca-accent hover:underline transition-colors">{{ $artesania->categoria->nombre }}</a></p> {{-- Enlace con color de acento --}}
+                            <p><strong>Categoría:</strong> <a href="{{ route('categorias.show', $artesania->categoria->slug) }}" class="text-oaxaca-accent hover:underline transition-colors">{{ $artesania->categoria->nombre }}</a></p> {{-- Enlace con color de acento --}}
                         @endif
                         @if ($artesania->ubicacion)
                             <p><strong>Origen:</strong> <a href="{{ route('ubicaciones.show', $artesania->ubicacion->id) }}" class="text-oaxaca-accent hover:underline transition-colors">{{ $artesania->ubicacion->nombre }}</a></p> {{-- Enlace con color de acento --}}

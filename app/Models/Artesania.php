@@ -107,14 +107,14 @@ class Artesania extends Model
 	{
 		return 'slug'; // esto le dice a Laravel que use el slug en vez del id
 	}
-protected static function booted()
-{
-    static::creating(function ($artesania) {
-        if (empty($artesania->slug)) {
-            $artesania->slug = Str::slug($artesania->nombre);
-        }
-    });
-}
+	protected static function booted()
+	{
+		static::creating(function ($artesania) {
+			if (empty($artesania->slug)) {
+				$artesania->slug = Str::slug($artesania->nombre);
+			}
+		});
+	}
 
 
 }
