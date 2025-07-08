@@ -19,7 +19,7 @@
             <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
                 @foreach ($artesanias as $artesania)
                     <div class="bg-oaxaca-card-bg rounded-xl shadow-lg overflow-hidden transform transition-all duration-300 hover:scale-105 hover:shadow-xl group border border-oaxaca-primary border-opacity-10">
-                        <a href="{{ route('artesanias.show', $artesania->id) }}">
+                        <a href="{{ route('artesanias.show', $artesania->slug) }}">
                             @if ($artesania->imagen_principal)
                                 <img src="{{ asset('storage/' . $artesania->imagen_principal) }}" alt="{{ $artesania->nombre }}"
                                      class="w-full h-64 object-cover object-center group-hover:opacity-90 transition-opacity duration-300">
@@ -30,7 +30,7 @@
                         </a>
                         <div class="p-6">
                             <h2 class="text-2xl font-display font-semibold mb-2 text-oaxaca-primary leading-tight">
-                                <a href="{{ route('artesanias.show', $artesania->id) }}" class="hover:text-oaxaca-secondary transition-colors">
+                                <a href="{{ route('artesanias.show', $artesania->slug) }}" class="hover:text-oaxaca-secondary transition-colors">
                                     {{ $artesania->nombre }}
                                 </a>
                             </h2>
@@ -40,7 +40,7 @@
                                 @if ($artesania->categoria)
                                     <p>
                                         <span class="font-semibold">Categoría:</span>
-                                        <a href="{{ route('categorias.show', $artesania->categoria->id) }}"
+                                        <a href="{{ route('categorias.show', $artesania->categoria->slug) }}"
                                            class="text-oaxaca-accent hover:underline transition-colors">
                                             {{ $artesania->categoria->nombre }}
                                         </a>
@@ -49,7 +49,7 @@
                                 @if ($artesania->ubicacion)
                                     <p>
                                         <span class="font-semibold">Origen:</span>
-                                        <a href="{{ route('ubicaciones.show', $artesania->ubicacion->id) }}"
+                                        <a href="{{ route('ubicaciones.show', $artesania->ubicacion->slug) }}"
                                            class="text-oaxaca-accent hover:underline transition-colors">
                                             {{ $artesania->ubicacion->nombre }}
                                         </a>

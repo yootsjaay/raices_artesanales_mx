@@ -10,7 +10,7 @@
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 text-gray-900">
                     {{-- El formulario apunta al método update y usa PUT para la actualización --}}
-                    <form action="{{ route('admin.ubicacion.update', $ubicacion->id) }}" method="POST">
+                    <form action="{{ route('admin.ubicacion.update', $ubicacion->slug) }}" method="POST">
                         @csrf
                         @method('PUT') {{-- O PATCH, ambos funcionan para update --}}
 

@@ -9,6 +9,7 @@ namespace App\Models;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Str;
 
 /**
  * Class Ubicacione
@@ -38,4 +39,27 @@ class Ubicacion extends Model
 	{
 		return $this->hasMany(Artesania::class, 'ubicacion_id');
 	}
+	
+public function getRouteKeyName()
+{
+    return 'slug';
+}
+
+protected static function booted()
+{
+    static::creating(function ($ubicacion) {
+        if (empty($ubicacion->slug)) {
+            $baseSlug = Str::slug($ubicacion->nombre);
+            $slug = $baseSlug;
+            $count = 1;
+
+            while (static::where('slug', $slug)->exists()) {
+                $slug = $baseSlug . '-' . $count;
+                $count++;
+            }
+
+            $ubicacion->slug = $slug;
+        }
+    });
+}
 }

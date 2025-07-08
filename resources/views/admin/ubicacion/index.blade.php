@@ -64,8 +64,8 @@
                                                 {{ $ubicacion->descripcion ?? 'N/A' }}
                                             </td>
                                             <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                                <a href="{{ route('admin.ubicacion.edit', $ubicacion->id) }}" class="text-indigo-600 hover:text-indigo-900 mr-4">Editar</a>
-                                                <form action="{{ route('admin.ubicacion.destroy', $ubicacion->id) }}" method="POST" class="inline-block" onsubmit="return confirm('¿Estás seguro de que quieres eliminar esta ubicación? Esto podría afectar a las artesanías asociadas.');">
+                                                <a href="{{ route('admin.ubicacion.edit', $ubicacion->slug) }}" class="text-indigo-600 hover:text-indigo-900 mr-4">Editar</a>
+                                                <form action="{{ route('admin.ubicacion.destroy', $ubicacion->slug) }}" method="POST" class="inline-block" onsubmit="return confirm('¿Estás seguro de que quieres eliminar esta ubicación? Esto podría afectar a las artesanías asociadas.');">
                                                     @csrf
                                                     @method('DELETE')
                                                     <button type="submit" class="text-red-600 hover:text-red-900">Eliminar</button>

@@ -31,7 +31,7 @@
                         Figuras fantásticas talladas y pintadas a mano con vibrantes colores que capturan el espíritu de los sueños y la imaginación.
                     </p>
                     <p class="text-oaxaca-tertiary font-bold text-xl mb-4">$500 - $5,000 MXN</p>
-                    <a href="{{ route('categorias.show', 1) }}" class="mt-auto inline-block w-full bg-oaxaca-tertiary text-oaxaca-primary px-6 py-3 rounded-lg hover:bg-oaxaca-secondary hover:text-white transition-colors text-center text-lg font-semibold shadow-md">
+                    <a href="{{ route('categorias.show', 'alebrijes') }}" class="mt-auto inline-block w-full bg-oaxaca-tertiary text-oaxaca-primary px-6 py-3 rounded-lg hover:bg-oaxaca-secondary hover:text-white transition-colors text-center text-lg font-semibold shadow-md">
                         Ver Más
                     </a>
                 </div>
@@ -46,7 +46,7 @@
                         Desde el elegante barro negro de San Bartolo Coyotepec hasta piezas policromadas, cada vasija narra una historia.
                     </p>
                     <p class="text-oaxaca-tertiary font-bold text-xl mb-4">$200 - $2,000 MXN</p>
-                    <a href="{{ route('categorias.show', 3) }}" class="mt-auto inline-block w-full bg-oaxaca-tertiary text-oaxaca-primary px-6 py-3 rounded-lg hover:bg-oaxaca-secondary hover:text-white transition-colors text-center text-lg font-semibold shadow-md">
+                    <a href="{{ route('categorias.show', 'barro-rojo') }}" class="mt-auto inline-block w-full bg-oaxaca-tertiary text-oaxaca-primary px-6 py-3 rounded-lg hover:bg-oaxaca-secondary hover:text-white transition-colors text-center text-lg font-semibold shadow-md">
                         Ver Más
                     </a>
                 </div>
@@ -61,7 +61,7 @@
                         Huipiles, rebozos y prendas únicas bordadas a mano con diseños ancestrales, un verdadero arte que se viste.
                     </p>
                     <p class="text-oaxaca-tertiary font-bold text-xl mb-4">$800 - $3,000 MXN</p>
-                    <a href="{{ route('categorias.show', 4) }}" class="mt-auto inline-block w-full bg-oaxaca-tertiary text-oaxaca-primary px-6 py-3 rounded-lg hover:bg-oaxaca-secondary hover:text-white transition-colors text-center text-lg font-semibold shadow-md">
+                    <a href="{{ route('categorias.show', 'textiles') }}" class="mt-auto inline-block w-full bg-oaxaca-tertiary text-oaxaca-primary px-6 py-3 rounded-lg hover:bg-oaxaca-secondary hover:text-white transition-colors text-center text-lg font-semibold shadow-md">
                         Ver Más
                     </a>
                 </div>
