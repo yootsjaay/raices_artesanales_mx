@@ -14,6 +14,7 @@ use App\Imports\ArtesaniasImport;
 use Spatie\Activitylog\Models\Activity; // Importa Activitylog
 use Spatie\Permission\Exceptions\UnauthorizedException;
 use Maatwebsite\Excel\Validators\ValidationException;
+use App\Models\ArtesaniaVariant; // Asegúrate de que este modelo exista y esté correctamente definido
 //
 
 class ArtesaniaController extends Controller
@@ -65,12 +66,12 @@ class ArtesaniaController extends Controller
             'height' => 'required|numeric|min:0.1|max:999.9',
 
             // Variantes
-            'variants' => 'required|array|min:1',
-            'variants.*.color' => 'required|string|max:50',
-            'variants.*.size' => 'required|string|max:50',
-            'variants.*.stock' => 'required|integer|min:0',
-            'variants.*.price_adjustment' => 'nullable|numeric',
-        ]);
+           'variants' => 'required|array|min:1',
+        'variants.*.color' => 'required|string|max:255',
+        'variants.*.size' => 'nullable|string|max:255',
+        'variants.*.sku' => 'nullable|string|max:255',
+    ]);
+
 
         if ($request->hasFile('imagen_principal')) {
             $validatedData['imagen_principal'] = $request->file('imagen_principal')->store('images/artesanias', 'public');
@@ -86,14 +87,14 @@ class ArtesaniaController extends Controller
 
         $artesania = Artesania::create($validatedData);
 
-        foreach ($request->variants as $variant) {
-            $artesania->artesania_variants()->create([
-                'color' => $variant['color'],
-                'size' => $variant['size'],
-                'stock' => $variant['stock'],
-                'price_adjustment' => $variant['price_adjustment'] ?? 0,
-            ]);
-        }
+       foreach ($request->variants as $variant) {
+        $artesania->artesania_variants()->create([
+            'color' => $variant['color'],
+            'size' => $variant['size'] ?? null,
+            'sku' => $variant['sku'] ?? null,
+        ]);
+    }
+
 
         return redirect()->route('admin.artesanias.index')->with('success', 'Artesanía y variantes creadas correctamente.');
     }
@@ -117,6 +118,12 @@ class ArtesaniaController extends Controller
         $ubicaciones = Ubicacion::all();
         return view('admin.artesanias.edit', compact('artesania', 'categorias', 'ubicaciones'));
     }
+    private function generateSku($artesaniaId, $variant)
+{
+    $color = strtoupper(substr($variant['color'], 0, 3));
+    $size = isset($variant['size']) && $variant['size'] ? strtoupper(substr($variant['size'], 0, 3)) : 'STD';
+    return "ART-{$artesaniaId}-{$color}-{$size}";
+}
 
    
 public function update(Request $request, Artesania $artesania)
@@ -130,7 +137,7 @@ public function update(Request $request, Artesania $artesania)
         'historia_piezas' => 'nullable|string',
         'categoria_id' => 'required|exists:categorias,id',
         'ubicacion_id' => 'nullable|exists:ubicaciones,id',
-        'imagen_principal' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,webp|max:10240',
+        'imagen_principal' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,webp|  max:10240',
         'imagen_adicionales.*' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,webp|max:10240',
         'weight' => 'required|numeric|min:0.01|max:9999.99',
         'length' => 'required|numeric|min:0.1|max:999.9',
@@ -174,15 +181,15 @@ public function update(Request $request, Artesania $artesania)
         // Eliminar variantes existentes
         $artesania->artesania_variants()->delete();
 
-        foreach ($request->variants as $variant) {
-            if (!empty($variant['color']) && !empty($variant['size']) && isset($variant['stock'])) {
-                $artesania->artesania_variants()->create([
-                    'color' => $variant['color'],
-                    'size' => $variant['size'],
-                    'stock' => $variant['stock'],
-                    'price_adjustment' => $variant['price_adjustment'] ?? 0,
-                ]);
-            }
+         foreach ($request->variants as $variant) {
+        $sku = $this->generateSku($artesania->id, $variant);
+        $artesania->artesania_variants()->create([
+            'color' => $variant['color'],
+            'size' => $variant['size'] ?? null,
+            'sku' => $sku,
+            // ...otros campos...
+        ]);
+            
         }
     }
     // ========================================================

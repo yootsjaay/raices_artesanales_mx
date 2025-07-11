@@ -22,7 +22,7 @@
                         {{-- Campo Nombre --}}
                         <div>
                             <label for="nombre" class="block text-sm font-medium text-gray-700">Nombre:</label>
-                            <input type="text" name="nombre" id="nombre" value="{{ old('nombre') }}"
+                            <input type="text" name="nombre" id="nombre" value="{{ old('nombre', $artesania->nombre ?? '') }}"
                                    class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 @error('nombre') border-red-500 @enderror" required>
                             @error('nombre')
                                 <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
@@ -32,7 +32,7 @@
                         {{-- Campo Precio --}}
                         <div>
                             <label for="precio" class="block text-sm font-medium text-gray-700">Precio (MXN):</label>
-                            <input type="number" name="precio" id="precio" step="0.01" value="{{ old('precio') }}"
+                            <input type="number" name="precio" id="precio" step="0.01" value="{{ old('precio', $artesania->precio ?? '') }}"
                                    class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 @error('precio') border-red-500 @enderror" required>
                             @error('precio')
                                 <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
@@ -42,7 +42,7 @@
                         {{-- Campo Stock --}}
                         <div>
                             <label for="stock" class="block text-sm font-medium text-gray-700">Stock:</label>
-                            <input type="number" name="stock" id="stock" value="{{ old('stock') }}"
+                            <input type="number" name="stock" id="stock" value="{{ old('stock', $artesania->stock ?? '') }}"
                                    class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 @error('stock') border-red-500 @enderror" required>
                             @error('stock')
                                 <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
@@ -52,7 +52,7 @@
                         {{-- Campo Materiales --}}
                         <div>
                             <label for="materiales" class="block text-sm font-medium text-gray-700">Materiales:</label>
-                            <input type="text" name="materiales" id="materiales" value="{{ old('materiales') }}"
+                            <input type="text" name="materiales" id="materiales" value="{{ old('materiales', $artesania->materiales ?? '') }}"
                                    class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 @error('materiales') border-red-500 @enderror">
                             @error('materiales')
                                 <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
@@ -66,7 +66,7 @@
                                     class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 @error('categoria_id') border-red-500 @enderror">
                                 <option value="">Seleccione una categoría</option>
                                 @foreach ($categorias as $categoria)
-                                    <option value="{{ $categoria->id }}" {{ old('categoria_id') == $categoria->id ? 'selected' : '' }}>
+                                    <option value="{{ $categoria->id }}" {{ old('categoria_id', $artesania->categoria_id ?? '') == $categoria->id ? 'selected' : '' }}>
                                         {{ $categoria->nombre }}
                                     </option>
                                 @endforeach
@@ -83,7 +83,7 @@
                                     class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 @error('ubicacion_id') border-red-500 @enderror">
                                 <option value="">Seleccione una ubicación</option>
                                 @foreach ($ubicaciones as $ubicacion)
-                                    <option value="{{ $ubicacion->id }}" {{ old('ubicacion_id') == $ubicacion->id ? 'selected' : '' }}>
+                                    <option value="{{ $ubicacion->id }}" {{ old('ubicacion_id', $artesania->ubicacion_id ?? '') == $ubicacion->id ? 'selected' : '' }}>
                                         {{ $ubicacion->nombre }}
                                     </option>
                                 @endforeach
@@ -103,7 +103,7 @@
                             {{-- Campo Peso --}}
                             <div>
                                 <label for="weight" class="block text-sm font-medium text-gray-700">Peso (KG):</label>
-                                <input type="number" name="weight" id="weight" step="0.01" min="0.01" value="{{ old('weight') }}"
+                                <input type="number" name="weight" id="weight" step="0.01" min="0.01" value="{{ old('weight', $artesania->weight ?? '') }}"
                                        class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 @error('weight') border-red-500 @enderror" required>
                                 @error('weight')
                                     <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
@@ -113,7 +113,7 @@
                             {{-- Campo Largo --}}
                             <div>
                                 <label for="length" class="block text-sm font-medium text-gray-700">Largo (CM):</label>
-                                <input type="number" name="length" id="length" step="0.1" min="0.1" value="{{ old('length') }}"
+                                <input type="number" name="length" id="length" step="0.1" min="0.1" value="{{ old('length', $artesania->length ?? '') }}"
                                        class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 @error('length') border-red-500 @enderror" required>
                                 @error('length')
                                     <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
@@ -123,7 +123,7 @@
                             {{-- Campo Ancho --}}
                             <div>
                                 <label for="width" class="block text-sm font-medium text-gray-700">Ancho (CM):</label>
-                                <input type="number" name="width" id="width" step="0.1" min="0.1" value="{{ old('width') }}"
+                                <input type="number" name="width" id="width" step="0.1" min="0.1" value="{{ old('width', $artesania->width ?? '') }}"
                                        class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 @error('width') border-red-500 @enderror" required>
                                 @error('width')
                                     <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
@@ -133,48 +133,111 @@
                             {{-- Campo Alto --}}
                             <div>
                                 <label for="height" class="block text-sm font-medium text-gray-700">Alto (CM):</label>
-                                <input type="number" name="height" id="height" step="0.1" min="0.1" value="{{ old('height') }}"
+                                <input type="number" name="height" id="height" step="0.1" min="0.1" value="{{ old('height', $artesania->height ?? '') }}"
                                        class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 @error('height') border-red-500 @enderror" required>
                                 @error('height')
                                     <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                                 @enderror
                             </div>
-                            
                         </div>
                     </div> {{-- Fin de la sección de dimensiones --}}
-
 
                     {{-- Campo Descripción --}}
                     <div class="mt-6">
                         <label for="descripcion" class="block text-sm font-medium text-gray-700">Descripción General:</label>
                         <textarea name="descripcion" id="descripcion" rows="4"
-                                  class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 @error('descripcion') border-red-500 @enderror" required>{{ old('descripcion') }}</textarea>
+                                  class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 @error('descripcion') border-red-500 @enderror" required>{{ old('descripcion', $artesania->descripcion ?? '') }}</textarea>
                         @error('descripcion')
                             <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                         @enderror
                     </div>
 
-                    {{-- Variantes --}}
-            <div class="mb-6">
-                <label class="block font-semibold mb-2">Variantes (Tallas / Colores):</label>
+                    {{-- Sección de Variantes --}}
+                    <div class="mb-6 mt-6 border-t pt-6">
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="text-lg font-medium text-gray-900">Variantes</h3>
+                            <button type="button" id="add-variant" class="text-sm bg-indigo-100 text-indigo-700 px-3 py-1 rounded-md hover:bg-indigo-200">
+                                + Añadir Variante
+                            </button>
+                        </div>
 
-                <div id="variants-container">
-                    <div class="variant-item grid grid-cols-4 gap-2 mb-2">
-                        <input type="text" name="variants[0][color]" placeholder="Color" class="border p-2 rounded" required>
-                        <input type="text" name="variants[0][size]" placeholder="Talla" class="border p-2 rounded" required>
-                        <input type="number" name="variants[0][stock]" placeholder="Stock" class="border p-2 rounded" required>
-                        <input type="number" name="variants[0][price_adjustment]" placeholder="Ajuste $" step="0.01" class="border p-2 rounded">
+                        <div id="variants-container">
+                            @forelse(old('variants', $artesania->variants ?? [[]]) as $index => $variant)
+                                <div class="variant-item grid grid-cols-1 md:grid-cols-4 gap-4 mb-4 p-4 bg-gray-50 rounded-lg">
+                                    {{-- Hidden input for existing variant ID if editing --}}
+                                    @if(isset($variant['id']))
+                                        <input type="hidden" name="variants[{{ $index }}][id]" value="{{ $variant['id'] }}">
+                                    @endif
+
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">Color</label>
+                                        <input type="text" name="variants[{{ $index }}][color]" placeholder="Ej: Rojo"
+                                               class="variant-color w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                                               value="{{ old('variants.' . $index . '.color', $variant['color'] ?? '') }}" required>
+                                        @error('variants.' . $index . '.color')
+                                            <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                                        @enderror
+                                    </div>
+                        <div class="variant-field-sku">
+                            <label>SKU</label>
+                            <input type="text" name="variants[{{ $index }}][sku]" class="variant-sku w-full border-gray-300 rounded-md" value="{{ old('variants.' . $index . '.sku', $variant['sku'] ?? '') }}">
+                        </div>
+                                    <div class="variant-attribute-field">
+                                        <label class="block text-sm font-medium text-gray-700 mb-1 variant-attribute-label">Atributo</label>
+                                        <input type="text" name="variants[{{ $index }}][attribute]" placeholder="Ej: M, Chico, etc"
+                                               class="variant-attribute w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                                               value="{{ old('variants.' . $index . '.attribute', $variant['attribute'] ?? '') }}">
+                                        @error('variants.' . $index . '.attribute')
+                                            <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                                        @enderror
+                                    </div>
+
+                                   
+
+                                    <div class="variant-price-field">
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">Ajuste Precio</label>
+                                        <input type="number" name="variants[{{ $index }}][price_adjustment]" placeholder="+/- $" step="0.01"
+                                               class="variant-price w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                                               value="{{ old('variants.' . $index . '.price_adjustment', $variant['price_adjustment'] ?? '') }}">
+                                        @error('variants.' . $index . '.price_adjustment')
+                                            <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                                        @enderror
+                                    </div>
+                                    <button type="button" class="remove-variant text-red-500 hover:text-red-700 text-sm mt-6">Eliminar</button>
+                                </div>
+                            @empty
+                                <div class="variant-item grid grid-cols-1 md:grid-cols-4 gap-4 mb-4 p-4 bg-gray-50 rounded-lg">
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">Color</label>
+                                        <input type="text" name="variants[0][color]" placeholder="Ej: Rojo"
+                                               class="variant-color w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500" required>
+                                    </div>
+
+                                    <div class="variant-attribute-field">
+                                        <label class="block text-sm font-medium text-gray-700 mb-1 variant-attribute-label">Atributo</label>
+                                        <input type="text" name="variants[0][attribute]" placeholder="Ej: M, Chico, etc"
+                                               class="variant-attribute w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                    </div>
+
+                                   
+                                   
+                                    <button type="button" class="remove-variant text-red-500 hover:text-red-700 text-sm mt-6 hidden">Eliminar</button>
+                                </div>
+                            @endforelse
+                        </div>
                     </div>
-                </div>
 
                     {{-- Campo Imagen Principal --}}
                     <div class="mt-6">
                         <label for="imagen_principal" class="block text-sm font-medium text-gray-700">Imagen Principal:</label>
-                        <input type="file" name="imagen_principal" id="imagen_principal" required
+                        <input type="file" name="imagen_principal" id="imagen_principal" {{ isset($artesania) ? '' : 'required' }}
                                class="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100">
                         @error('imagen_principal')
                             <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                         @enderror
+                        @if(isset($artesania) && $artesania->imagen_principal_url)
+                            <img src="{{ asset('storage/' . $artesania->imagen_principal_url) }}" alt="Imagen Principal Actual" class="mt-2 h-20 w-20 object-cover rounded-md">
+                        @endif
                     </div>
 
                     {{-- Campo Imágenes Adicionales (múltiples archivos) --}}
@@ -185,9 +248,16 @@
                         @error('imagen_adicionales')
                             <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                         @enderror
-                        @error('imagen_adicionales.*') {{-- Para errores de cada archivo --}}
+                        @error('imagen_adicionales.*')
                             <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                         @enderror
+                        @if(isset($artesania) && $artesania->imagenes_adicionales)
+                            <div class="mt-2 flex space-x-2">
+                                @foreach($artesania->imagenes_adicionales as $imagePath)
+                                    <img src="{{ asset('storage/' . $imagePath) }}" alt="Imagen Adicional" class="h-20 w-20 object-cover rounded-md">
+                                @endforeach
+                            </div>
+                        @endif
                     </div>
 
                     <div class="mt-8 flex justify-end space-x-4 border-t pt-6">
@@ -202,4 +272,168 @@
             </div>
         </div>
     </div>
+    @push('scripts')
+        <script>
+            // Configuración de categorías y sus atributos
+            const categoryAttributes = {
+    @foreach ($categorias as $categoria)
+        "{{ $categoria->id }}": {
+            name: @json($categoria->nombre),
+            attributeType: @json(in_array($categoria->nombre, ['Ropas', 'Calzados']) ? 'Talla' : ($categoria->nombre === 'Barros' ? 'Tamaño' : 'Atributo')),
+            options: @json($categoria->nombre === 'Barros' ? ['Chico', 'Mediano', 'Grande'] : []),
+            requiresAttribute: {{ in_array($categoria->nombre, ['Ropas', 'Calzados', 'Barros']) ? 'true' : 'false' }},
+            requiresPriceAdjustment: {{ in_array($categoria->nombre, ['Ropas', 'Calzados']) ? 'true' : 'false' }}
+        }{{ !$loop->last ? ',' : '' }}
+    @endforeach
+};
+
+            let variantCounter = {{ count(old('variants', $artesania->variants ?? [])) > 0 ? count(old('variants', $artesania->variants ?? [])) : 1 }};
+
+            // Función para actualizar los campos de variantes según la categoría
+            function updateVariantFields() {
+                const categoriaId = document.getElementById('categoria_id').value;
+                const config = categoryAttributes[categoriaId] || { attributeType: 'Atributo', options: [], requiresAttribute: false, requiresPriceAdjustment: false };
+
+                document.querySelectorAll('.variant-item').forEach(item => {
+                    const attributeField = item.querySelector('.variant-attribute-field');
+                    const attributeLabel = item.querySelector('.variant-attribute-label');
+                    const attributeInput = item.querySelector('.variant-attribute');
+                    const priceField = item.querySelector('.variant-price-field');
+
+                    // Actualizar la etiqueta del campo de atributo
+                    attributeLabel.textContent = config.attributeType;
+
+                    // Mostrar u ocultar el campo de atributo según la configuración
+                    if (config.requiresAttribute) {
+                        attributeField.classList.remove('hidden');
+                        attributeInput.required = true;
+                    } else {
+                        attributeField.classList.add('hidden');
+                        attributeInput.required = false;
+                        attributeInput.value = '';
+                    }
+
+                    // Mostrar u ocultar el campo de ajuste de precio
+                    if (config.requiresPriceAdjustment) {
+                        priceField.classList.remove('hidden');
+                    } else {
+                        priceField.classList.add('hidden');
+                        item.querySelector('.variant-price').value = '';
+                    }
+
+                    // Cambiar entre input y select según las opciones disponibles
+                    if (config.options.length > 0) {
+                        // Reemplazar input por select
+                        const newSelect = document.createElement('select');
+                        newSelect.name = attributeInput.name;
+                        newSelect.className = attributeInput.className;
+                        newSelect.required = config.requiresAttribute;
+                        newSelect.innerHTML = '<option value="">Seleccione ' + config.attributeType + '</option>' +
+                            config.options.map(option => `<option value="${option}" ${attributeInput.value === option ? 'selected' : ''}>${option}</option>`).join('');
+                        attributeInput.replaceWith(newSelect);
+                    } else {
+                        // Reemplazar select por input si no hay opciones
+                        if (attributeInput.tagName.toLowerCase() === 'select') {
+                            const newInput = document.createElement('input');
+                            newInput.type = 'text';
+                            newInput.name = attributeInput.name;
+                            newInput.className = attributeInput.className;
+                            newInput.placeholder = `Ej: ${config.attributeType === 'Talla' ? 'M, 38, etc' : 'Chico, etc'}`;
+                            newInput.required = config.requiresAttribute;
+                            attributeInput.replaceWith(newInput);
+                        }
+                    }
+                });
+            }
+
+            // Añadir nueva variante
+            document.getElementById('add-variant').addEventListener('click', function() {
+                const container = document.getElementById('variants-container');
+                const config = categoryAttributes[document.getElementById('categoria_id').value] || { attributeType: 'Atributo', options: [], requiresAttribute: false, requiresPriceAdjustment: false };
+
+                const newItem = document.createElement('div');
+                newItem.className = 'variant-item grid grid-cols-1 md:grid-cols-4 gap-4 mb-4 p-4 bg-gray-50 rounded-lg';
+                newItem.innerHTML = `
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Color</label>
+                        <input type="text" name="variants[${variantCounter}][color]" placeholder="Ej: Rojo"
+                               class="variant-color w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500" required>
+                    </div>
+                    <div class="variant-attribute-field ${config.requiresAttribute ? '' : 'hidden'}">
+                        <label class="block text-sm font-medium text-gray-700 mb-1 variant-attribute-label">${config.attributeType}</label>
+                        ${config.options.length > 0 ? `
+                            <select name="variants[${variantCounter}][attribute]" class="variant-attribute w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500" ${config.requiresAttribute ? 'required' : ''}>
+                                <option value="">Seleccione ${config.attributeType}</option>
+                                ${config.options.map(option => `<option value="${option}">${option}</option>`).join('')}
+                            </select>
+                        ` : `
+                            <input type="text" name="variants[${variantCounter}][attribute]" placeholder="Ej: ${config.attributeType === 'Talla' ? 'M, 38, etc' : 'Chico, etc'}"
+                                   class="variant-attribute w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500" ${config.requiresAttribute ? 'required' : ''}>
+                        `}
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Stock</label>
+                        <input type="number" name="variants[${variantCounter}][stock]" placeholder="Cantidad" min="0"
+                               class="variant-stock w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500" required>
+                    </div>
+                    <div class="variant-price-field ${config.requiresPriceAdjustment ? '' : 'hidden'}">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Ajuste Precio</label>
+                        <input type="number" name="variants[${variantCounter}][price_adjustment]" placeholder="+/- $" step="0.01"
+                               class="variant-price w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                    </div>
+                    <button type="button" class="remove-variant text-red-500 hover:text-red-700 text-sm mt-6">Eliminar</button>
+                `;
+
+                container.appendChild(newItem);
+                variantCounter++;
+                updateRemoveButtons();
+                updateVariantFields(); // Asegurar que los nuevos campos se ajusten a la categoría
+            });
+
+            // Eliminar variante
+            document.getElementById('variants-container').addEventListener('click', function(event) {
+                if (event.target.classList.contains('remove-variant')) {
+                    event.target.closest('.variant-item').remove();
+                    updateRemoveButtons();
+                    updateVariantFieldNames();
+                }
+            });
+
+            // Actualizar visibilidad de botones de eliminación
+            function updateRemoveButtons() {
+                const variantItems = document.querySelectorAll('.variant-item');
+                variantItems.forEach((item, index) => {
+                    const removeButton = item.querySelector('.remove-variant');
+                    if (removeButton) {
+                        if (variantItems.length > 1) {
+                            removeButton.classList.remove('hidden');
+                        } else {
+                            removeButton.classList.add('hidden');
+                        }
+                    }
+                });
+            }
+
+            // Reindexar nombres de campos de variantes después de eliminación
+            function updateVariantFieldNames() {
+                document.querySelectorAll('.variant-item').forEach((item, index) => {
+                    item.querySelectorAll('input, select').forEach(input => {
+                        if (input.name) {
+                            input.name = input.name.replace(/variants\[\d+\]/, `variants[${index}]`);
+                        }
+                    });
+                });
+                variantCounter = document.querySelectorAll('.variant-item').length;
+            }
+
+            // Event listener para cambio de categoría
+            document.getElementById('categoria_id').addEventListener('change', updateVariantFields);
+
+            // Inicializar en la carga de la página
+            document.addEventListener('DOMContentLoaded', function() {
+                updateVariantFields();
+                updateRemoveButtons();
+            });
+        </script>
+    @endpush
 </x-app-layout>

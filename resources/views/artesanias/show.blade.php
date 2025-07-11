@@ -95,12 +95,7 @@
                 {{ $artesania->stock > 0 ? 'Añadir al Carrito' : 'Agotado' }}
             </button>
         </form>
-
-                  
-
-
-
-                </div>
+    </div>
             </div>
 
             <hr class="my-10 border-t-2 border-oaxaca-primary border-opacity-10"> {{-- Separador más robusto --}}
