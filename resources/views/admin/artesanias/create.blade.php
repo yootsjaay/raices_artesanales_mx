@@ -152,80 +152,130 @@
                         @enderror
                     </div>
 
-                    {{-- Sección de Variantes --}}
-                    <div class="mb-6 mt-6 border-t pt-6">
-                        <div class="flex justify-between items-center mb-4">
-                            <h3 class="text-lg font-medium text-gray-900">Variantes</h3>
-                            <button type="button" id="add-variant" class="text-sm bg-indigo-100 text-indigo-700 px-3 py-1 rounded-md hover:bg-indigo-200">
-                                + Añadir Variante
-                            </button>
-                        </div>
+                 {{-- Sección de Variantes --}}
+<div class="mb-6 mt-6 border-t pt-6">
+    <div class="flex justify-between items-center mb-4">
+        <h3 class="text-lg font-medium text-gray-900">Variantes</h3>
+        <button type="button" id="add-variant" class="text-sm bg-indigo-100 text-indigo-700 px-3 py-1 rounded-md hover:bg-indigo-200">
+            + Añadir Variante
+        </button>
+    </div>
 
-                        <div id="variants-container">
-                            @forelse(old('variants', $artesania->variants ?? [[]]) as $index => $variant)
-                                <div class="variant-item grid grid-cols-1 md:grid-cols-4 gap-4 mb-4 p-4 bg-gray-50 rounded-lg">
-                                    {{-- Hidden input for existing variant ID if editing --}}
-                                    @if(isset($variant['id']))
-                                        <input type="hidden" name="variants[{{ $index }}][id]" value="{{ $variant['id'] }}">
-                                    @endif
+    <div id="variants-container">
+        @forelse(old('variants', $artesania->variants ?? [[]]) as $index => $variant)
+            <div class="variant-item grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-4 p-4 bg-gray-50 rounded-lg">
+                {{-- Hidden input para ID si existe --}}
+                @if(isset($variant['id']))
+                    <input type="hidden" name="variants[{{ $index }}][id]" value="{{ $variant['id'] }}">
+                @endif
 
-                                    <div>
-                                        <label class="block text-sm font-medium text-gray-700 mb-1">Color</label>
-                                        <input type="text" name="variants[{{ $index }}][color]" placeholder="Ej: Rojo"
-                                               class="variant-color w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                                               value="{{ old('variants.' . $index . '.color', $variant['color'] ?? '') }}" required>
-                                        @error('variants.' . $index . '.color')
-                                            <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
-                                        @enderror
-                                    </div>
-                        <div class="variant-field-sku">
-                            <label>SKU</label>
-                            <input type="text" name="variants[{{ $index }}][sku]" class="variant-sku w-full border-gray-300 rounded-md" value="{{ old('variants.' . $index . '.sku', $variant['sku'] ?? '') }}">
-                        </div>
-                                    <div class="variant-attribute-field">
-                                        <label class="block text-sm font-medium text-gray-700 mb-1 variant-attribute-label">Atributo</label>
-                                        <input type="text" name="variants[{{ $index }}][attribute]" placeholder="Ej: M, Chico, etc"
-                                               class="variant-attribute w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                                               value="{{ old('variants.' . $index . '.attribute', $variant['attribute'] ?? '') }}">
-                                        @error('variants.' . $index . '.attribute')
-                                            <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
-                                        @enderror
-                                    </div>
+                {{-- Color --}}
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Color</label>
+                    <input type="text" name="variants[{{ $index }}][color]" placeholder="Ej: Rojo"
+                        class="w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                        value="{{ old("variants.$index.color", $variant['color'] ?? '') }}" required>
+                    @error("variants.$index.color")
+                        <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                    @enderror
+                </div>
 
-                                   
+                {{-- Talla (size) --}}
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Talla</label>
+                    <input type="text" name="variants[{{ $index }}][size]" placeholder="Ej: M, L"
+                        class="w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                        value="{{ old("variants.$index.size", $variant['size'] ?? '') }}">
+                    @error("variants.$index.size")
+                        <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                    @enderror
+                </div>
 
-                                    <div class="variant-price-field">
-                                        <label class="block text-sm font-medium text-gray-700 mb-1">Ajuste Precio</label>
-                                        <input type="number" name="variants[{{ $index }}][price_adjustment]" placeholder="+/- $" step="0.01"
-                                               class="variant-price w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                                               value="{{ old('variants.' . $index . '.price_adjustment', $variant['price_adjustment'] ?? '') }}">
-                                        @error('variants.' . $index . '.price_adjustment')
-                                            <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
-                                        @enderror
-                                    </div>
-                                    <button type="button" class="remove-variant text-red-500 hover:text-red-700 text-sm mt-6">Eliminar</button>
-                                </div>
-                            @empty
-                                <div class="variant-item grid grid-cols-1 md:grid-cols-4 gap-4 mb-4 p-4 bg-gray-50 rounded-lg">
-                                    <div>
-                                        <label class="block text-sm font-medium text-gray-700 mb-1">Color</label>
-                                        <input type="text" name="variants[0][color]" placeholder="Ej: Rojo"
-                                               class="variant-color w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500" required>
-                                    </div>
+                {{-- Material --}}
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Material</label>
+                    <input type="text" name="variants[{{ $index }}][material_variant]" placeholder="Ej: Algodón"
+                        class="w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                        value="{{ old("variants.$index.material_variant", $variant['material_variant'] ?? '') }}">
+                    @error("variants.$index.material_variant")
+                        <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                    @enderror
+                </div>
 
-                                    <div class="variant-attribute-field">
-                                        <label class="block text-sm font-medium text-gray-700 mb-1 variant-attribute-label">Atributo</label>
-                                        <input type="text" name="variants[0][attribute]" placeholder="Ej: M, Chico, etc"
-                                               class="variant-attribute w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
-                                    </div>
+                {{-- SKU --}}
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">SKU</label>
+                    <input type="text" name="variants[{{ $index }}][sku]"
+                        class="w-full border-gray-300 rounded-md shadow-sm"
+                        value="{{ old("variants.$index.sku", $variant['sku'] ?? '') }}">
+                    @error("variants.$index.sku")
+                        <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                    @enderror
+                </div>
 
-                                   
-                                   
-                                    <button type="button" class="remove-variant text-red-500 hover:text-red-700 text-sm mt-6 hidden">Eliminar</button>
-                                </div>
-                            @endforelse
-                        </div>
-                    </div>
+                {{-- Precio --}}
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Ajuste de Precio</label>
+                    <input type="number" step="0.01" name="variants[{{ $index }}][price]"
+                        placeholder="+/- $" class="w-full border-gray-300 rounded-md shadow-sm"
+                        value="{{ old("variants.$index.price", $variant['price_adjustment'] ?? '') }}">
+                    @error("variants.$index.price")
+                        <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                    @enderror
+                </div>
+
+                {{-- Stock --}}
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Stock</label>
+                    <input type="number" name="variants[{{ $index }}][stock]" min="0"
+                        class="w-full border-gray-300 rounded-md shadow-sm"
+                        value="{{ old("variants.$index.stock", $variant['stock'] ?? 0) }}">
+                    @error("variants.$index.stock")
+                        <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                    @enderror
+                </div>
+
+                {{-- Imagen de la variante --}}
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Imagen</label>
+                    <input type="file" name="variants[{{ $index }}][image]"
+                        class="w-full text-sm border-gray-300 rounded-md shadow-sm">
+                    @error("variants.$index.image")
+                        <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                    @enderror
+                </div>
+
+                {{-- Botón eliminar --}}
+                <div class="flex items-end">
+                    <button type="button" class="remove-variant text-red-500 hover:text-red-700 text-sm">Eliminar</button>
+                </div>
+            </div>
+        @empty
+            {{-- Variante vacía por defecto --}}
+            <div class="variant-item grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-4 p-4 bg-gray-50 rounded-lg">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Color</label>
+                    <input type="text" name="variants[0][color]" placeholder="Ej: Rojo"
+                        class="w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500" required>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Talla</label>
+                    <input type="text" name="variants[0][size]" placeholder="Ej: M"
+                        class="w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Stock</label>
+                    <input type="number" name="variants[0][stock]" min="0"
+                        class="w-full border-gray-300 rounded-md shadow-sm">
+                </div>
+                <div class="flex items-end">
+                    <button type="button" class="remove-variant text-red-500 hover:text-red-700 text-sm hidden">Eliminar</button>
+                </div>
+            </div>
+        @endforelse
+    </div>
+</div>
+
 
                     {{-- Campo Imagen Principal --}}
                     <div class="mt-6">

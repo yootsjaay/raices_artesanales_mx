@@ -87,7 +87,8 @@ class CarritoController extends Controller
                 'artesania_variant_id' => $variant->id,
                 'quantity' => $quantity,
                 'price' => $variant->precio ?? $artesania->precio,
-            ]);
+            ])->save();
+        
         }
 
     } else {
@@ -111,12 +112,13 @@ class CarritoController extends Controller
             $cartItem->quantity = $newQuantity;
             $cartItem->save();
         } else {
-            $cart->cart_items()->create([
-                'artesania_id' => $artesania->id,
-                'quantity' => $quantity,
-                'price' => $artesania->precio,
-                'artesania_variant_id' => null,
-            ]);
+        $cart->cart_items()->create([
+            'artesania_id' => $artesania->id,
+            'artesania_variant_id' => $variant->id,
+            'quantity' => $quantity,
+            'price' => $variant->precio ?? $artesania->precio,
+        ]);
+
         }
     }
 

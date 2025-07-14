@@ -154,18 +154,57 @@
                         @enderror
                     </div>
 
-                   {{-- Variantes --}}
-            <div class="mb-6">
-                <label class="block font-semibold mb-2">Variantes (Tallas / Colores):</label>
+                {{-- Variantes --}}
+<div class="mb-6">
+    <label class="block font-semibold mb-2">Variantes (Tallas / Colores / Materiales):</label>
 
-                <div id="variants-container">
-                    <div class="variant-item grid grid-cols-4 gap-2 mb-2">
-                        <input type="text" name="variants[0][color]" placeholder="Color" class="border p-2 rounded" required>
-                        <input type="text" name="variants[0][size]" placeholder="Talla" class="border p-2 rounded" required>
-                        <input type="number" name="variants[0][stock]" placeholder="Stock" class="border p-2 rounded" required>
-                        <input type="number" name="variants[0][price_adjustment]" placeholder="Ajuste $" step="0.01" class="border p-2 rounded">
-                    </div>
+    <div id="variants-container">
+        @forelse (old('variants', $artesania->artesania_variants ?? []) as $index => $variant)
+            <div class="variant-item grid grid-cols-1 md:grid-cols-6 gap-4 mb-4 p-4 bg-gray-50 rounded-lg">
+                {{-- Si ya existe la variante, ocultar el ID --}}
+                @if (isset($variant['id']) || isset($variant->id))
+                    <input type="hidden" name="variants[{{ $index }}][id]" value="{{ $variant['id'] ?? $variant->id }}">
+                @endif
+
+                <input type="text" name="variants[{{ $index }}][color]" placeholder="Color" class="border p-2 rounded w-full"
+                       value="{{ old("variants.$index.color", $variant['color'] ?? $variant->color ?? '') }}" required>
+
+                <input type="text" name="variants[{{ $index }}][size]" placeholder="Talla" class="border p-2 rounded w-full"
+                       value="{{ old("variants.$index.size", $variant['size'] ?? $variant->size ?? '') }}">
+
+                <input type="text" name="variants[{{ $index }}][material_variant]" placeholder="Material (opcional)" class="border p-2 rounded w-full"
+                       value="{{ old("variants.$index.material_variant", $variant['material_variant'] ?? $variant->material_variant ?? '') }}">
+
+                <input type="number" name="variants[{{ $index }}][stock]" placeholder="Stock" class="border p-2 rounded w-full"
+                       value="{{ old("variants.$index.stock", $variant['stock'] ?? $variant->stock ?? 0) }}" min="0" required>
+
+                <input type="number" name="variants[{{ $index }}][price_adjustment]" placeholder="Ajuste $" step="0.01" class="border p-2 rounded w-full"
+                       value="{{ old("variants.$index.price_adjustment", $variant['price_adjustment'] ?? $variant->price_adjustment ?? 0.00) }}">
+
+                <div>
+                    <label class="block text-xs font-medium text-gray-600 mb-1">Imagen (opcional)</label>
+                    <input type="file" name="variants[{{ $index }}][image]" class="text-sm border p-2 rounded w-full">
+                    @if (!empty($variant['image'] ?? $variant->image))
+                        <div class="mt-1">
+                            <img src="{{ asset('storage/' . ($variant['image'] ?? $variant->image)) }}" alt="Variante" class="w-16 h-16 object-cover rounded">
+                        </div>
+                    @endif
                 </div>
+            </div>
+        @empty
+            {{-- Si no hay variantes previas, mostrar una vacía por defecto --}}
+            <div class="variant-item grid grid-cols-1 md:grid-cols-6 gap-4 mb-4 p-4 bg-gray-50 rounded-lg">
+                <input type="text" name="variants[0][color]" placeholder="Color" class="border p-2 rounded w-full" required>
+                <input type="text" name="variants[0][size]" placeholder="Talla" class="border p-2 rounded w-full">
+                <input type="text" name="variants[0][material_variant]" placeholder="Material (opcional)" class="border p-2 rounded w-full">
+                <input type="number" name="variants[0][stock]" placeholder="Stock" class="border p-2 rounded w-full" min="0" required>
+                <input type="number" name="variants[0][price_adjustment]" placeholder="Ajuste $" step="0.01" class="border p-2 rounded w-full">
+                <input type="file" name="variants[0][image]" class="text-sm border p-2 rounded w-full">
+            </div>
+        @endforelse
+    </div>
+</div>
+
                     {{-- Campo Imagen Principal --}}
                     <div class="mt-6">
                         <label class="block text-sm font-medium text-gray-700">Imagen Principal Actual:</label>
