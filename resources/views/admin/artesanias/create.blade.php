@@ -169,6 +169,28 @@
                     <input type="hidden" name="variants[{{ $index }}][id]" value="{{ $variant['id'] }}">
                 @endif
 
+                {{-- Nombre Variante --}}
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Nombre Variante</label>
+                    <input type="text" name="variants[{{ $index }}][variant_name]" placeholder="Ej: Playera Azul"
+                        class="w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                        value="{{ old("variants.$index.variant_name", $variant['variant_name'] ?? '') }}">
+                    @error("variants.$index.variant_name")
+                        <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                    @enderror
+                </div>
+
+                {{-- Descripción Variante --}}
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Descripción Variante</label>
+                    <input type="text" name="variants[{{ $index }}][description_variant]" placeholder="Descripción corta"
+                        class="w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                        value="{{ old("variants.$index.description_variant", $variant['description_variant'] ?? '') }}">
+                    @error("variants.$index.description_variant")
+                        <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                    @enderror
+                </div>
+
                 {{-- Color --}}
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Color</label>
@@ -213,13 +235,35 @@
                     @enderror
                 </div>
 
-                {{-- Precio --}}
+                {{-- Dimensiones --}}
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Dimensiones</label>
+                    <input type="text" name="variants[{{ $index }}][dimensions]" placeholder="Ej: 10x20x5cm"
+                        class="w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                        value="{{ old("variants.$index.dimensions", $variant['dimensions'] ?? '') }}">
+                    @error("variants.$index.dimensions")
+                        <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                    @enderror
+                </div>
+
+                {{-- Peso --}}
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Peso (kg)</label>
+                    <input type="number" step="0.01" name="variants[{{ $index }}][weight]" placeholder="Ej: 0.50"
+                        class="w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                        value="{{ old("variants.$index.weight", $variant['weight'] ?? '') }}">
+                    @error("variants.$index.weight")
+                        <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                    @enderror
+                </div>
+
+                {{-- Ajuste de Precio --}}
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Ajuste de Precio</label>
-                    <input type="number" step="0.01" name="variants[{{ $index }}][price]"
+                    <input type="number" step="0.01" name="variants[{{ $index }}][price_adjustment]"
                         placeholder="+/- $" class="w-full border-gray-300 rounded-md shadow-sm"
-                        value="{{ old("variants.$index.price", $variant['price_adjustment'] ?? '') }}">
-                    @error("variants.$index.price")
+                        value="{{ old("variants.$index.price_adjustment", $variant['price_adjustment'] ?? '') }}">
+                    @error("variants.$index.price_adjustment")
                         <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                     @enderror
                 </div>
@@ -243,6 +287,26 @@
                     @error("variants.$index.image")
                         <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                     @enderror
+                    @if(isset($variant['image_url']))
+                        <img src="{{ asset('storage/' . $variant['image_url']) }}" alt="Imagen Variante" class="mt-2 h-16 w-16 object-cover rounded-md">
+                    @endif
+                </div>
+
+                {{-- Imágenes adicionales --}}
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Imágenes Adicionales</label>
+                    <input type="file" name="variants[{{ $index }}][additional_images_urls][]" multiple
+                        class="w-full text-sm border-gray-300 rounded-md shadow-sm">
+                    @error("variants.$index.additional_images_urls")
+                        <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                    @enderror
+                    @if(isset($variant['additional_images_urls']) && is_array($variant['additional_images_urls']))
+                        <div class="mt-2 flex space-x-2">
+                            @foreach($variant['additional_images_urls'] as $img)
+                                <img src="{{ asset('storage/' . $img) }}" alt="Imagen Adicional" class="h-12 w-12 object-cover rounded-md">
+                            @endforeach
+                        </div>
+                    @endif
                 </div>
 
                 {{-- Botón eliminar --}}
@@ -253,29 +317,85 @@
         @empty
             {{-- Variante vacía por defecto --}}
             <div class="variant-item grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-4 p-4 bg-gray-50 rounded-lg">
+                {{-- Nombre Variante --}}
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Nombre Variante</label>
+                    <input type="text" name="variants[0][variant_name]" placeholder="Ej: Playera Azul"
+                        class="w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                </div>
+                {{-- Descripción Variante --}}
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Descripción Variante</label>
+                    <input type="text" name="variants[0][description_variant]" placeholder="Descripción corta"
+                        class="w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                </div>
+                {{-- Color --}}
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Color</label>
                     <input type="text" name="variants[0][color]" placeholder="Ej: Rojo"
                         class="w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500" required>
                 </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Talla</label>
+                {{-- Talla / Tamaño / Atributo dinámico --}}
+                <div class="variant-attribute-field">
+                    <label class="block text-sm font-medium text-gray-700 mb-1 variant-attribute-label">Talla</label>
                     <input type="text" name="variants[0][size]" placeholder="Ej: M"
+                        class="w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 variant-attribute">
+                </div>
+                {{-- Material --}}
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Material</label>
+                    <input type="text" name="variants[0][material_variant]" placeholder="Ej: Algodón"
                         class="w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                 </div>
+                {{-- SKU --}}
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">SKU</label>
+                    <input type="text" name="variants[0][sku]"
+                        class="w-full border-gray-300 rounded-md shadow-sm">
+                </div>
+                {{-- Dimensiones --}}
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Dimensiones</label>
+                    <input type="text" name="variants[0][dimensions]" placeholder="Ej: 10x20x5cm"
+                        class="w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                </div>
+                {{-- Peso --}}
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Peso (kg)</label>
+                    <input type="number" step="0.01" name="variants[0][weight]" placeholder="Ej: 0.50"
+                        class="w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                </div>
+                {{-- Ajuste de Precio --}}
+                <div class="variant-price-field">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Ajuste de Precio</label>
+                    <input type="number" step="0.01" name="variants[0][price_adjustment]"
+                        placeholder="+/- $" class="w-full border-gray-300 rounded-md shadow-sm variant-price">
+                </div>
+                {{-- Stock --}}
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Stock</label>
                     <input type="number" name="variants[0][stock]" min="0"
                         class="w-full border-gray-300 rounded-md shadow-sm">
                 </div>
+                {{-- Imagen --}}
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Imagen</label>
+                    <input type="file" name="variants[0][image]"
+                        class="w-full text-sm border-gray-300 rounded-md shadow-sm">
+                </div>
+                {{-- Imágenes Adicionales --}}
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Imágenes Adicionales</label>
+                    <input type="file" name="variants[0][additional_images_urls][]" multiple
+                        class="w-full text-sm border-gray-300 rounded-md shadow-sm">
+                </div>
+                {{-- Botón eliminar --}}
                 <div class="flex items-end">
                     <button type="button" class="remove-variant text-red-500 hover:text-red-700 text-sm hidden">Eliminar</button>
                 </div>
             </div>
         @endforelse
     </div>
-</div>
-
 
                     {{-- Campo Imagen Principal --}}
                     <div class="mt-6">
@@ -402,37 +522,60 @@
                 const config = categoryAttributes[document.getElementById('categoria_id').value] || { attributeType: 'Atributo', options: [], requiresAttribute: false, requiresPriceAdjustment: false };
 
                 const newItem = document.createElement('div');
-                newItem.className = 'variant-item grid grid-cols-1 md:grid-cols-4 gap-4 mb-4 p-4 bg-gray-50 rounded-lg';
-                newItem.innerHTML = `
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Color</label>
-                        <input type="text" name="variants[${variantCounter}][color]" placeholder="Ej: Rojo"
-                               class="variant-color w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500" required>
-                    </div>
-                    <div class="variant-attribute-field ${config.requiresAttribute ? '' : 'hidden'}">
-                        <label class="block text-sm font-medium text-gray-700 mb-1 variant-attribute-label">${config.attributeType}</label>
-                        ${config.options.length > 0 ? `
-                            <select name="variants[${variantCounter}][attribute]" class="variant-attribute w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500" ${config.requiresAttribute ? 'required' : ''}>
-                                <option value="">Seleccione ${config.attributeType}</option>
-                                ${config.options.map(option => `<option value="${option}">${option}</option>`).join('')}
-                            </select>
-                        ` : `
-                            <input type="text" name="variants[${variantCounter}][attribute]" placeholder="Ej: ${config.attributeType === 'Talla' ? 'M, 38, etc' : 'Chico, etc'}"
-                                   class="variant-attribute w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500" ${config.requiresAttribute ? 'required' : ''}>
-                        `}
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Stock</label>
-                        <input type="number" name="variants[${variantCounter}][stock]" placeholder="Cantidad" min="0"
-                               class="variant-stock w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500" required>
-                    </div>
-                    <div class="variant-price-field ${config.requiresPriceAdjustment ? '' : 'hidden'}">
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Ajuste Precio</label>
-                        <input type="number" name="variants[${variantCounter}][price_adjustment]" placeholder="+/- $" step="0.01"
-                               class="variant-price w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
-                    </div>
-                    <button type="button" class="remove-variant text-red-500 hover:text-red-700 text-sm mt-6">Eliminar</button>
-                `;
+                 newItem.className = 'variant-item grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-4 p-4 bg-gray-50 rounded-lg';
+    newItem.innerHTML = `
+        <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Nombre Variante</label>
+            <input type="text" name="variants[${variantCounter}][variant_name]" class="w-full border-gray-300 rounded-md shadow-sm" placeholder="Ej: Playera Azul">
+        </div>
+        <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Descripción Variante</label>
+            <input type="text" name="variants[${variantCounter}][description_variant]" class="w-full border-gray-300 rounded-md shadow-sm" placeholder="Descripción corta">
+        </div>
+        <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Color</label>
+            <input type="text" name="variants[${variantCounter}][color]" class="w-full border-gray-300 rounded-md shadow-sm" placeholder="Ej: Rojo">
+        </div>
+        <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Talla</label>
+            <input type="text" name="variants[${variantCounter}][size]" class="w-full border-gray-300 rounded-md shadow-sm" placeholder="Ej: M, L">
+        </div>
+        <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Material</label>
+            <input type="text" name="variants[${variantCounter}][material_variant]" class="w-full border-gray-300 rounded-md shadow-sm" placeholder="Ej: Algodón">
+        </div>
+        <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">SKU</label>
+            <input type="text" name="variants[${variantCounter}][sku]" class="w-full border-gray-300 rounded-md shadow-sm" placeholder="SKU único">
+        </div>
+        <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Dimensiones</label>
+            <input type="text" name="variants[${variantCounter}][dimensions]" class="w-full border-gray-300 rounded-md shadow-sm" placeholder="Ej: 10x20x5cm">
+        </div>
+        <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Peso (kg)</label>
+            <input type="number" step="0.01" name="variants[${variantCounter}][weight]" class="w-full border-gray-300 rounded-md shadow-sm" placeholder="Ej: 0.50">
+        </div>
+        <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Ajuste Precio</label>
+            <input type="number" step="0.01" name="variants[${variantCounter}][price_adjustment]" class="w-full border-gray-300 rounded-md shadow-sm" placeholder="+/- $">
+        </div>
+        <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Stock</label>
+            <input type="number" name="variants[${variantCounter}][stock]" min="0" class="w-full border-gray-300 rounded-md shadow-sm" placeholder="Cantidad">
+        </div>
+        <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Imagen</label>
+            <input type="file" name="variants[${variantCounter}][image]" class="w-full text-sm border-gray-300 rounded-md shadow-sm">
+        </div>
+        <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Imágenes Adicionales</label>
+            <input type="file" name="variants[${variantCounter}][additional_images_urls][]" multiple class="w-full text-sm border-gray-300 rounded-md shadow-sm">
+        </div>
+        <div class="flex items-end">
+            <button type="button" class="remove-variant text-red-500 hover:text-red-700 text-sm">Eliminar</button>
+        </div>
+    `;
 
                 container.appendChild(newItem);
                 variantCounter++;

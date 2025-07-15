@@ -25,7 +25,7 @@
                             <span class="block sm:inline">{{ session('success') }}</span>
                         </div>
                     @endif
-
+                  
                     @if ($artesanias->isEmpty())
                         <p class="text-gray-600">No hay artesanías registradas aún.</p>
                     @else
@@ -57,6 +57,7 @@
                                         <th scope="col" class="relative px-6 py-3">
                                             <span class="sr-only">Acciones</span>
                                         </th>
+                                       
                                     </tr>
                                 </thead>
                                 <tbody class="bg-white divide-y divide-gray-200">

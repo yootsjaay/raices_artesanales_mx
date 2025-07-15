@@ -61,40 +61,45 @@
                     <p class="text-oaxaca-text-dark leading-relaxed mb-6">{{ $artesania->historia_pieza ?? 'No hay una historia específica para esta pieza aún.' }}</p>
 
                    <form method="POST" action="{{ route('carrito.agregar') }}" class="flex flex-col sm:flex-row items-center gap-3 flex-wrap">
-            @csrf
-            <input type="hidden" name="artesania_id" value="{{ $artesania->slug }}">
+    @csrf
+    {{-- ⚠️ OJO: artesania_id debe ser el ID numérico, no el slug --}}
+    <input type="hidden" name="artesania_id" value="{{ $artesania->id }}">
 
-            @if ($artesania->artesania_variants->count())
-                <div class="w-full sm:w-auto">
-                    <label for="variant_id" class="block text-oaxaca-text-dark font-semibold mb-1">Selecciona una variante:</label>
-                   <select name="variant_id" id="variant_id"
+    @if ($artesania->artesania_variants->count())
+        <div class="w-full sm:w-auto">
+            <label for="variant_id" class="block text-oaxaca-text-dark font-semibold mb-1">Selecciona una variante:</label>
+            <select name="variant_id" id="variant_id"
                 class="p-3 border border-oaxaca-primary border-opacity-30 rounded-lg w-full sm:w-64 focus:outline-none focus:ring-2 focus:ring-oaxaca-tertiary text-lg text-oaxaca-text-dark"
                 required>
                 <option value="">-- Elige Talla y/o Color --</option>
                 @foreach ($artesania->artesania_variants as $variant)
-                    <option value="{{ $variant->id }}">
-                        {{ $variant->size ?? 'Sin talla' }} / {{ $variant->color ?? 'Sin color' }} (Stock: {{ $variant->stock }})
+                    <option value="{{ $variant->id }}"
+                        {{ $variant->stock <= 0 ? 'disabled' : '' }}>
+                        {{ $variant->size ?? 'Sin talla' }} / {{ $variant->color ?? 'Sin color' }}
+                        - ${{ number_format($artesania->precio + $variant->price_adjustment, 2) }} MXN
+                        (Stock: {{ $variant->stock }})
                     </option>
                 @endforeach
             </select>
+        </div>
+    @endif
 
-                </div>
-            @endif
+    {{-- Selector de cantidad --}}
+    <input type="number" name="cantidad" min="1" value="1"
+        class="w-24 p-3 border border-oaxaca-primary border-opacity-30 rounded-lg focus:outline-none focus:ring-2 focus:ring-oaxaca-tertiary text-oaxaca-text-dark text-lg"
+        required>
 
-            {{-- Selector de cantidad --}}
-            <input type="number" name="cantidad" min="1" value="1"
-                class="w-24 p-3 border border-oaxaca-primary border-opacity-30 rounded-lg focus:outline-none focus:ring-2 focus:ring-oaxaca-tertiary text-oaxaca-text-dark text-lg"
-                required>
+    {{-- Botón de agregar al carrito --}}
+    <button type="submit"
+        class="bg-oaxaca-primary hover:bg-oaxaca-secondary text-white font-semibold px-6 py-3 rounded-lg shadow-md transition duration-200 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
+        {{ $artesania->stock <= 0 ? 'disabled' : '' }}>
+        <svg class="w-5 h-5 inline-block mr-2" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/>
+        </svg>
+        {{ $artesania->stock > 0 ? 'Añadir al Carrito' : 'Agotado' }}
+    </button>
+</form>
 
-            <button type="submit"
-                    class="bg-oaxaca-primary hover:bg-oaxaca-secondary text-white font-semibold px-6 py-3 rounded-lg shadow-md transition duration-200 transform hover:scale-105"
-                    {{ $artesania->stock <= 0 ? 'disabled' : '' }}>
-                <svg class="w-5 h-5 inline-block mr-2" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/>
-                </svg>
-                {{ $artesania->stock > 0 ? 'Añadir al Carrito' : 'Agotado' }}
-            </button>
-        </form>
     </div>
             </div>
 

@@ -41,7 +41,7 @@ class CarritoController extends Controller
 
     // Ya no necesitamos syncGuestCart() si los invitados no tienen carrito persistente
 
-  public function agregar(Request $request)
+ public function agregar(Request $request)
 {
     if (!Auth::check()) {
         return redirect()->route('login')->with('error', 'Debes iniciar sesión para añadir productos al carrito.');
@@ -57,6 +57,8 @@ class CarritoController extends Controller
     $quantity = $request->cantidad;
     $variantId = $request->variant_id;
 
+    $cart = $this->getOrCreateCart();
+
     if ($variantId) {
         // 🧬 Con variante
         $variant = ArtesaniaVariant::where('id', $variantId)
@@ -67,11 +69,9 @@ class CarritoController extends Controller
             return back()->with('error', 'No hay suficiente stock para esta variante.');
         }
 
-        $cart = $this->getOrCreateCart();
-
         $cartItem = $cart->cart_items()
             ->where('artesania_id', $artesania->id)
-            ->where('artesania_variant_id', $variantId)
+            ->where('artesania_variant_id', $variant->id)
             ->first();
 
         if ($cartItem) {
@@ -86,9 +86,8 @@ class CarritoController extends Controller
                 'artesania_id' => $artesania->id,
                 'artesania_variant_id' => $variant->id,
                 'quantity' => $quantity,
-                'price' => $variant->precio ?? $artesania->precio,
-            ])->save();
-        
+                'price' => $artesania->precio + $variant->price_adjustment,
+            ]);
         }
 
     } else {
@@ -96,8 +95,6 @@ class CarritoController extends Controller
         if ($artesania->stock < $quantity) {
             return back()->with('error', 'Solo hay ' . $artesania->stock . ' unidades disponibles.');
         }
-
-        $cart = $this->getOrCreateCart();
 
         $cartItem = $cart->cart_items()
             ->where('artesania_id', $artesania->id)
@@ -112,13 +109,12 @@ class CarritoController extends Controller
             $cartItem->quantity = $newQuantity;
             $cartItem->save();
         } else {
-        $cart->cart_items()->create([
-            'artesania_id' => $artesania->id,
-            'artesania_variant_id' => $variant->id,
-            'quantity' => $quantity,
-            'price' => $variant->precio ?? $artesania->precio,
-        ]);
-
+            $cart->cart_items()->create([
+                'artesania_id' => $artesania->id,
+                'artesania_variant_id' => null,
+                'quantity' => $quantity,
+                'price' => $artesania->precio,
+            ]);
         }
     }
 

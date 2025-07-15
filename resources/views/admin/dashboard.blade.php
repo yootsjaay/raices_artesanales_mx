@@ -37,8 +37,6 @@
                             <h4 class="text-xl font-semibold text-purple-800 mb-2">Gestionar Usuarios</h4>
                             <p class="text-purple-700">Administra los usuarios para mejor uso del sistema.</p>
                         </a>
-                          
-
                         {{-- Puedes agregar más tarjetas aquí para otras funcionalidades --}}
                     </div>
                 </div>
