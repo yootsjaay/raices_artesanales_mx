@@ -22,9 +22,7 @@ return new class extends Migration
         $table->string('size')->nullable()->comment('Talla (ej. S, M, L, XL)');
         $table->string('color')->nullable()->comment('Color (ej. Rojo, Azul)');
         $table->string('material_variant')->nullable()->comment('Material de la variante (ej. Algodón, Seda)');
-        $table->string('dimensions', 100)->nullable()->comment('Dimensiones de la variante (ej. 10x20x5cm)');
-        $table->decimal('weight', 8, 2)->nullable()->comment('Peso de la variante en kg');
-        $table->decimal('price_adjustment', 10, 2)->default(0.00)->comment('Ajuste de precio para esta variante');
+     $table->decimal('price_adjustment', 10, 2)->default(0.00)->comment('Ajuste de precio para esta variante');
         $table->integer('stock')->default(0)->comment('Inventario específico para esta variante');
         $table->string('image')->nullable()->comment('Imagen específica para esta variante');
         $table->json('additional_images_urls')->nullable()->comment('URLs de imágenes adicionales para esta variante');

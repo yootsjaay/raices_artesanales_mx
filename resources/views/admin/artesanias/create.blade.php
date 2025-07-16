@@ -180,16 +180,7 @@
                     @enderror
                 </div>
 
-                {{-- Descripción Variante --}}
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Descripción Variante</label>
-                    <input type="text" name="variants[{{ $index }}][description_variant]" placeholder="Descripción corta"
-                        class="w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                        value="{{ old("variants.$index.description_variant", $variant['description_variant'] ?? '') }}">
-                    @error("variants.$index.description_variant")
-                        <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
-                    @enderror
-                </div>
+              
 
                 {{-- Color --}}
                 <div>
@@ -235,27 +226,7 @@
                     @enderror
                 </div>
 
-                {{-- Dimensiones --}}
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Dimensiones</label>
-                    <input type="text" name="variants[{{ $index }}][dimensions]" placeholder="Ej: 10x20x5cm"
-                        class="w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                        value="{{ old("variants.$index.dimensions", $variant['dimensions'] ?? '') }}">
-                    @error("variants.$index.dimensions")
-                        <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
-                    @enderror
-                </div>
-
-                {{-- Peso --}}
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Peso (kg)</label>
-                    <input type="number" step="0.01" name="variants[{{ $index }}][weight]" placeholder="Ej: 0.50"
-                        class="w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                        value="{{ old("variants.$index.weight", $variant['weight'] ?? '') }}">
-                    @error("variants.$index.weight")
-                        <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
-                    @enderror
-                </div>
+                
 
                 {{-- Ajuste de Precio --}}
                 <div>

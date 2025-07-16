@@ -46,7 +46,6 @@ class ArtesaniaController extends Controller
         $ubicaciones = Ubicacion::all();
         return view('admin.artesanias.create', compact('categorias', 'ubicaciones'));
     }
-
 public function store(Request $request)
 {
     $validatedData = $request->validate([
@@ -60,15 +59,19 @@ public function store(Request $request)
         'ubicacion_id' => 'nullable|exists:ubicaciones,id',
         'imagen_principal' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,webp|max:10240',
         'imagen_adicionales.*' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,webp|max:10240',
+
+        // 🔥 Campos de dimensiones obligatorios
+        'weight' => 'required|numeric|min:0.01|max:9999.99',
+        'length' => 'required|numeric|min:0.1|max:9999.99',
+        'width'  => 'required|numeric|min:0.1|max:9999.99',
+        'height' => 'required|numeric|min:0.1|max:9999.99',
+
         // Variantes
         'variants' => 'required|array|min:1',
         'variants.*.variant_name' => 'nullable|string|max:255',
-        'variants.*.description_variant' => 'nullable|string',
         'variants.*.color' => 'nullable|string|max:255',
         'variants.*.size' => 'nullable|string|max:255',
         'variants.*.material_variant' => 'nullable|string|max:255',
-        'variants.*.dimensions' => 'nullable|string|max:100',
-        'variants.*.weight' => 'nullable|numeric|min:0.01|max:9999.99',
         'variants.*.price_adjustment' => 'required|numeric|min:0.01',
         'variants.*.stock' => 'required|integer|min:0',
         'variants.*.image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,webp|max:10240',
@@ -91,8 +94,23 @@ public function store(Request $request)
     }
     $validatedData['imagen_adicionales'] = $additionalImagesPaths;
 
-    // Crear la artesanía
-    $artesania = Artesania::create($validatedData);
+    // Crear la artesanía con dimensiones y peso
+    $artesania = Artesania::create([
+        'nombre'             => $validatedData['nombre'],
+        'descripcion'        => $validatedData['descripcion'] ?? null,
+        'precio'             => $validatedData['precio'],
+        'stock'              => $validatedData['stock'],
+        'materiales'         => $validatedData['materiales'] ?? null,
+        'historia_piezas'    => $validatedData['historia_piezas'] ?? null,
+        'categoria_id'       => $validatedData['categoria_id'],
+        'ubicacion_id'       => $validatedData['ubicacion_id'] ?? null,
+        'imagen_principal'   => $validatedData['imagen_principal'] ?? null,
+        'imagen_adicionales' => $validatedData['imagen_adicionales'],
+        'weight'             => $validatedData['weight'],
+        'length'             => $validatedData['length'],
+        'width'              => $validatedData['width'],
+        'height'             => $validatedData['height'],
+    ]);
 
     // Crear las variantes
     foreach ($request->variants as $index => $variant) {
@@ -101,7 +119,6 @@ public function store(Request $request)
             $variantImagePath = $request->file("variants.$index.image")->store('images/artesanias/variants', 'public');
         }
 
-        // Imágenes adicionales de la variante
         $variantAdditionalImages = [];
         if ($request->hasFile("variants.$index.additional_images_urls")) {
             foreach ($request->file("variants.$index.additional_images_urls") as $file) {
@@ -110,20 +127,17 @@ public function store(Request $request)
         }
 
         $artesania->artesania_variants()->create([
-            'sku' => $variant['sku'] ?? $this->generateSku($artesania->id, $variant),
-            'variant_name' => $variant['variant_name'] ?? null,
-            'description_variant' => $variant['description_variant'] ?? null,
-            'size' => $variant['size'] ?? null,
-            'color' => $variant['color'] ?? null,
-            'material_variant' => $variant['material_variant'] ?? null,
-            'dimensions' => $variant['dimensions'] ?? null,
-            'weight' => $variant['weight'] ?? null,
-            'price_adjustment' => $variant['price_adjustment'],
-            'stock' => $variant['stock'],
-            'image' => $variantImagePath,
+            'sku'                   => $variant['sku'] ?? $this->generateSku($artesania->id, $variant),
+            'variant_name'         => $variant['variant_name'] ?? null,
+            'size'                 => $variant['size'] ?? null,
+            'color'                => $variant['color'] ?? null,
+            'material_variant'     => $variant['material_variant'] ?? null,
+            'price_adjustment'     => $variant['price_adjustment'],
+            'stock'                => $variant['stock'],
+            'image'                => $variantImagePath,
             'additional_images_urls' => $variantAdditionalImages,
-            'is_main' => isset($variant['is_main']) ? (bool)$variant['is_main'] : false,
-            'is_active' => isset($variant['is_active']) ? (bool)$variant['is_active'] : true,
+            'is_main'              => isset($variant['is_main']) ? (bool)$variant['is_main'] : false,
+            'is_active'            => isset($variant['is_active']) ? (bool)$variant['is_active'] : true,
         ]);
     }
 
@@ -166,17 +180,22 @@ public function update(Request $request, Artesania $artesania)
         'historia_piezas' => 'nullable|string',
         'categoria_id' => 'required|exists:categorias,id',
         'ubicacion_id' => 'nullable|exists:ubicaciones,id',
+
+        // 🔥 Dimensiones y peso
+        'weight' => 'required|numeric|min:0.01|max:9999.99',
+        'length' => 'required|numeric|min:0.1|max:9999.99',
+        'width'  => 'required|numeric|min:0.1|max:9999.99',
+        'height' => 'required|numeric|min:0.1|max:9999.99',
+
         'imagen_principal' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,webp|max:10240',
         'imagen_adicionales.*' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,webp|max:10240',
+
         // Variantes
         'variants' => 'required|array|min:1',
         'variants.*.variant_name' => 'nullable|string|max:255',
-        'variants.*.description_variant' => 'nullable|string',
         'variants.*.color' => 'nullable|string|max:255',
         'variants.*.size' => 'nullable|string|max:255',
         'variants.*.material_variant' => 'nullable|string|max:255',
-        'variants.*.dimensions' => 'nullable|string|max:100',
-        'variants.*.weight' => 'nullable|numeric|min:0.01|max:9999.99',
         'variants.*.price_adjustment' => 'required|numeric|min:0.01',
         'variants.*.stock' => 'required|integer|min:0',
         'variants.*.image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,webp|max:10240',
@@ -198,7 +217,6 @@ public function update(Request $request, Artesania $artesania)
     // Imágenes adicionales
     $additionalImagesPaths = [];
     if ($request->hasFile('imagen_adicionales')) {
-        // Borra las imágenes anteriores
         if ($artesania->imagen_adicionales) {
             foreach ($artesania->imagen_adicionales as $img) {
                 if (Storage::disk('public')->exists($img)) {
@@ -214,30 +232,42 @@ public function update(Request $request, Artesania $artesania)
     }
     $validatedData['imagen_adicionales'] = $additionalImagesPaths;
 
-    // Actualizar la artesanía principal
-    $artesania->update($validatedData);
+    // 🔧 Actualizar artesanía (incluye dimensiones y peso)
+    $artesania->update([
+        'nombre'             => $validatedData['nombre'],
+        'descripcion'        => $validatedData['descripcion'] ?? null,
+        'precio'             => $validatedData['precio'],
+        'stock'              => $validatedData['stock'],
+        'materiales'         => $validatedData['materiales'] ?? null,
+        'historia_piezas'    => $validatedData['historia_piezas'] ?? null,
+        'categoria_id'       => $validatedData['categoria_id'],
+        'ubicacion_id'       => $validatedData['ubicacion_id'] ?? null,
+        'imagen_principal'   => $validatedData['imagen_principal'],
+        'imagen_adicionales' => $validatedData['imagen_adicionales'],
+        'weight'             => $validatedData['weight'],
+        'length'             => $validatedData['length'],
+        'width'              => $validatedData['width'],
+        'height'             => $validatedData['height'],
+    ]);
 
-    // ===================== VARIANTES ======================
+    // ========== Actualizar o crear variantes ==========
     $idsSolicitados = [];
+
     foreach ($request->variants as $index => $variant) {
         $variantData = [
-            'variant_name' => $variant['variant_name'] ?? null,
-            'description_variant' => $variant['description_variant'] ?? null,
-            'size' => $variant['size'] ?? null,
-            'color' => $variant['color'] ?? null,
-            'material_variant' => $variant['material_variant'] ?? null,
-            'dimensions' => $variant['dimensions'] ?? null,
-            'weight' => $variant['weight'] ?? null,
-            'price_adjustment' => $variant['price_adjustment'],
-            'stock' => $variant['stock'],
-            'is_main' => isset($variant['is_main']) ? (bool)$variant['is_main'] : false,
-            'is_active' => isset($variant['is_active']) ? (bool)$variant['is_active'] : true,
+            'variant_name'         => $variant['variant_name'] ?? null,
+            'size'                 => $variant['size'] ?? null,
+            'color'                => $variant['color'] ?? null,
+            'material_variant'     => $variant['material_variant'] ?? null,
+            'price_adjustment'     => $variant['price_adjustment'],
+            'stock'                => $variant['stock'],
+            'is_main'              => isset($variant['is_main']) ? (bool)$variant['is_main'] : false,
+            'is_active'            => isset($variant['is_active']) ? (bool)$variant['is_active'] : true,
         ];
 
-        // Imagen de la variante
+        // Imagen variante
         $variantImagePath = null;
         if ($request->hasFile("variants.$index.image")) {
-            // Si es update, borra la anterior
             if (isset($variant['id'])) {
                 $varModel = $artesania->artesania_variants()->find($variant['id']);
                 if ($varModel && $varModel->image && Storage::disk('public')->exists($varModel->image)) {
@@ -253,10 +283,9 @@ public function update(Request $request, Artesania $artesania)
         }
         $variantData['image'] = $variantImagePath;
 
-        // Imágenes adicionales de la variante
+        // Imágenes adicionales
         $variantAdditionalImages = [];
         if ($request->hasFile("variants.$index.additional_images_urls")) {
-            // Borra las anteriores si existen
             if (isset($variant['id'])) {
                 $varModel = $artesania->artesania_variants()->find($variant['id']);
                 if ($varModel && is_array($varModel->additional_images_urls)) {
@@ -279,21 +308,19 @@ public function update(Request $request, Artesania $artesania)
         $variantData['additional_images_urls'] = $variantAdditionalImages;
 
         if (isset($variant['id'])) {
-            // Actualizar variante existente
             $varModel = $artesania->artesania_variants()->find($variant['id']);
             if ($varModel) {
                 $idsSolicitados[] = $variant['id'];
                 $varModel->update($variantData);
             }
         } else {
-            // Crear variante nueva
             $variantData['sku'] = $this->generateSku($artesania->id, $variant);
             $newVariant = $artesania->artesania_variants()->create($variantData);
             $idsSolicitados[] = $newVariant->id;
         }
     }
 
-    // Borrar las variantes no incluidas
+    // Eliminar variantes no incluidas
     $artesania->artesania_variants()
         ->whereNotIn('id', $idsSolicitados)
         ->get()
@@ -313,20 +340,16 @@ public function update(Request $request, Artesania $artesania)
 
     return redirect()->route('admin.artesanias.index')->with('success', 'Artesanía actualizada correctamente.');
 }
+
 public function destroy(Artesania $artesania)
 {
     // 1. Eliminar la imagen principal asociada
-    if ($artesania->imagen_principal) {
-        // Verifica si el archivo existe antes de intentar eliminarlo
-        if (Storage::disk('public')->exists($artesania->imagen_principal)) {
-            Storage::disk('public')->delete($artesania->imagen_principal);
-        }
+    if ($artesania->imagen_principal && Storage::disk('public')->exists($artesania->imagen_principal)) {
+        Storage::disk('public')->delete($artesania->imagen_principal);
     }
 
     // 2. Eliminar las imágenes adicionales asociadas
-    // ¡AHORA $artesania->imagen_adicionales YA ES UN ARRAY GRACIAS AL CASTING DEL MODELO!
-    // No necesitamos json_decode() ni is_array() aquí.
-    if ($artesania->imagen_adicionales) { // Esto verifica que no sea null o un array vacío
+    if ($artesania->imagen_adicionales) {
         foreach ($artesania->imagen_adicionales as $imagePath) {
             if (Storage::disk('public')->exists($imagePath)) {
                 Storage::disk('public')->delete($imagePath);
@@ -334,10 +357,27 @@ public function destroy(Artesania $artesania)
         }
     }
 
-    // 3. Eliminar la artesanía de la base de datos
+    // 3. Eliminar variantes y sus imágenes
+    foreach ($artesania->artesania_variants as $variant) {
+        // Imagen principal de la variante
+        if ($variant->image && Storage::disk('public')->exists($variant->image)) {
+            Storage::disk('public')->delete($variant->image);
+        }
+        // Imágenes adicionales de la variante
+        if (is_array($variant->additional_images_urls)) {
+            foreach ($variant->additional_images_urls as $img) {
+                if (Storage::disk('public')->exists($img)) {
+                    Storage::disk('public')->delete($img);
+                }
+            }
+        }
+        $variant->delete();
+    }
+
+    // 4. Eliminar la artesanía de la base de datos
     $artesania->delete();
 
-    // 4. Redireccionar al listado con un mensaje de éxito
+    // 5. Redireccionar al listado con un mensaje de éxito
     return redirect()->route('admin.artesanias.index')
                      ->with('success', 'Artesanía eliminada exitosamente.');
 }

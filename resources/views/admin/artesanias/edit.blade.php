@@ -95,53 +95,66 @@
                         </div>
                     </div> {{-- Fin del grid de información general --}}
 
-                    {{-- Sección de Dimensiones de Envío (¡IMPORTANTE!) --}}
-                    <div class="mb-6 border-t pt-6 pb-4">
-                        <h3 class="text-lg font-medium text-gray-900">Dimensiones y Peso para Envío <span class="text-sm text-gray-500">(¡Con Embalaje Individual!)</span></h3>
-                        <p class="mt-1 text-sm text-gray-600 mb-4">Ingresa las medidas y el peso de la artesanía **ya embalada y lista para ser enviada individualmente**.</p>
+                  {{-- 📦 Sección: Dimensiones y Peso para Envío --}}
+<div class="mb-8 border-t pt-8">
+    <h3 class="text-xl font-bold text-oaxaca-primary mb-2">
+        📦 Dimensiones y Peso para Envío
+        <span class="text-sm font-normal text-gray-500">(con embalaje individual)</span>
+    </h3>
+    <p class="text-sm text-oaxaca-text-dark mb-6">
+        Ingresa las medidas y el peso de la artesanía <strong>ya embalada</strong> y lista para envío. Esto es indispensable para calcular el costo real de paquetería.
+    </p>
 
-                        <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
-                            {{-- Campo Peso --}}
-                            <div>
-                                <label for="weight" class="block text-sm font-medium text-gray-700">Peso (KG):</label>
-                                <input type="number" name="weight" id="weight" step="0.01" min="0.01" value="{{ old('weight', $artesania->weight) }}"
-                                       class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 @error('weight') border-red-500 @enderror" required>
-                                @error('weight')
-                                    <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
-                                @enderror
-                            </div>
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
+        {{-- Peso --}}
+        <div>
+            <label for="weight" class="block text-sm font-semibold text-oaxaca-text-dark">Peso (kg)</label>
+            <input type="number" name="weight" id="weight" step="0.01" min="0.01"
+                placeholder="Ej. 1.25"
+                value="{{ old('weight', $artesania->weight) }}"
+                class="mt-1 block w-full border border-oaxaca-primary border-opacity-30 rounded-md shadow-sm focus:ring-oaxaca-tertiary focus:border-oaxaca-tertiary @error('weight') border-red-500 @enderror" required>
+            @error('weight')
+                <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+            @enderror
+        </div>
 
-                            {{-- Campo Largo --}}
-                            <div>
-                                <label for="length" class="block text-sm font-medium text-gray-700">Largo (CM):</label>
-                                <input type="number" name="length" id="length" step="0.1" min="0.1" value="{{ old('length', $artesania->length) }}"
-                                       class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 @error('length') border-red-500 @enderror" required>
-                                @error('length')
-                                    <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
-                                @enderror
-                            </div>
+        {{-- Largo --}}
+        <div>
+            <label for="length" class="block text-sm font-semibold text-oaxaca-text-dark">Largo (cm)</label>
+            <input type="number" name="length" id="length" step="0.1" min="0.1"
+                placeholder="Ej. 40.5"
+                value="{{ old('length', $artesania->length) }}"
+                class="mt-1 block w-full border border-oaxaca-primary border-opacity-30 rounded-md shadow-sm focus:ring-oaxaca-tertiary focus:border-oaxaca-tertiary @error('length') border-red-500 @enderror" required>
+            @error('length')
+                <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+            @enderror
+        </div>
 
-                            {{-- Campo Ancho --}}
-                            <div>
-                                <label for="width" class="block text-sm font-medium text-gray-700">Ancho (CM):</label>
-                                <input type="number" name="width" id="width" step="0.1" min="0.1" value="{{ old('width', $artesania->width) }}"
-                                       class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 @error('width') border-red-500 @enderror" required>
-                                @error('width')
-                                    <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
-                                @enderror
-                            </div>
+        {{-- Ancho --}}
+        <div>
+            <label for="width" class="block text-sm font-semibold text-oaxaca-text-dark">Ancho (cm)</label>
+            <input type="number" name="width" id="width" step="0.1" min="0.1"
+                placeholder="Ej. 20.0"
+                value="{{ old('width', $artesania->width) }}"
+                class="mt-1 block w-full border border-oaxaca-primary border-opacity-30 rounded-md shadow-sm focus:ring-oaxaca-tertiary focus:border-oaxaca-tertiary @error('width') border-red-500 @enderror" required>
+            @error('width')
+                <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+            @enderror
+        </div>
 
-                            {{-- Campo Alto --}}
-                            <div>
-                                <label for="height" class="block text-sm font-medium text-gray-700">Alto (CM):</label>
-                                <input type="number" name="height" id="height" step="0.1" min="0.1" value="{{ old('height', $artesania->height) }}"
-                                       class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 @error('height') border-red-500 @enderror" required>
-                                @error('height')
-                                    <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
-                                @enderror
-                            </div>
-                        </div>
-                    </div> {{-- Fin de la sección de dimensiones --}}
+        {{-- Alto --}}
+        <div>
+            <label for="height" class="block text-sm font-semibold text-oaxaca-text-dark">Alto (cm)</label>
+            <input type="number" name="height" id="height" step="0.1" min="0.1"
+                placeholder="Ej. 15.3"
+                value="{{ old('height', $artesania->height) }}"
+                class="mt-1 block w-full border border-oaxaca-primary border-opacity-30 rounded-md shadow-sm focus:ring-oaxaca-tertiary focus:border-oaxaca-tertiary @error('height') border-red-500 @enderror" required>
+            @error('height')
+                <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+            @enderror
+        </div>
+    </div>
+</div>
 
 
                     {{-- Campo Descripción --}}
@@ -155,71 +168,144 @@
                     </div>
 
                 {{-- Variantes --}}
-                <div class="mb-6">
-                    <label class="block font-semibold mb-2">Variantes (Tallas / Colores / Materiales):</label>
+<div class="mb-6">
+    <label class="block font-semibold mb-2">Variantes (Tallas / Colores / Materiales):</label>
 
-                    <div id="variants-container">
-                        @php
-                            // Normaliza las variantes para que siempre sea un array de arrays
-                            $oldVariants = old('variants');
-                            $variants = $oldVariants !== null
-                                ? $oldVariants
-                                : (isset($artesania->artesania_variants) ? $artesania->artesania_variants->toArray() : []);
-                        @endphp
+    <div id="variants-container">
+        @php
+            $oldVariants = old('variants');
+            $variants = $oldVariants !== null
+                ? $oldVariants
+                : (isset($artesania->artesania_variants) ? $artesania->artesania_variants->toArray() : []);
+        @endphp
 
-                        @forelse ($variants as $index => $variant)
-                            <div class="variant-item grid grid-cols-1 md:grid-cols-6 gap-4 mb-4 p-4 bg-gray-50 rounded-lg">
-                                {{-- Si ya existe la variante, ocultar el ID --}}
-                                @if (isset($variant['id']) || isset($variant->id))
-                                    <input type="hidden" name="variants[{{ $index }}][id]" value="{{ $variant['id'] ?? $variant->id }}">
-                                @endif
+        @forelse ($variants as $index => $variant)
+            <div class="variant-item grid grid-cols-1 md:grid-cols-6 gap-4 mb-4 p-4 bg-gray-50 rounded-lg">
+                {{-- ID oculto --}}
+                @if (isset($variant['id']) || isset($variant->id))
+                    <input type="hidden" name="variants[{{ $index }}][id]" value="{{ $variant['id'] ?? $variant->id }}">
+                @endif
 
-                                <input type="text" name="variants[{{ $index }}][color]" placeholder="Color" class="border p-2 rounded w-full"
-                                       value="{{ old("variants.$index.color", $variant['color'] ?? $variant->color ?? '') }}" required>
-
-                                <input type="text" name="variants[{{ $index }}][size]" placeholder="Talla" class="border p-2 rounded w-full"
-                                       value="{{ old("variants.$index.size", $variant['size'] ?? $variant->size ?? '') }}">
-
-                                <input type="text" name="variants[{{ $index }}][material_variant]" placeholder="Material (opcional)" class="border p-2 rounded w-full"
-                                       value="{{ old("variants.$index.material_variant", $variant['material_variant'] ?? $variant->material_variant ?? '') }}">
-
-                                <input type="number" name="variants[{{ $index }}][stock]" placeholder="Stock" class="border p-2 rounded w-full"
-                                       value="{{ old("variants.$index.stock", $variant['stock'] ?? $variant->stock ?? 0) }}" min="0" required>
-
-                                <input type="number" name="variants[{{ $index }}][price_adjustment]" placeholder="Ajuste $" step="0.01" class="border p-2 rounded w-full"
-                                       value="{{ old("variants.$index.price_adjustment", $variant['price_adjustment'] ?? $variant->price_adjustment ?? 0.00) }}">
-
-                                <div>
-                                    <label class="block text-xs font-medium text-gray-600 mb-1">Imagen (opcional)</label>
-                                    <input type="file" name="variants[{{ $index }}][image]" class="text-sm border p-2 rounded w-full">
-                                    @php
-                                        $imagePath = $variant['image'] ?? $variant->image ?? null;
-                                    @endphp
-                                    @if (!empty($imagePath))
-                                        <div class="mt-1">
-                                            <img src="{{ Str::startsWith($imagePath, 'http') ? $imagePath : asset('storage/' . $imagePath) }}" alt="Variante" class="w-16 h-16 object-cover rounded">
-                                        </div>
-                                        {{-- Opción para eliminar imagen existente --}}
-                                        <label class="inline-flex items-center mt-2 text-xs">
-                                            <input type="checkbox" name="variants[{{ $index }}][remove_image]" value="1" class="mr-1">
-                                            Eliminar imagen
-                                        </label>
-                                    @endif
-                                </div>
-                            </div>
-                        @empty
-                            {{-- Si no hay variantes previas, mostrar una vacía por defecto --}}
-                            <div class="variant-item grid grid-cols-1 md:grid-cols-6 gap-4 mb-4 p-4 bg-gray-50 rounded-lg">
-                                <input type="text" name="variants[0][color]" placeholder="Color" class="border p-2 rounded w-full" required>
-                                <input type="text" name="variants[0][size]" placeholder="Talla" class="border p-2 rounded w-full">
-                                <input type="text" name="variants[0][material_variant]" placeholder="Material (opcional)" class="border p-2 rounded w-full">
-                                <input type="number" name="variants[0][stock]" placeholder="Stock" class="border p-2 rounded w-full" min="0" required>
-                                <input type="number" name="variants[0][price_adjustment]" placeholder="Ajuste $" step="0.01" class="border p-2 rounded w-full">
-                                <input type="file" name="variants[0][image]" class="text-sm border p-2 rounded w-full">
-                            </div>
-                        @endforelse
-                    </div>
+                {{-- Nombre Variante --}}
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Nombre Variante</label>
+                    <input type="text" name="variants[{{ $index }}][variant_name]" placeholder="Ej: Playera Azul"
+                        class="w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                        value="{{ old("variants.$index.variant_name", $variant['variant_name'] ?? $variant->variant_name ?? '') }}">
+                    @error("variants.$index.variant_name")
+                        <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                    @enderror
                 </div>
+
+                {{-- Color --}}
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Color</label>
+                    <input type="text" name="variants[{{ $index }}][color]" placeholder="Color"
+                        class="w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                        value="{{ old("variants.$index.color", $variant['color'] ?? $variant->color ?? '') }}" required>
+                </div>
+
+                {{-- Talla --}}
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Talla</label>
+                    <input type="text" name="variants[{{ $index }}][size]" placeholder="Talla"
+                        class="w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                        value="{{ old("variants.$index.size", $variant['size'] ?? $variant->size ?? '') }}">
+                </div>
+
+                {{-- Material --}}
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Material</label>
+                    <input type="text" name="variants[{{ $index }}][material_variant]" placeholder="Material (opcional)"
+                        class="w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                        value="{{ old("variants.$index.material_variant", $variant['material_variant'] ?? $variant->material_variant ?? '') }}">
+                </div>
+
+                {{-- Stock --}}
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Stock</label>
+                    <input type="number" name="variants[{{ $index }}][stock]" placeholder="Stock" min="0"
+                        class="w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                        value="{{ old("variants.$index.stock", $variant['stock'] ?? $variant->stock ?? 0) }}" required>
+                </div>
+
+                {{-- Ajuste de precio --}}
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Ajuste de Precio</label>
+                    <input type="number" name="variants[{{ $index }}][price_adjustment]" placeholder="Ajuste $" step="0.01"
+                        class="w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                        value="{{ old("variants.$index.price_adjustment", $variant['price_adjustment'] ?? $variant->price_adjustment ?? 0.00) }}">
+                </div>
+
+                {{-- Imagen --}}
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Imagen</label>
+                    <input type="file" name="variants[{{ $index }}][image]"
+                        class="w-full border-gray-300 rounded-md shadow-sm text-sm">
+                    @php
+                        $imagePath = $variant['image'] ?? $variant->image ?? null;
+                    @endphp
+                    @if (!empty($imagePath))
+                        <div class="mt-1">
+                            <img src="{{ Str::startsWith($imagePath, 'http') ? $imagePath : asset('storage/' . $imagePath) }}"
+                                alt="Variante" class="w-16 h-16 object-cover rounded">
+                        </div>
+                        <label class="inline-flex items-center mt-2 text-xs">
+                            <input type="checkbox" name="variants[{{ $index }}][remove_image]" value="1" class="mr-1">
+                            Eliminar imagen
+                        </label>
+                    @endif
+                </div>
+            </div>
+        @empty
+            {{-- Variante vacía por defecto --}}
+            <div class="variant-item grid grid-cols-1 md:grid-cols-6 gap-4 mb-4 p-4 bg-gray-50 rounded-lg">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Nombre Variante</label>
+                    <input type="text" name="variants[0][variant_name]" placeholder="Ej: Variante"
+                        class="w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Color</label>
+                    <input type="text" name="variants[0][color]" placeholder="Color"
+                        class="w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500" required>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Talla</label>
+                    <input type="text" name="variants[0][size]" placeholder="Talla"
+                        class="w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Material</label>
+                    <input type="text" name="variants[0][material_variant]" placeholder="Material"
+                        class="w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Stock</label>
+                    <input type="number" name="variants[0][stock]" placeholder="Stock" min="0"
+                        class="w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500" required>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Ajuste de Precio</label>
+                    <input type="number" name="variants[0][price_adjustment]" placeholder="Ajuste $" step="0.01"
+                        class="w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Imagen</label>
+                    <input type="file" name="variants[0][image]"
+                        class="w-full border-gray-300 rounded-md shadow-sm text-sm">
+                </div>
+            </div>
+        @endforelse
+    </div>
+</div>
+
 
                     {{-- Campo Imagen Principal --}}
                     <div class="mt-6">

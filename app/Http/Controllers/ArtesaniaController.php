@@ -13,8 +13,6 @@ use App\Models\ArtesaniaVariant;
 class ArtesaniaController extends Controller
 {
   
-
- 
     public function index()
     {
         // Obtiene todas las artesanías de la base de datos
@@ -34,8 +32,17 @@ class ArtesaniaController extends Controller
         $artesania = Artesania::with(['categoria', 'ubicacion', 'artesania_variants'])
             ->where('slug', $slug)
             ->firstOrFail();
-
-        return view('artesanias.show', compact('artesania'));
+        //si el cliente envio un ID DE VARIANTE como query (?variant=ID)
+        $variant= null;
+        if (request()->has('variant')) {
+            $variant= ArtesaniaVariant::where('id', request()->variant)
+                ->where('artesania_id', $artesania->id)
+                ->first();
+        }
+        if(!$variant){
+            $variant= $artesania->artesania_variants->where('is_main', true)->first();
+        }
+        return view('artesanias.show', compact('artesania', 'variant'));
     }
 
    
