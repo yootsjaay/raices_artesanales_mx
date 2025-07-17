@@ -127,7 +127,7 @@ public function store(Request $request)
         }
 
         $artesania->artesania_variants()->create([
-            'sku'                   => $variant['sku'] ?? $this->generateSku($artesania->id, $variant),
+            'sku'                  => $variant['sku'] ?? $this->generateSku($artesania->id, $variant),
             'variant_name'         => $variant['variant_name'] ?? null,
             'size'                 => $variant['size'] ?? null,
             'color'                => $variant['color'] ?? null,

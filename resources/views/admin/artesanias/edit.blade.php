@@ -301,6 +301,23 @@
                     <input type="file" name="variants[0][image]"
                         class="w-full border-gray-300 rounded-md shadow-sm text-sm">
                 </div>
+                
+                {{-- Imágenes adicionales --}}
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Imágenes Adicionales</label>
+                    <input type="file" name="variants[{{ $index }}][additional_images_urls][]" multiple
+                        class="w-full text-sm border-gray-300 rounded-md shadow-sm">
+                    @error("variants.$index.additional_images_urls")
+                        <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                    @enderror
+                    @if(isset($variant['additional_images_urls']) && is_array($variant['additional_images_urls']))
+                        <div class="mt-2 flex space-x-2">
+                            @foreach($variant['additional_images_urls'] as $img)
+                                <img src="{{ asset('storage/' . $img) }}" alt="Imagen Adicional" class="h-12 w-12 object-cover rounded-md">
+                            @endforeach
+                        </div>
+                    @endif
+                </div>
             </div>
         @endforelse
     </div>

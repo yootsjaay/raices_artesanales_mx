@@ -27,23 +27,29 @@ class ArtesaniaController extends Controller
     /**
      * Muestra los detalles de una artesanía específica.
      */
-    public function show($slug)
-    {
-        $artesania = Artesania::with(['categoria', 'ubicacion', 'artesania_variants'])
-            ->where('slug', $slug)
-            ->firstOrFail();
-        //si el cliente envio un ID DE VARIANTE como query (?variant=ID)
-        $variant= null;
-        if (request()->has('variant')) {
-            $variant= ArtesaniaVariant::where('id', request()->variant)
-                ->where('artesania_id', $artesania->id)
-                ->first();
-        }
-        if(!$variant){
-            $variant= $artesania->artesania_variants->where('is_main', true)->first();
-        }
-        return view('artesanias.show', compact('artesania', 'variant'));
+  public function show($slug)
+{
+    $artesania = Artesania::with(['categoria', 'ubicacion', 'artesania_variants'])
+        ->where('slug', $slug)
+        ->firstOrFail();
+
+    $variant = null;
+
+    // Si se pasa el ID de la variante por query y es válida, la usamos
+    if (request()->filled('variant')) {
+        $variant = ArtesaniaVariant::where('id', request()->variant)
+            ->where('artesania_id', $artesania->id)
+            ->first();
     }
+
+    // Si no se pasó variante o la pasada no era válida, usamos la principal
+    if (!$variant) {
+        $variant = $artesania->artesania_variants->where('is_main', true)->first();
+    }
+
+    return view('artesanias.show', compact('artesania', 'variant'));
+}
+
 
    
 
