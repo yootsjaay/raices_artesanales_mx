@@ -215,16 +215,7 @@
                     @enderror
                 </div>
 
-                {{-- SKU --}}
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">SKU</label>
-                    <input type="text" name="variants[{{ $index }}][sku]"
-                        class="w-full border-gray-300 rounded-md shadow-sm"
-                        value="{{ old("variants.$index.sku", $variant['sku'] ?? '') }}">
-                    @error("variants.$index.sku")
-                        <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
-                    @enderror
-                </div>
+              
 
                 
 
@@ -294,12 +285,7 @@
                     <input type="text" name="variants[0][variant_name]" placeholder="Ej: Playera Azul"
                         class="w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                 </div>
-                {{-- Descripción Variante --}}
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Descripción Variante</label>
-                    <input type="text" name="variants[0][description_variant]" placeholder="Descripción corta"
-                        class="w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
-                </div>
+               
                 {{-- Color --}}
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Color</label>
@@ -318,18 +304,8 @@
                     <input type="text" name="variants[0][material_variant]" placeholder="Ej: Algodón"
                         class="w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                 </div>
-                {{-- SKU --}}
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">SKU</label>
-                    <input type="text" name="variants[0][sku]"
-                        class="w-full border-gray-300 rounded-md shadow-sm">
-                </div>
-                {{-- Dimensiones --}}
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Dimensiones</label>
-                    <input type="text" name="variants[0][dimensions]" placeholder="Ej: 10x20x5cm"
-                        class="w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
-                </div>
+               
+                
                 {{-- Peso --}}
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Peso (kg)</label>
@@ -499,10 +475,7 @@
             <label class="block text-sm font-medium text-gray-700 mb-1">Nombre Variante</label>
             <input type="text" name="variants[${variantCounter}][variant_name]" class="w-full border-gray-300 rounded-md shadow-sm" placeholder="Ej: Playera Azul">
         </div>
-        <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Descripción Variante</label>
-            <input type="text" name="variants[${variantCounter}][description_variant]" class="w-full border-gray-300 rounded-md shadow-sm" placeholder="Descripción corta">
-        </div>
+       
         <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Color</label>
             <input type="text" name="variants[${variantCounter}][color]" class="w-full border-gray-300 rounded-md shadow-sm" placeholder="Ej: Rojo">
@@ -515,18 +488,9 @@
             <label class="block text-sm font-medium text-gray-700 mb-1">Material</label>
             <input type="text" name="variants[${variantCounter}][material_variant]" class="w-full border-gray-300 rounded-md shadow-sm" placeholder="Ej: Algodón">
         </div>
-        <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">SKU</label>
-            <input type="text" name="variants[${variantCounter}][sku]" class="w-full border-gray-300 rounded-md shadow-sm" placeholder="SKU único">
-        </div>
-        <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Dimensiones</label>
-            <input type="text" name="variants[${variantCounter}][dimensions]" class="w-full border-gray-300 rounded-md shadow-sm" placeholder="Ej: 10x20x5cm">
-        </div>
-        <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Peso (kg)</label>
-            <input type="number" step="0.01" name="variants[${variantCounter}][weight]" class="w-full border-gray-300 rounded-md shadow-sm" placeholder="Ej: 0.50">
-        </div>
+       
+       
+      
         <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Ajuste Precio</label>
             <input type="number" step="0.01" name="variants[${variantCounter}][price_adjustment]" class="w-full border-gray-300 rounded-md shadow-sm" placeholder="+/- $">

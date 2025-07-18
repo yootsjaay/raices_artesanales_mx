@@ -16,22 +16,17 @@
                 <div>
                     {{-- Contenedor de la imagen principal --}}
                     <div id="main-image-container">
-                        @if ($variant && $variant->image)
-                            <a href="{{ asset('storage/' . $variant->image) }}" data-lightbox="artesania-gallery" data-title="{{ $variant->variant_name ?? $artesania->nombre }}">
-                                <img id="main-artesania-image" src="{{ asset('storage/' . $variant->image) }}" alt="{{ $variant->variant_name ?? $artesania->nombre }}" class="w-full h-96 object-cover rounded-lg shadow-md cursor-zoom-in border border-oaxaca-accent border-opacity-30">
-                            </a>
-                        @elseif ($artesania->imagen_principal)
-                             <a href="{{ asset('storage/' . $artesania->imagen_principal) }}" data-lightbox="artesania-gallery" data-title="{{ $artesania->nombre }}">
-                                <img id="main-artesania-image" src="{{ asset('storage/' . $artesania->imagen_principal) }}" alt="{{ $artesania->nombre }}" class="w-full h-96 object-cover rounded-lg shadow-md cursor-zoom-in border border-oaxaca-accent border-opacity-30">
-                            </a>
-                        @else
-                            <a href="{{ asset('storage/images/artesanias/placeholder-alebrije.jpg') }}" data-lightbox="artesania-gallery" data-title="Imagen no disponible">
-                                <img id="main-artesania-image" src="{{ asset('storage/images/artesanias/placeholder-alebrije.jpg') }}" alt="Imagen no disponible" class="w-full h-96 object-cover rounded-lg shadow-md bg-gray-200 cursor-zoom-in border border-oaxaca-accent border-opacity-30">
-                            </a>
-                        @endif
+                        {{-- La imagen se inicializa con la variante seleccionada o la imagen principal de la artesanía --}}
+                        @php
+                            $initialImage = ($selectedVariant && $selectedVariant->image) ? asset('storage/' . $selectedVariant->image) : ($artesania->imagen_principal ? asset('storage/' . $artesania->imagen_principal) : asset('storage/images/artesanias/placeholder-alebrije.jpg'));
+                            $initialImageAlt = ($selectedVariant && $selectedVariant->variant_name) ? $selectedVariant->variant_name : $artesania->nombre;
+                        @endphp
+                        <a href="{{ $initialImage }}" data-lightbox="artesania-gallery" data-title="{{ $initialImageAlt }}">
+                            <img id="main-artesania-image" src="{{ $initialImage }}" alt="{{ $initialImageAlt }}" class="w-full h-96 object-cover rounded-lg shadow-md cursor-zoom-in border border-oaxaca-accent border-opacity-30">
+                        </a>
                     </div>
 
-                    {{-- Miniaturas de imágenes adicionales --}}
+                    {{-- Miniaturas de imágenes adicionales (se mantienen para la artesanía principal) --}}
                     @if ($artesania->imagen_adicionales)
                         @php
                          $imagenesAdicionales = is_string($artesania->imagen_adicionales) ? json_decode($artesania->imagen_adicionales) : $artesania->imagen_adicionales;
@@ -50,7 +45,10 @@
 
                 <div>
                     {{-- Precio dinámico --}}
-                    <p class="text-4xl font-bold text-oaxaca-tertiary mb-6" id="artesania-price">${{ number_format($artesania->precio, 2) }} MXN</p>
+                    @php
+                        $initialPrice = $artesania->precio + (($selectedVariant && $selectedVariant->price_adjustment) ? $selectedVariant->price_adjustment : 0);
+                    @endphp
+                    <p class="text-4xl font-bold text-oaxaca-tertiary mb-6" id="artesania-price">${{ number_format($initialPrice, 2) }} MXN</p>
                     <p class="text-oaxaca-text-dark text-lg mb-6 leading-relaxed">{{ $artesania->descripcion }}</p>
 
                     <div class="text-base text-oaxaca-text-dark space-y-3 mb-6">
@@ -61,47 +59,98 @@
                             <p><strong>Origen:</strong> <a href="{{ route('ubicaciones.show', $artesania->ubicacion->slug) }}" class="text-oaxaca-accent hover:underline transition-colors">{{ $artesania->ubicacion->nombre }}</a></p>
                         @endif
                         {{-- Stock dinámico --}}
-                        <p><strong>Stock:</strong> <span id="artesania-stock" class="{{ $artesania->stock > 0 ? 'text-green-600' : 'text-red-600' }} font-semibold">{{ $artesania->stock > 0 ? $artesania->stock . ' disponibles' : 'Agotado' }}</span></p>
-                        <p><strong>Técnica:</strong> {{ $artesania->tecnica_empleada ?? 'N/A' }}</p>
+                        @php
+                            $initialStock = ($selectedVariant && $selectedVariant->stock !== null) ? $selectedVariant->stock : $artesania->stock;
+                        @endphp
+                        <p><strong>Stock:</strong> <span id="artesania-stock" class="{{ $initialStock > 0 ? 'text-green-600' : 'text-red-600' }} font-semibold">{{ $initialStock > 0 ? $initialStock . ' disponibles' : 'Agotado' }}</span></p>
                         <p><strong>Materiales:</strong> {{ $artesania->materiales ?? 'N/A' }}</p>
 
-                      
+                        {{-- Nuevos elementos para mostrar detalles de la variante --}}
+                        <p id="variant-color-display" class="{{ ($selectedVariant && $selectedVariant->color) ? '' : 'hidden' }}">
+                            <strong>Color:</strong> <span id="current-color-value">{{ $selectedVariant->color ?? '' }}</span>
+                        </p>
+                        <p id="variant-size-display" class="{{ ($selectedVariant && $selectedVariant->size) ? '' : 'hidden' }}">
+                            <strong>Talla:</strong> <span id="current-size-value">{{ $selectedVariant->size ?? '' }}</span>
+                        </p>
+                        <p id="variant-material-display" class="{{ ($selectedVariant && $selectedVariant->material_variant) ? '' : 'hidden' }}">
+                            <strong>Material Variante:</strong> <span id="current-material-value">{{ $selectedVariant->material_variant ?? '' }}</span>
+                        </p>
                     </div>
 
                     <h3 class="text-2xl font-display font-bold text-oaxaca-primary mb-3">La Historia Detrás de la Pieza</h3>
                     <p class="text-oaxaca-text-dark leading-relaxed mb-6">{{ $artesania->historia_pieza ?? 'No hay una historia específica para esta pieza aún.' }}</p>
 
+                    {{-- Sección de selección de variantes --}}
+                    @if ($artesania->artesania_variants->count())
+                        <div class="mb-6 space-y-4">
+                            {{-- Agrupación de variantes por atributo (Color, Talla, Material) --}}
+                            @php
+                                $colors = $artesania->artesania_variants->pluck('color')->filter()->unique();
+                                $sizes = $artesania->artesania_variants->pluck('size')->filter()->unique();
+                                $materials = $artesania->artesania_variants->pluck('material_variant')->filter()->unique();
+                            @endphp
+
+                            @if ($colors->isNotEmpty())
+                                <div>
+                                    <h4 class="font-semibold text-oaxaca-primary mb-2">Color:</h4>
+                                    <div class="flex flex-wrap gap-2" id="color-options">
+                                        @foreach ($colors as $color)
+                                            @php
+                                                // Encuentra una variante con este color para obtener su imagen (si aplica)
+                                                $colorVariant = $artesania->artesania_variants->where('color', $color)->first();
+                                                $colorImage = $colorVariant && $colorVariant->image ? asset('storage/' . $colorVariant->image) : 'https://placehold.co/40x40/cccccc/ffffff?text=' . substr($color, 0, 1);
+                                            @endphp
+                                            <button type="button"
+                                                    class="variant-option p-1 rounded-full border-2 {{ ($selectedVariant && $selectedVariant->color === $color) ? 'border-oaxaca-tertiary shadow-md' : 'border-gray-300 hover:border-oaxaca-accent' }} transition-all duration-200"
+                                                    data-attribute="color"
+                                                    data-value="{{ $color }}"
+                                                    title="{{ $color }}">
+                                                <img src="{{ $colorImage }}" alt="{{ $color }}" class="w-10 h-10 rounded-full object-cover">
+                                            </button>
+                                        @endforeach
+                                    </div>
+                                </div>
+                            @endif
+
+                            @if ($sizes->isNotEmpty())
+                                <div>
+                                    <h4 class="font-semibold text-oaxaca-primary mb-2">Talla:</h4>
+                                    <div class="flex flex-wrap gap-2" id="size-options">
+                                        @foreach ($sizes as $size)
+                                            <button type="button"
+                                                    class="variant-option px-4 py-2 rounded-lg border-2 {{ ($selectedVariant && $selectedVariant->size === $size) ? 'border-oaxaca-tertiary bg-oaxaca-tertiary bg-opacity-20 text-oaxaca-primary font-bold' : 'border-gray-300 text-oaxaca-text-dark hover:border-oaxaca-accent' }} transition-all duration-200"
+                                                    data-attribute="size"
+                                                    data-value="{{ $size }}">
+                                                {{ $size }}
+                                            </button>
+                                        @endforeach
+                                    </div>
+                                </div>
+                            @endif
+
+                            @if ($materials->isNotEmpty())
+                                <div>
+                                    <h4 class="font-semibold text-oaxaca-primary mb-2">Material Variante:</h4>
+                                    <div class="flex flex-wrap gap-2" id="material-options">
+                                        @foreach ($materials as $material)
+                                            <button type="button"
+                                                    class="variant-option px-4 py-2 rounded-lg border-2 {{ ($selectedVariant && $selectedVariant->material_variant === $material) ? 'border-oaxaca-tertiary bg-oaxaca-tertiary bg-opacity-20 text-oaxaca-primary font-bold' : 'border-gray-300 text-oaxaca-text-dark hover:border-oaxaca-accent' }} transition-all duration-200"
+                                                    data-attribute="material_variant"
+                                                    data-value="{{ $material }}">
+                                                {{ $material }}
+                                            </button>
+                                        @endforeach
+                                    </div>
+                                </div>
+                            @endif
+                        </div>
+                    @endif
+
                    <form method="POST" action="{{ route('carrito.agregar') }}" class="flex flex-col sm:flex-row items-center gap-3 flex-wrap">
                         @csrf
                         <input type="hidden" name="artesania_id" value="{{ $artesania->id }}">
-
-                        @if ($artesania->artesania_variants->count())
-                            <div class="w-full sm:w-auto">
-                                <label for="variant_id" class="block text-oaxaca-text-dark font-semibold mb-1">Selecciona una variante:</label>
-                               <select id="variant-select" name="variant">
-    <option value="">-- Elige Talla y/o Color --</option>
-    @foreach ($artesania->artesania_variants as $variantLoop)
-        <option value="{{ $variantLoop->id }}"
-            data-image="{{ $variantLoop->image ? asset('storage/' . $variantLoop->image) : '' }}"
-            data-price-adjustment="{{ $variantLoop->price_adjustment }}"
-            data-stock="{{ $variantLoop->stock }}"
-            data-color="{{ $variantLoop->color ?? '' }}"
-            data-size="{{ $variantLoop->size ?? '' }}"
-            data-material="{{ $variantLoop->material_variant ?? '' }}"
-            {{ isset($variant) && $variant->id === $variantLoop->id ? 'selected' : '' }}
-            {{ $variantLoop->stock <= 0 ? 'disabled' : '' }}>
-            {{ $variantLoop->variant_name ?: (($variantLoop->size ?? 'Sin talla') . ' / ' . ($variantLoop->color ?? 'Sin color') . ' / ' . ($variantLoop->material_variant ?? '')) }}
-            - ${{ number_format($artesania->precio + $variantLoop->price_adjustment, 2) }} MXN
-            (Stock: {{ $variantLoop->stock }})
-        </option>
-    @endforeach
-</select>
-
-                            </div>
-                        @else
-                            {{-- Si no hay variantes, se usará la artesania_id principal y el stock de la artesanía --}}
-                            <input type="hidden" name="variant_id" value="">
-                        @endif
+                        {{-- Este input oculto se actualizará con el ID de la variante seleccionada --}}
+                        <input type="hidden" name="variant_id" id="selected_variant_id" value="{{ $selectedVariant->id ?? '' }}">
 
                         {{-- Selector de cantidad --}}
                         <input type="number" name="cantidad" min="1" value="1"
@@ -109,17 +158,25 @@
                             required>
 
                         {{-- Botón de agregar al carrito --}}
-                                    <button type="submit" id="add-to-cart-btn"
-                class="bg-oaxaca-primary hover:bg-oaxaca-secondary text-white font-semibold px-6 py-3 rounded-lg shadow-md transition duration-200 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
-                {{ ($artesania->artesania_variants->isEmpty() && $artesania->stock <= 0) || ($artesania->artesania_variants->isNotEmpty() && (!isset($variant) || $variant->stock <= 0)) ? 'disabled' : '' }}>
-                <svg class="w-5 h-5 inline-block mr-2" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/>
-                </svg>
-                <span>
-                    {{ ($artesania->artesania_variants->isEmpty() && $artesania->stock <= 0) || ($artesania->artesania_variants->isNotEmpty() && (!isset($variant) || $variant->stock <= 0)) ? 'Agotado' : 'Añadir al Carrito' }}
-                </span>
-            </button>
-
+                        @php
+                            $isAddToCartDisabled = false;
+                            if ($artesania->artesania_variants->isEmpty()) {
+                                $isAddToCartDisabled = $artesania->stock <= 0;
+                            } else {
+                                $isAddToCartDisabled = !isset($selectedVariant) || $selectedVariant->stock <= 0;
+                            }
+                        @endphp
+                        <button type="submit" id="add-to-cart-btn"
+                            class="bg-oaxaca-primary hover:bg-oaxaca-secondary text-white font-semibold px-6 py-3 rounded-lg shadow-md transition duration-200 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
+                            {{ $isAddToCartDisabled ? 'disabled' : '' }}>
+                            <svg class="w-5 h-5 inline-block mr-2" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/>
+                            </svg>
+                            <span>
+                                {{ $isAddToCartDisabled ? 'Agotado' : 'Añadir al Carrito' }}
+                            </span>
+                        </button>
+                        <p id="no-variant-selected-message" class="text-red-600 text-sm mt-2 hidden">Por favor, selecciona una combinación válida de variantes.</p>
                     </form>
 
                 </div>
@@ -134,6 +191,13 @@
                     <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-4" role="alert">
                         <strong class="font-bold">¡Éxito!</strong>
                         <span class="block sm:inline">{{ session('success') }}</span>
+                    </div>
+                @endif
+
+                @if (session('error'))
+                    <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4" role="alert">
+                        <strong class="font-bold">¡Error!</strong>
+                        <span class="block sm:inline">{{ session('error') }}</span>
                     </div>
                 @endif
 
@@ -201,121 +265,169 @@
 @section('js')
 <script>
     document.addEventListener('DOMContentLoaded', function () {
-        const variantSelect = document.getElementById('variant_id_select');
         const mainArtesaniaImage = document.getElementById('main-artesania-image');
         const mainImageLink = mainArtesaniaImage.closest('a');
         const artesaniaPriceDisplay = document.getElementById('artesania-price');
         const artesaniaStockDisplay = document.getElementById('artesania-stock');
         const addToCartBtn = document.getElementById('add-to-cart-btn');
-        const originalBasePrice = {{ $artesania->precio }};
-        const originalStock = {{ $artesania->stock }}; // Stock de la artesanía base
-        const variantColorDisplay = document.getElementById('variant-color-display');
-        const variantSizeDisplay = document.getElementById('variant-size-display');
-        const variantMaterialDisplay = document.getElementById('variant-material-display');
+        const selectedVariantIdInput = document.getElementById('selected_variant_id');
+        const noVariantMessage = document.getElementById('no-variant-selected-message');
 
-        // Función para actualizar los detalles de la artesanía
-        function updateArtesaniaDetails() {
-            const selectedOption = variantSelect.options[variantSelect.selectedIndex];
-            const variantImage = selectedOption.dataset.image;
-            const priceAdjustment = parseFloat(selectedOption.dataset.priceAdjustment || 0);
-            const variantStock = parseInt(selectedOption.dataset.stock);
-            const variantColor = selectedOption.dataset.color;
-            const variantSize = selectedOption.dataset.size;
-            const variantMaterial = selectedOption.dataset.material;
-            const variantName = selectedOption.text.split(' - ')[0]; // Obtener el nombre de la variante del texto de la opción
+        // Elementos para mostrar los detalles específicos de la variante (color, talla, material)
+        const currentColorValueDisplay = document.getElementById('current-color-value');
+        const currentSizeValueDisplay = document.getElementById('current-size-value');
+        const currentMaterialValueDisplay = document.getElementById('current-material-value');
+        const variantColorDisplayContainer = document.getElementById('variant-color-display');
+        const variantSizeDisplayContainer = document.getElementById('variant-size-display');
+        const variantMaterialDisplayContainer = document.getElementById('variant-material-display');
 
-            // Actualizar imagen principal
-            if (variantImage) {
-                mainArtesaniaImage.src = variantImage;
-                mainArtesaniaImage.alt = variantName;
-                mainImageLink.href = variantImage; // Actualizar el href para Lightbox
-                mainImageLink.dataset.title = variantName; // Actualizar el título para Lightbox
-            } else {
-                // Si no hay imagen de variante, volver a la imagen principal de la artesanía o al placeholder
-                mainArtesaniaImage.src = '{{ $artesania->imagen_principal ? asset('storage/' . $artesania->imagen_principal) : asset('storage/images/artesanias/placeholder-alebrije.jpg') }}';
-                mainArtesaniaImage.alt = '{{ $artesania->nombre }}';
-                mainImageLink.href = '{{ $artesania->imagen_principal ? asset('storage/' . $artesania->imagen_principal) : asset('storage/images/artesanias/placeholder-alebrije.jpg') }}';
-                mainImageLink.dataset.title = '{{ $artesania->nombre }}';
+
+        // Datos de la artesanía principal y todas sus variantes
+        const artesaniaData = {
+            precio: {{ $artesania->precio }},
+            stock: {{ $artesania->stock }},
+            imagen_principal: '{{ $artesania->imagen_principal ? asset('storage/' . $artesania->imagen_principal) : asset('storage/images/artesanias/placeholder-alebrije.jpg') }}',
+            nombre: '{{ $artesania->nombre }}'
+        };
+
+        // Incrustar todas las variantes como un objeto JSON
+        const allVariants = @json($artesania->artesania_variants);
+
+        // Estado para almacenar las selecciones actuales del usuario
+        let selectedAttributes = {};
+
+        // Inicializar selectedAttributes con la variante que viene del controlador (si hay una)
+        @if ($selectedVariant)
+            @if ($selectedVariant->color)
+                selectedAttributes.color = '{{ $selectedVariant->color }}';
+            @endif
+            @if ($selectedVariant->size)
+                selectedAttributes.size = '{{ $selectedVariant->size }}';
+            @endif
+            @if ($selectedVariant->material_variant)
+                selectedAttributes.material_variant = '{{ $selectedVariant->material_variant }}';
+            @endif
+        @endif
+
+        // Función para encontrar la variante que coincide con los atributos seleccionados
+        function findMatchingVariant() {
+            if (Object.keys(selectedAttributes).length === 0 && allVariants.length > 0) {
+                // Si no hay atributos seleccionados pero hay variantes, intentar encontrar la principal
+                return allVariants.find(variant => variant.is_main === true) || allVariants[0];
             }
 
-            // Actualizar precio
-            const newPrice = originalBasePrice + priceAdjustment;
-            artesaniaPriceDisplay.textContent = `$${newPrice.toFixed(2)} MXN`;
-
-            // Actualizar stock
-            if (variantSelect.value === '') { // Si no hay variante seleccionada (opción "-- Elige Talla y/o Color --")
-                artesaniaStockDisplay.textContent = `${originalStock > 0 ? originalStock + ' disponibles' : 'Agotado'}`;
-                artesaniaStockDisplay.className = `${originalStock > 0 ? 'text-green-600' : 'text-red-600'} font-semibold`;
-                addToCartBtn.disabled = originalStock <= 0;
-                addToCartBtn.querySelector('span').textContent = originalStock > 0 ? 'Añadir al Carrito' : 'Agotado'; // Actualiza el texto del botón
-            } else {
-                artesaniaStockDisplay.textContent = `${variantStock > 0 ? variantStock + ' disponibles' : 'Agotado'}`;
-                artesaniaStockDisplay.className = `${variantStock > 0 ? 'text-green-600' : 'text-red-600'} font-semibold`;
-                addToCartBtn.disabled = variantStock <= 0;
-                addToCartBtn.querySelector('span').textContent = variantStock > 0 ? 'Añadir al Carrito' : 'Agotado'; // Actualiza el texto del botón
-            }
-
-
-            // Actualizar y mostrar/ocultar detalles de variante
-            if (variantColor) {
-                variantColorDisplay.innerHTML = `<strong>Color:</strong> ${variantColor}`;
-                variantColorDisplay.classList.remove('hidden');
-            } else {
-                variantColorDisplay.classList.add('hidden');
-            }
-
-            if (variantSize) {
-                variantSizeDisplay.innerHTML = `<strong>Talla:</strong> ${variantSize}`;
-                variantSizeDisplay.classList.remove('hidden');
-            } else {
-                variantSizeDisplay.classList.add('hidden');
-            }
-
-            if (variantMaterial) {
-                variantMaterialDisplay.innerHTML = `<strong>Material Variante:</strong> ${variantMaterial}`;
-                variantMaterialDisplay.classList.remove('hidden');
-            } else {
-                variantMaterialDisplay.classList.add('hidden');
-            }
-
-            // Opcional: Recargar Lightbox para que incluya las nuevas imágenes si la imagen principal cambia
-            // Esto dependerá de cómo se inicialice Lightbox. Si se inicializa en DOMContentLoaded,
-            // puede que necesites un método para "refrescarlo" o reinicializarlo si el contenido de la galería cambia dinámicamente.
-            // Para la imagen principal, el cambio de src y href suele ser suficiente.
+            // Buscar una variante que coincida con TODOS los atributos seleccionados
+            const matchedVariant = allVariants.find(variant => {
+                let matches = true;
+                for (const attr in selectedAttributes) {
+                    if (variant[attr] !== selectedAttributes[attr]) {
+                        matches = false;
+                        break;
+                    }
+                }
+                return matches;
+            });
+            return matchedVariant;
         }
 
-        // Ejecutar al cargar la página para la variante seleccionada inicialmente (si hay una)
-        updateArtesaniaDetails();
+        // Función para actualizar la UI
+        function updateUI(variant) {
+            let currentStock = artesaniaData.stock;
+            let currentPrice = artesaniaData.precio;
+            let currentImage = artesaniaData.imagen_principal;
+            let currentName = artesaniaData.nombre;
+            let isButtonDisabled = artesaniaData.stock <= 0;
 
-        // Escuchar cambios en el selector de variantes
-        variantSelect.addEventListener('change', updateArtesaniaDetails);
-    });
-</script>
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
-        const select = document.getElementById('variant-select');
-        const image = document.getElementById('main-artesania-image');
-        const price = document.getElementById('variant-price');
-        const stock = document.getElementById('variant-stock');
+            // Limpiar detalles de variante
+            if (currentColorValueDisplay) currentColorValueDisplay.textContent = '';
+            if (currentSizeValueDisplay) currentSizeValueDisplay.textContent = '';
+            if (currentMaterialValueDisplay) currentMaterialValueDisplay.textContent = '';
+            if (variantColorDisplayContainer) variantColorDisplayContainer.classList.add('hidden');
+            if (variantSizeDisplayContainer) variantSizeDisplayContainer.classList.add('hidden');
+            if (variantMaterialDisplayContainer) variantMaterialDisplayContainer.classList.add('hidden');
 
-        select.addEventListener('change', function () {
-            const selected = this.options[this.selectedIndex];
+            if (variant) {
+                currentStock = variant.stock;
+                currentPrice = artesaniaData.precio + (variant.price_adjustment || 0);
+                currentImage = variant.image ? `{{ asset('storage') }}/${variant.image}` : artesaniaData.imagen_principal;
+                currentName = variant.variant_name || artesaniaData.nombre;
+                isButtonDisabled = variant.stock <= 0;
+                selectedVariantIdInput.value = variant.id; // Actualizar el ID de la variante en el formulario
 
-            // Imagen
-            const imageUrl = selected.dataset.image;
-            if (imageUrl) {
-                image.src = imageUrl;
+                // Actualizar y mostrar detalles de variante
+                if (variant.color && currentColorValueDisplay) {
+                    currentColorValueDisplay.textContent = variant.color;
+                    variantColorDisplayContainer.classList.remove('hidden');
+                }
+                if (variant.size && currentSizeValueDisplay) {
+                    currentSizeValueDisplay.textContent = variant.size;
+                    variantSizeDisplayContainer.classList.remove('hidden');
+                }
+                if (variant.material_variant && currentMaterialValueDisplay) {
+                    currentMaterialValueDisplay.textContent = variant.material_variant;
+                    variantMaterialDisplayContainer.classList.remove('hidden');
+                }
+
+                noVariantMessage.classList.add('hidden'); // Ocultar mensaje de no variante
+            } else {
+                // Si no se encuentra una variante coincidente, deshabilitar y mostrar mensaje
+                isButtonDisabled = true;
+                selectedVariantIdInput.value = '';
+                noVariantMessage.classList.remove('hidden'); // Mostrar mensaje de no variante
             }
 
-            // Precio
-            const basePrice = parseFloat({{ $artesania->precio }});
-            const adjustment = parseFloat(selected.dataset.priceAdjustment || 0);
-            price.textContent = '$' + (basePrice + adjustment).toFixed(2) + ' MXN';
+            // Actualizar imagen principal
+            mainArtesaniaImage.src = currentImage;
+            mainArtesaniaImage.alt = currentName;
+            mainImageLink.href = currentImage;
+            mainImageLink.dataset.title = currentName;
 
-            // Stock
-            stock.textContent = 'Stock: ' + (selected.dataset.stock || 0);
+            // Actualizar precio
+            artesaniaPriceDisplay.textContent = `$${currentPrice.toFixed(2)} MXN`;
+
+            // Actualizar stock y estado del botón "Añadir al Carrito"
+            artesaniaStockDisplay.textContent = `${currentStock > 0 ? currentStock + ' disponibles' : 'Agotado'}`;
+            artesaniaStockDisplay.className = `${currentStock > 0 ? 'text-green-600' : 'text-red-600'} font-semibold`;
+            addToCartBtn.disabled = isButtonDisabled;
+            addToCartBtn.querySelector('span').textContent = isButtonDisabled ? 'Agotado' : 'Añadir al Carrito';
+
+            // Actualizar clases de 'selected' en los botones de variante
+            document.querySelectorAll('.variant-option').forEach(button => {
+                const attribute = button.dataset.attribute;
+                const value = button.dataset.value;
+                if (selectedAttributes[attribute] === value) {
+                    button.classList.add('border-oaxaca-tertiary', 'shadow-md');
+                    if (attribute !== 'color') { // Los botones de color ya tienen un estilo diferente
+                        button.classList.add('bg-oaxaca-tertiary', 'bg-opacity-20', 'text-oaxaca-primary', 'font-bold');
+                    }
+                } else {
+                    button.classList.remove('border-oaxaca-tertiary', 'shadow-md', 'bg-oaxaca-tertiary', 'bg-opacity-20', 'text-oaxaca-primary', 'font-bold');
+                    button.classList.add('border-gray-300');
+                }
+            });
+        }
+
+        // Manejador de eventos para las opciones de variante
+        document.querySelectorAll('.variant-option').forEach(button => {
+            button.addEventListener('click', function() {
+                const attribute = this.dataset.attribute;
+                const value = this.dataset.value;
+
+                // Si el atributo ya está seleccionado con este valor, deseleccionar
+                if (selectedAttributes[attribute] === value) {
+                    delete selectedAttributes[attribute];
+                } else {
+                    selectedAttributes[attribute] = value;
+                }
+
+                const matchedVariant = findMatchingVariant();
+                updateUI(matchedVariant);
+            });
         });
+
+        // Inicializar la UI al cargar la página
+        const initialMatchedVariant = findMatchingVariant();
+        updateUI(initialMatchedVariant);
     });
 </script>
-
 @endsection

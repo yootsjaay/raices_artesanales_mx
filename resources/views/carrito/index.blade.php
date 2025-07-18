@@ -40,20 +40,54 @@
                         <thead class="bg-oaxaca-primary bg-opacity-5"> {{-- Fondo de cabecera de tabla --}}
                             <tr>
                                 <th class="px-6 py-3 text-left text-sm font-semibold text-oaxaca-primary uppercase tracking-wider">Producto</th> {{-- Texto de cabecera --}}
-                                <th class="px-6 py-3 text-left text-sm font-semibold text-oaxaca-primary uppercase tracking-wider">Precio</th>
+                                <th class="px-6 py-3 text-left text-sm font-semibold text-oaxaca-primary uppercase tracking-wider">Precio Unitario</th>
                                 <th class="px-6 py-3 text-left text-sm font-semibold text-oaxaca-primary uppercase tracking-wider">Cantidad</th>
-                               
+                                <th class="px-6 py-3 text-left text-sm font-semibold text-oaxaca-primary uppercase tracking-wider">Subtotal</th>
                                 <th class="px-6 py-3 relative"><span class="sr-only">Acciones</span></th>
                             </tr>
                         </thead>
                         <tbody class="bg-oaxaca-card-bg divide-y divide-oaxaca-primary divide-opacity-10"> {{-- Fondo y divisores de cuerpo de tabla --}}
                             @foreach ($cartItems as $item)
+                                @php
+                                    // Determinar la imagen a mostrar (variante o principal)
+                                    $itemImage = null;
+                                    if ($item->artesania_variant && $item->artesania_variant->image) {
+                                        $itemImage = asset('storage/' . $item->artesania_variant->image);
+                                    } elseif ($item->artesania->imagen_principal) {
+                                        $itemImage = asset('storage/' . $item->artesania->imagen_principal);
+                                    } else {
+                                        $itemImage = asset('storage/images/artesanias/placeholder-alebrije.jpg');
+                                    }
+
+                                    // Determinar el nombre a mostrar (variante o principal)
+                                    $itemName = $item->artesania->nombre;
+                                    $variantDetails = '';
+                                    if ($item->artesania_variant) {
+                                        $itemName = $item->artesania_variant->variant_name ?: $item->artesania->nombre; // Usar nombre de variante si existe
+                                        $details = [];
+                                        if ($item->artesania_variant->size) $details[] = 'Talla: ' . $item->artesania_variant->size;
+                                        if ($item->artesania_variant->color) $details[] = 'Color: ' . $item->artesania_variant->color;
+                                        if ($item->artesania_variant->material_variant) $details[] = 'Material: ' . $item->artesania_variant->material_variant;
+                                        if (!empty($details)) {
+                                            $variantDetails = ' (' . implode(', ', $details) . ')';
+                                        }
+                                    }
+
+                                    // Determinar el stock disponible para el input de cantidad
+                                    $availableStock = $item->artesania_variant ? $item->artesania_variant->stock : $item->artesania->stock;
+                                @endphp
                                 <tr>
                                     <td class="px-6 py-4 whitespace-nowrap">
                                         <div class="flex items-center">
-                                            <img class="h-24 w-24 rounded-lg object-cover border border-oaxaca-accent border-opacity-30" src="{{ asset('storage/' . $item->artesania->imagen_principal) }}" alt="{{ $item->artesania->nombre }}"> {{-- Borde de imagen --}}
+                                            <img class="h-24 w-24 rounded-lg object-cover border border-oaxaca-accent border-opacity-30" src="{{ $itemImage }}" alt="{{ $itemName }}"> {{-- Borde de imagen --}}
                                             <div class="ml-4">
-                                                <a href="{{ route('artesanias.show', $item->artesania->id) }}" class="text-base font-semibold text-oaxaca-primary hover:text-oaxaca-secondary transition-colors">{{ $item->artesania->nombre }}</a> {{-- Enlace al producto --}}
+                                                {{-- Enlace a la página del producto, incluyendo la variante si aplica --}}
+                                                <a href="{{ route('artesanias.show', ['slug' => $item->artesania->slug, 'variant' => $item->artesania_variant->id ?? null]) }}" class="text-base font-semibold text-oaxaca-primary hover:text-oaxaca-secondary transition-colors">
+                                                    {{ $itemName }}
+                                                </a>
+                                                @if($variantDetails)
+                                                    <p class="text-sm text-gray-600">{{ $variantDetails }}</p>
+                                                @endif
                                             </div>
                                         </div>
                                     </td>
@@ -63,21 +97,25 @@
                                     <td class="px-6 py-4">
                                        <form action="{{ route('carrito.actualizar') }}" method="POST" class="flex items-center">
                                         @csrf
+                                        {{-- Usamos PUT para actualizar semánticamente, aunque el controlador puede aceptar POST --}}
                                         @method('PUT')
                                         <input type="hidden" name="id" value="{{ $item->id }}">
                                         <input type="number"
                                             name="cantidad"
                                             value="{{ $item->quantity }}"
                                             min="0"
-                                            max="{{ $item->artesania->stock }}" {{-- Añadir max para stock --}}
+                                            max="{{ $availableStock }}" {{-- Stock máximo basado en la variante o artesanía --}}
                                             class="w-24 p-2 border border-oaxaca-primary border-opacity-30 rounded-md shadow-sm focus:ring-oaxaca-tertiary focus:border-oaxaca-tertiary text-oaxaca-text-dark text-base" {{-- Estilo de input --}}
                                             onchange="this.form.submit()">
                                     </form>
                                     </td>
-                                   
-                                    <td class="px-6 py-4 text-right text-base font-medium">
+                                    <td class="px-6 py-4 text-right text-base font-medium text-oaxaca-text-dark">
+                                        ${{ number_format($item->quantity * $item->price, 2) }}
+                                    </td>
+                                    <td class="px-6 py-4 text-center">
                                        <form action="{{ route('carrito.remover') }}" method="POST">
                                         @csrf
+                                        {{-- Usamos DELETE para remover semánticamente, aunque el controlador puede aceptar POST --}}
                                         @method('DELETE')
                                         <input type="hidden" name="id" value="{{ $item->id }}">
                                         <button type="submit" class="text-oaxaca-secondary hover:text-red-700 transition-colors">Eliminar</button> {{-- Color del botón de eliminar --}}
@@ -106,10 +144,27 @@
                     <h2 class="text-2xl font-display font-semibold text-oaxaca-primary mb-5">Resumen del Pedido</h2> {{-- Título del resumen --}}
                     <ul class="divide-y divide-oaxaca-primary divide-opacity-10 mb-6"> {{-- Divisores de lista --}}
                         @foreach($cartItems as $item)
+                        @php
+                            // Determinar el nombre a mostrar (variante o principal) para el resumen
+                            $summaryItemName = $item->artesania->nombre;
+                            $summaryVariantDetails = '';
+                            if ($item->artesania_variant) {
+                                $summaryItemName = $item->artesania_variant->variant_name ?: $item->artesania->nombre;
+                                $summaryDetails = [];
+                                if ($item->artesania_variant->size) $summaryDetails[] = 'Talla: ' . $item->artesania_variant->size;
+                                if ($item->artesania_variant->color) $summaryDetails[] = 'Color: ' . $item->artesania_variant->color;
+                                if ($item->artesania_variant->material_variant) $summaryDetails[] = 'Material: ' . $item->artesania_variant->material_variant;
+                                if (!empty($summaryDetails)) {
+                                    $summaryVariantDetails = ' (' . implode(', ', $summaryDetails) . ')';
+                                }
+                            }
+                        @endphp
                         <li class="py-3 flex items-center gap-4">
-                            {{-- Se eliminó la imagen aquí para evitar la duplicación --}}
                             <div class="flex-grow">
-                                <p class="font-semibold text-oaxaca-text-dark">{{ $item->artesania->nombre }}</p>
+                                <p class="font-semibold text-oaxaca-text-dark">{{ $summaryItemName }}</p>
+                                @if($summaryVariantDetails)
+                                    <p class="text-oaxaca-text-dark text-sm">{{ $summaryVariantDetails }}</p>
+                                @endif
                                 <p class="text-oaxaca-text-dark text-sm">Cantidad: {{ $item->quantity }}</p>
                             </div>
                             <span class="font-bold text-oaxaca-primary">${{ number_format($item->quantity * $item->price, 2) }} MXN</span> {{-- Color del subtotal --}}

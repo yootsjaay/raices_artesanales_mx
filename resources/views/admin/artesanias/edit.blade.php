@@ -96,27 +96,27 @@
                     </div> {{-- Fin del grid de información general --}}
 
                   {{-- 📦 Sección: Dimensiones y Peso para Envío --}}
-<div class="mb-8 border-t pt-8">
-    <h3 class="text-xl font-bold text-oaxaca-primary mb-2">
-        📦 Dimensiones y Peso para Envío
-        <span class="text-sm font-normal text-gray-500">(con embalaje individual)</span>
-    </h3>
-    <p class="text-sm text-oaxaca-text-dark mb-6">
-        Ingresa las medidas y el peso de la artesanía <strong>ya embalada</strong> y lista para envío. Esto es indispensable para calcular el costo real de paquetería.
-    </p>
+        <div class="mb-8 border-t pt-8">
+            <h3 class="text-xl font-bold text-oaxaca-primary mb-2">
+                📦 Dimensiones y Peso para Envío
+                <span class="text-sm font-normal text-gray-500">(con embalaje individual)</span>
+            </h3>
+            <p class="text-sm text-oaxaca-text-dark mb-6">
+                Ingresa las medidas y el peso de la artesanía <strong>ya embalada</strong> y lista para envío. Esto es indispensable para calcular el costo real de paquetería.
+            </p>
 
-    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
-        {{-- Peso --}}
-        <div>
-            <label for="weight" class="block text-sm font-semibold text-oaxaca-text-dark">Peso (kg)</label>
-            <input type="number" name="weight" id="weight" step="0.01" min="0.01"
-                placeholder="Ej. 1.25"
-                value="{{ old('weight', $artesania->weight) }}"
-                class="mt-1 block w-full border border-oaxaca-primary border-opacity-30 rounded-md shadow-sm focus:ring-oaxaca-tertiary focus:border-oaxaca-tertiary @error('weight') border-red-500 @enderror" required>
-            @error('weight')
-                <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
-            @enderror
-        </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
+                {{-- Peso --}}
+                <div>
+                    <label for="weight" class="block text-sm font-semibold text-oaxaca-text-dark">Peso (kg)</label>
+                    <input type="number" name="weight" id="weight" step="0.01" min="0.01"
+                        placeholder="Ej. 1.25"
+                        value="{{ old('weight', $artesania->weight) }}"
+                        class="mt-1 block w-full border border-oaxaca-primary border-opacity-30 rounded-md shadow-sm focus:ring-oaxaca-tertiary focus:border-oaxaca-tertiary @error('weight') border-red-500 @enderror" required>
+                    @error('weight')
+                        <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                    @enderror
+                </div>
 
         {{-- Largo --}}
         <div>
@@ -166,8 +166,7 @@
                             <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                         @enderror
                     </div>
-
-                {{-- Variantes --}}
+{{-- Variantes --}}
 <div class="mb-6">
     <label class="block font-semibold mb-2">Variantes (Tallas / Colores / Materiales):</label>
 
@@ -237,7 +236,7 @@
                         value="{{ old("variants.$index.price_adjustment", $variant['price_adjustment'] ?? $variant->price_adjustment ?? 0.00) }}">
                 </div>
 
-                {{-- Imagen --}}
+                {{-- Imagen principal --}}
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Imagen</label>
                     <input type="file" name="variants[{{ $index }}][image]"
@@ -256,68 +255,47 @@
                         </label>
                     @endif
                 </div>
+{{-- Imágenes adicionales --}}
+<div>
+    <label class="block text-sm font-medium text-gray-700 mb-1">Imágenes Adicionales (clic para eliminar)</label>
+    <input type="file" name="variants[{{ $index }}][additional_images_urls][]" multiple
+        class="w-full text-sm border-gray-300 rounded-md shadow-sm mb-4">
+
+    @php
+        $additionalImages = is_string($variant['additional_images_urls'] ?? null)
+            ? json_decode($variant['additional_images_urls'], true)
+            : ($variant['additional_images_urls'] ?? []);
+    @endphp
+
+    @if(!empty($additionalImages) && is_array($additionalImages))
+        <div class="mt-2 flex flex-wrap gap-4">
+            @foreach($additionalImages as $img)
+               
+
+                <div class="relative group">
+    <img src="{{ asset('storage/' . $img) }}" 
+         alt="Imagen Adicional" 
+         class="h-20 w-20 object-cover rounded-md cursor-pointer transition-transform duration-200 hover:scale-105" 
+         onclick="eliminarImagen(this, '{{ $img }}', {{ $index }})">
+
+    <input type="hidden" 
+           name="variants[{{ $index }}][delete_additional_images_urls][]" 
+           value="{{ $img }}" 
+           class="hidden-input-delete">
+</div>
+
+            @endforeach
+        </div>
+    @endif
+</div>
+
+
             </div>
         @empty
-            {{-- Variante vacía por defecto --}}
+            {{-- Variante vacía --}}
             <div class="variant-item grid grid-cols-1 md:grid-cols-6 gap-4 mb-4 p-4 bg-gray-50 rounded-lg">
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Nombre Variante</label>
-                    <input type="text" name="variants[0][variant_name]" placeholder="Ej: Variante"
-                        class="w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
-                </div>
-
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Color</label>
-                    <input type="text" name="variants[0][color]" placeholder="Color"
-                        class="w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500" required>
-                </div>
-
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Talla</label>
-                    <input type="text" name="variants[0][size]" placeholder="Talla"
-                        class="w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
-                </div>
-
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Material</label>
-                    <input type="text" name="variants[0][material_variant]" placeholder="Material"
-                        class="w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
-                </div>
-
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Stock</label>
-                    <input type="number" name="variants[0][stock]" placeholder="Stock" min="0"
-                        class="w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500" required>
-                </div>
-
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Ajuste de Precio</label>
-                    <input type="number" name="variants[0][price_adjustment]" placeholder="Ajuste $" step="0.01"
-                        class="w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
-                </div>
-
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Imagen</label>
-                    <input type="file" name="variants[0][image]"
-                        class="w-full border-gray-300 rounded-md shadow-sm text-sm">
-                </div>
-                
-                {{-- Imágenes adicionales --}}
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Imágenes Adicionales</label>
-                    <input type="file" name="variants[{{ $index }}][additional_images_urls][]" multiple
-                        class="w-full text-sm border-gray-300 rounded-md shadow-sm">
-                    @error("variants.$index.additional_images_urls")
-                        <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
-                    @enderror
-                    @if(isset($variant['additional_images_urls']) && is_array($variant['additional_images_urls']))
-                        <div class="mt-2 flex space-x-2">
-                            @foreach($variant['additional_images_urls'] as $img)
-                                <img src="{{ asset('storage/' . $img) }}" alt="Imagen Adicional" class="h-12 w-12 object-cover rounded-md">
-                            @endforeach
-                        </div>
-                    @endif
-                </div>
+                {{-- Aquí puedes replicar la estructura base vacía si lo deseas --}}
+                {{-- También podrías cargar con JavaScript una nueva variante dinámicamente --}}
             </div>
         @endforelse
     </div>
@@ -402,4 +380,20 @@
             </div>
         </div>
     </div>
+@section('js')
+<script>
+    function eliminarImagen(imgElement, imageUrl, index) {
+        // Oculta visualmente la imagen
+        imgElement.closest('.group').remove();
+
+        // Crea un input hidden para marcar la imagen como eliminada
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = `variants[${index}][delete_additional_images_urls][]`;
+        input.value = imageUrl;
+        document.querySelector('form').appendChild(input);
+    }
+</script>
+
+@endsection
 </x-app-layout>
