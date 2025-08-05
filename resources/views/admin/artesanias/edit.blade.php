@@ -5,24 +5,25 @@
         </h2>
     </x-slot>
 
-    <div class="py-6 sm:py-12"> {{-- Ajuste de padding vertical --}}
+    <div class="py-6 sm:py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white overflow-hidden shadow-md sm:rounded-lg p-6 sm:p-8"> {{-- Sombra y padding mejorados --}}
+            <div class="bg-white overflow-hidden shadow-md sm:rounded-lg p-6 sm:p-8">
 
                 <div class="mb-6 border-b pb-4">
-                    <h3 class="text-lg font-medium text-gray-900">Detalles de la Artesanía</h3>
-                    <p class="mt-1 text-sm text-gray-600">Edita la información básica y las dimensiones para el envío.</p>
+                    <h3 class="text-lg font-medium text-gray-900">Información General de la Artesanía</h3>
+                    <p class="mt-1 text-sm text-gray-600">Actualiza los detalles del tipo de artesanía.</p>
                 </div>
 
-                <form action="{{ route('admin.artesanias.update', $artesania->slug) }}" method="POST" enctype="multipart/form-data">
+                {{-- Formulario principal para la edición --}}
+                <form action="{{ route('admin.artesanias.update', $artesania) }}" method="POST" enctype="multipart/form-data">
                     @csrf
-                    @method('PUT') {{-- Importante para las actualizaciones --}}
+                    @method('PUT')
 
-                    {{-- Sección de Información General --}}
+                    {{-- Sección de Información General de la Artesanía --}}
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                        {{-- Campo Nombre --}}
+                        {{-- Campo: Nombre General --}}
                         <div>
-                            <label for="nombre" class="block text-sm font-medium text-gray-700">Nombre:</label>
+                            <label for="nombre" class="block text-sm font-medium text-gray-700">Nombre General:</label>
                             <input type="text" name="nombre" id="nombre" value="{{ old('nombre', $artesania->nombre) }}"
                                    class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 @error('nombre') border-red-500 @enderror" required>
                             @error('nombre')
@@ -30,37 +31,7 @@
                             @enderror
                         </div>
 
-                        {{-- Campo Precio --}}
-                        <div>
-                            <label for="precio" class="block text-sm font-medium text-gray-700">Precio (MXN):</label>
-                            <input type="number" name="precio" id="precio" step="0.01" value="{{ old('precio', $artesania->precio) }}"
-                                   class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 @error('precio') border-red-500 @enderror" required>
-                            @error('precio')
-                                <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
-                            @enderror
-                        </div>
-
-                        {{-- Campo Stock --}}
-                        <div>
-                            <label for="stock" class="block text-sm font-medium text-gray-700">Stock:</label>
-                            <input type="number" name="stock" id="stock" value="{{ old('stock', $artesania->stock) }}"
-                                   class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 @error('stock') border-red-500 @enderror" required>
-                            @error('stock')
-                                <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
-                            @enderror
-                        </div>
-
-                        {{-- Campo Materiales --}}
-                        <div>
-                            <label for="materiales" class="block text-sm font-medium text-gray-700">Materiales:</label>
-                            <input type="text" name="materiales" id="materiales" value="{{ old('materiales', $artesania->materiales) }}"
-                                   class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 @error('materiales') border-red-500 @enderror">
-                            @error('materiales')
-                                <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
-                            @enderror
-                        </div>
-
-                        {{-- Selector de Categoría --}}
+                        {{-- Campo: Categoría --}}
                         <div>
                             <label for="categoria_id" class="block text-sm font-medium text-gray-700">Categoría:</label>
                             <select name="categoria_id" id="categoria_id" required
@@ -77,9 +48,9 @@
                             @enderror
                         </div>
 
-                        {{-- Selector de Ubicación --}}
+                        {{-- Campo: Ubicación --}}
                         <div>
-                            <label for="ubicacion_id" class="block text-sm font-medium text-gray-700">Ubicación:</label>
+                            <label for="ubicacion_id" class="block text-sm font-medium text-gray-700">Ubicación de Origen/Venta:</label>
                             <select name="ubicacion_id" id="ubicacion_id"
                                     class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 @error('ubicacion_id') border-red-500 @enderror">
                                 <option value="">Seleccione una ubicación</option>
@@ -93,307 +64,341 @@
                                 <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                             @enderror
                         </div>
-                    </div> {{-- Fin del grid de información general --}}
+                    </div>
 
-                  {{-- 📦 Sección: Dimensiones y Peso para Envío --}}
-        <div class="mb-8 border-t pt-8">
-            <h3 class="text-xl font-bold text-oaxaca-primary mb-2">
-                📦 Dimensiones y Peso para Envío
-                <span class="text-sm font-normal text-gray-500">(con embalaje individual)</span>
-            </h3>
-            <p class="text-sm text-oaxaca-text-dark mb-6">
-                Ingresa las medidas y el peso de la artesanía <strong>ya embalada</strong> y lista para envío. Esto es indispensable para calcular el costo real de paquetería.
-            </p>
+                    {{-- Campos de Precio, Peso y Dimensiones --}}
+                    <div class="mb-6 border-b pb-4">
+                        <h3 class="text-lg font-medium text-gray-900">Precio y Dimensiones Generales</h3>
+                        <p class="mt-1 text-sm text-gray-600">Define el precio base, peso y dimensiones para la artesanía general.</p>
+                    </div>
 
-            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
-                {{-- Peso --}}
-                <div>
-                    <label for="weight" class="block text-sm font-semibold text-oaxaca-text-dark">Peso (kg)</label>
-                    <input type="number" name="weight" id="weight" step="0.01" min="0.01"
-                        placeholder="Ej. 1.25"
-                        value="{{ old('weight', $artesania->weight) }}"
-                        class="mt-1 block w-full border border-oaxaca-primary border-opacity-30 rounded-md shadow-sm focus:ring-oaxaca-tertiary focus:border-oaxaca-tertiary @error('weight') border-red-500 @enderror" required>
-                    @error('weight')
-                        <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
-                    @enderror
-                </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-6">
+                        {{-- Campo: Precio Base --}}
+                        <div>
+                            <label for="precio" class="block text-sm font-medium text-gray-700">Precio Base:</label>
+                            <input type="number" name="precio" id="precio" step="0.01" value="{{ old('precio', $artesania->precio) }}"
+                                   class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 @error('precio') border-red-500 @enderror">
+                            @error('precio')
+                                <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                            @enderror
+                        </div>
 
-        {{-- Largo --}}
-        <div>
-            <label for="length" class="block text-sm font-semibold text-oaxaca-text-dark">Largo (cm)</label>
-            <input type="number" name="length" id="length" step="0.1" min="0.1"
-                placeholder="Ej. 40.5"
-                value="{{ old('length', $artesania->length) }}"
-                class="mt-1 block w-full border border-oaxaca-primary border-opacity-30 rounded-md shadow-sm focus:ring-oaxaca-tertiary focus:border-oaxaca-tertiary @error('length') border-red-500 @enderror" required>
-            @error('length')
-                <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
-            @enderror
-        </div>
+                        {{-- Campo: Peso (KG) --}}
+                        <div>
+                            <label for="weight" class="block text-sm font-medium text-gray-700">Peso (KG):</label>
+                            <input type="number" name="weight" id="weight" step="0.01" value="{{ old('weight', $artesania->weight) }}"
+                                   class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 @error('weight') border-red-500 @enderror">
+                            @error('weight')
+                                <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                            @enderror
+                        </div>
 
-        {{-- Ancho --}}
-        <div>
-            <label for="width" class="block text-sm font-semibold text-oaxaca-text-dark">Ancho (cm)</label>
-            <input type="number" name="width" id="width" step="0.1" min="0.1"
-                placeholder="Ej. 20.0"
-                value="{{ old('width', $artesania->width) }}"
-                class="mt-1 block w-full border border-oaxaca-primary border-opacity-30 rounded-md shadow-sm focus:ring-oaxaca-tertiary focus:border-oaxaca-tertiary @error('width') border-red-500 @enderror" required>
-            @error('width')
-                <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
-            @enderror
-        </div>
+                        {{-- Campo: Largo (CM) --}}
+                        <div>
+                            <label for="length" class="block text-sm font-medium text-gray-700">Largo (CM):</label>
+                            <input type="number" name="length" id="length" step="0.01" value="{{ old('length', $artesania->length) }}"
+                                   class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 @error('length') border-red-500 @enderror">
+                            @error('length')
+                                <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                            @enderror
+                        </div>
 
-        {{-- Alto --}}
-        <div>
-            <label for="height" class="block text-sm font-semibold text-oaxaca-text-dark">Alto (cm)</label>
-            <input type="number" name="height" id="height" step="0.1" min="0.1"
-                placeholder="Ej. 15.3"
-                value="{{ old('height', $artesania->height) }}"
-                class="mt-1 block w-full border border-oaxaca-primary border-opacity-30 rounded-md shadow-sm focus:ring-oaxaca-tertiary focus:border-oaxaca-tertiary @error('height') border-red-500 @enderror" required>
-            @error('height')
-                <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
-            @enderror
-        </div>
-    </div>
-</div>
+                        {{-- Campo: Ancho (CM) --}}
+                        <div>
+                            <label for="width" class="block text-sm font-medium text-gray-700">Ancho (CM):</label>
+                            <input type="number" name="width" id="width" step="0.01" value="{{ old('width', $artesania->width) }}"
+                                   class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 @error('width') border-red-500 @enderror">
+                            @error('width')
+                                <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                            @enderror
+                        </div>
 
-
-                    {{-- Campo Descripción --}}
-                    <div class="mt-6">
-                        <label for="descripcion" class="block text-sm font-medium text-gray-700">Descripción General:</label>
-                        <textarea name="descripcion" id="descripcion" rows="4"
-                                  class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 @error('descripcion') border-red-500 @enderror" required>{{ old('descripcion', $artesania->descripcion) }}</textarea>
+                        {{-- Campo: Alto (CM) --}}
+                        <div>
+                            <label for="height" class="block text-sm font-medium text-gray-700">Alto (CM):</label>
+                            <input type="number" name="height" id="height" step="0.01" value="{{ old('height', $artesania->height) }}"
+                                   class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 @error('height') border-red-500 @enderror">
+                            @error('height')
+                                <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                            @enderror
+                        </div>
+                    </div>
+                    
+                    <div class="col-span-full">
+                        <label for="descripcion" class="block text-sm font-medium text-gray-700">Descripción General del Tipo de Artesanía:</label>
+                        <textarea name="descripcion" id="descripcion" rows="3"
+                                  class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 @error('descripcion') border-red-500 @enderror">{{ old('descripcion', $artesania->descripcion) }}</textarea>
                         @error('descripcion')
                             <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                         @enderror
                     </div>
-{{-- Variantes --}}
-<div class="mb-6">
-    <label class="block font-semibold mb-2">Variantes (Tallas / Colores / Materiales):</label>
 
-    <div id="variants-container">
-        @php
-            $oldVariants = old('variants');
-            $variants = $oldVariants !== null
-                ? $oldVariants
-                : (isset($artesania->artesania_variants) ? $artesania->artesania_variants->toArray() : []);
-        @endphp
+                    <div class="col-span-full">
+                        <label for="historia_piezas_general" class="block text-sm font-medium text-gray-700">Historia o Contexto Cultural General:</label>
+                        <textarea name="historia_piezas_general" id="historia_piezas_general" rows="3"
+                                  class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 @error('historia_piezas_general') border-red-500 @enderror">{{ old('historia_piezas_general', $artesania->historia_piezas_general) }}</textarea>
+                        @error('historia_piezas_general')
+                            <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                        @enderror
+                    </div>
 
-        @forelse ($variants as $index => $variant)
-            <div class="variant-item grid grid-cols-1 md:grid-cols-6 gap-4 mb-4 p-4 bg-gray-50 rounded-lg">
-                {{-- ID oculto --}}
-                @if (isset($variant['id']) || isset($variant->id))
-                    <input type="hidden" name="variants[{{ $index }}][id]" value="{{ $variant['id'] ?? $variant->id }}">
+                    {{-- Sección de imágenes existentes --}}
+                                @if(is_array($artesania->imagen_artesanias))
+                    @foreach($artesania->imagen_artesanias as $imageUrl)
+                        <div class="relative group">
+                            <img src="{{ asset('storage/' . str_replace('storage/', '', $imageUrl)) }}" alt="Imagen de artesanía" class="w-full h-auto object-cover rounded-md shadow">
+                            <div class="absolute inset-0 bg-red-500 opacity-0 group-hover:opacity-75 transition-opacity duration-300 flex items-center justify-center rounded-md">
+                                <label class="text-white text-sm font-bold cursor-pointer">
+                                    Eliminar
+                                    <input type="checkbox" name="delete_general_images[]" value="{{ $imageUrl }}" class="hidden">
+                                </label>
+                            </div>
+                        </div>
+                    @endforeach
                 @endif
 
-                {{-- Nombre Variante --}}
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Nombre Variante</label>
-                    <input type="text" name="variants[{{ $index }}][variant_name]" placeholder="Ej: Playera Azul"
-                        class="w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                        value="{{ old("variants.$index.variant_name", $variant['variant_name'] ?? $variant->variant_name ?? '') }}">
-                    @error("variants.$index.variant_name")
-                        <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
-                    @enderror
-                </div>
 
-                {{-- Color --}}
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Color</label>
-                    <input type="text" name="variants[{{ $index }}][color]" placeholder="Color"
-                        class="w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                        value="{{ old("variants.$index.color", $variant['color'] ?? $variant->color ?? '') }}" required>
-                </div>
-
-                {{-- Talla --}}
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Talla</label>
-                    <input type="text" name="variants[{{ $index }}][size]" placeholder="Talla"
-                        class="w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                        value="{{ old("variants.$index.size", $variant['size'] ?? $variant->size ?? '') }}">
-                </div>
-
-                {{-- Material --}}
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Material</label>
-                    <input type="text" name="variants[{{ $index }}][material_variant]" placeholder="Material (opcional)"
-                        class="w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                        value="{{ old("variants.$index.material_variant", $variant['material_variant'] ?? $variant->material_variant ?? '') }}">
-                </div>
-
-                {{-- Stock --}}
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Stock</label>
-                    <input type="number" name="variants[{{ $index }}][stock]" placeholder="Stock" min="0"
-                        class="w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                        value="{{ old("variants.$index.stock", $variant['stock'] ?? $variant->stock ?? 0) }}" required>
-                </div>
-
-                {{-- Ajuste de precio --}}
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Ajuste de Precio</label>
-                    <input type="number" name="variants[{{ $index }}][price_adjustment]" placeholder="Ajuste $" step="0.01"
-                        class="w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                        value="{{ old("variants.$index.price_adjustment", $variant['price_adjustment'] ?? $variant->price_adjustment ?? 0.00) }}">
-                </div>
-
-                {{-- Imagen principal --}}
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Imagen</label>
-                    <input type="file" name="variants[{{ $index }}][image]"
-                        class="w-full border-gray-300 rounded-md shadow-sm text-sm">
-                    @php
-                        $imagePath = $variant['image'] ?? $variant->image ?? null;
-                    @endphp
-                    @if (!empty($imagePath))
-                        <div class="mt-1">
-                            <img src="{{ Str::startsWith($imagePath, 'http') ? $imagePath : asset('storage/' . $imagePath) }}"
-                                alt="Variante" class="w-16 h-16 object-cover rounded">
-                        </div>
-                        <label class="inline-flex items-center mt-2 text-xs">
-                            <input type="checkbox" name="variants[{{ $index }}][remove_image]" value="1" class="mr-1">
-                            Eliminar imagen
-                        </label>
-                    @endif
-                </div>
-{{-- Imágenes adicionales --}}
-<div>
-    <label class="block text-sm font-medium text-gray-700 mb-1">Imágenes Adicionales (clic para eliminar)</label>
-    <input type="file" name="variants[{{ $index }}][additional_images_urls][]" multiple
-        class="w-full text-sm border-gray-300 rounded-md shadow-sm mb-4">
-
-    @php
-        $additionalImages = is_string($variant['additional_images_urls'] ?? null)
-            ? json_decode($variant['additional_images_urls'], true)
-            : ($variant['additional_images_urls'] ?? []);
-    @endphp
-
-    @if(!empty($additionalImages) && is_array($additionalImages))
-        <div class="mt-2 flex flex-wrap gap-4">
-            @foreach($additionalImages as $img)
-               
-
-                <div class="relative group">
-    <img src="{{ asset('storage/' . $img) }}" 
-         alt="Imagen Adicional" 
-         class="h-20 w-20 object-cover rounded-md cursor-pointer transition-transform duration-200 hover:scale-105" 
-         onclick="eliminarImagen(this, '{{ $img }}', {{ $index }})">
-
-    <input type="hidden" 
-           name="variants[{{ $index }}][delete_additional_images_urls][]" 
-           value="{{ $img }}" 
-           class="hidden-input-delete">
-</div>
-
-            @endforeach
-        </div>
-    @endif
-</div>
-
-
-            </div>
-        @empty
-            {{-- Variante vacía --}}
-            <div class="variant-item grid grid-cols-1 md:grid-cols-6 gap-4 mb-4 p-4 bg-gray-50 rounded-lg">
-                {{-- Aquí puedes replicar la estructura base vacía si lo deseas --}}
-                {{-- También podrías cargar con JavaScript una nueva variante dinámicamente --}}
-            </div>
-        @endforelse
-    </div>
-</div>
-
-
-                    {{-- Campo Imagen Principal --}}
-                    <div class="mt-6">
-                        <label class="block text-sm font-medium text-gray-700">Imagen Principal Actual:</label>
-                        
-                        @if ($artesania->imagen_principal)
+                    {{-- Input para subir nuevas imágenes --}}
+                    <div class="col-span-full mt-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Subir Nuevas Imágenes Generales:</label>
+                        <input type="file" name="imagenes_artesanias[]" multiple
+                               class="w-full text-sm border-gray-300 rounded-md shadow-sm @error('imagenes_artesanias.*') border-red-500 @enderror">
+                        @error('imagenes_artesanias.*')
+                            <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                        @enderror
+                    </div>
                     
-                            <img src="{{ Storage::url($artesania->imagen_principal) }}" alt="Imagen Principal" class="mt-2 h-48 w-auto object-cover rounded-md shadow-md">
-                        @else
-                            <p class="mt-2 text-gray-500">No hay imagen principal subida.</p>
-                        @endif
+                    <hr class="my-6">
 
-                        <label for="imagen_principal" class="block text-sm font-medium text-gray-700 mt-4">Cambiar Imagen Principal:</label>
-                        <input type="file" name="imagen_principal" id="imagen_principal"
-                               class="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100">
-                        <p class="mt-1 text-sm text-gray-500">Deja en blanco para mantener la imagen actual.</p>
-                        @error('imagen_principal')
-                            <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
-                        @enderror
+                    {{-- Sección de variantes --}}
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-lg font-medium text-gray-900">Variantes de la Artesanía</h3>
+                        <button type="button" id="add-variant" class="px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                            Añadir Nueva Variante
+                        </button>
                     </div>
+                    
+                    {{-- Contenedor de variantes existentes --}}
+                    <div id="variants-container">
+                        @foreach($artesania->variants as $variant)
+                            <div class="variant-item p-4 border rounded-md shadow-sm mb-4 bg-gray-50">
+                                {{-- Campo oculto para el ID de la variante --}}
+                                <input type="hidden" name="variants[{{ $loop->index }}][id]" value="{{ $variant->id }}">
 
-                    {{-- Campo Imágenes Adicionales (múltiples archivos) --}}
-                    <div class="mt-6">
-                        <label class="block text-sm font-medium text-gray-700">Imágenes Adicionales Actuales:</label>
-     
-                        @php
-                    $imagenes = $artesania->imagen_adicionales;
-
-                    if (is_string($imagenes)) {
-                        $imagenes = json_decode($imagenes, true);
-                    }
-
-                    $imagenes = is_array($imagenes) ? $imagenes : [];
-                @endphp
-
-                @if (count($imagenes))
-                    <div class="mt-2 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-                        @foreach ($imagenes as $imagePath)
-
-                                    <div class="relative">
-                                        {{-- Asegurarse de que $imagePath no sea nulo/vacío si algo falló --}}
-                                        @if ($imagePath)
-                                            <img src="{{ Storage::url($imagePath) }}" alt="Imagen Adicional" class="h-32 w-full object-cover rounded-md shadow-md">
-                                        @else
-                                            <div class="h-32 w-full bg-gray-200 flex items-center justify-center text-gray-500 text-xs rounded-md">Error de imagen</div>
-                                        @endif
-                                        {{-- Opcional: botón para eliminar imágenes individuales --}}
-                                        {{-- <button type="button" class="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 text-xs">X</button> --}}
+                                {{-- Botón para eliminar la variante existente --}}
+                                <div class="flex justify-end mb-2">
+                                    <button type="button" class="remove-existing-variant text-red-500 hover:text-red-700 text-sm" data-variant-id="{{ $variant->id }}">
+                                        Eliminar Variante
+                                    </button>
+                                </div>
+                                
+                                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                                    {{-- ... Campos de la variante pre-cargados ... --}}
+                                    <div>
+                                        <label for="variants[{{ $loop->index }}][sku]" class="block text-sm font-medium text-gray-700">SKU:</label>
+                                        <input type="text" name="variants[{{ $loop->index }}][sku]" id="variants[{{ $loop->index }}][sku]" value="{{ old('variants.' . $loop->index . '.sku', $variant->sku) }}"
+                                               class="mt-1 block w-full border-gray-300 rounded-md shadow-sm" required>
                                     </div>
-                                @endforeach
+                                    <div>
+                                        <label for="variants[{{ $loop->index }}][variant_name]" class="block text-sm font-medium text-gray-700">Nombre de la Variante:</label>
+                                        <input type="text" name="variants[{{ $loop->index }}][variant_name]" id="variants[{{ $loop->index }}][variant_name]" value="{{ old('variants.' . $loop->index . '.variant_name', $variant->variant_name) }}"
+                                               class="mt-1 block w-full border-gray-300 rounded-md shadow-sm">
+                                    </div>
+                                    <div>
+                                        <label for="variants[{{ $loop->index }}][size]" class="block text-sm font-medium text-gray-700">Talla:</label>
+                                        <input type="text" name="variants[{{ $loop->index }}][size]" id="variants[{{ $loop->index }}][size]" value="{{ old('variants.' . $loop->index . '.size', $variant->size) }}"
+                                               class="mt-1 block w-full border-gray-300 rounded-md shadow-sm">
+                                    </div>
+                                    <div>
+                                        <label for="variants[{{ $loop->index }}][color]" class="block text-sm font-medium text-gray-700">Color:</label>
+                                        <input type="text" name="variants[{{ $loop->index }}][color]" id="variants[{{ $loop->index }}][color]" value="{{ old('variants.' . $loop->index . '.color', $variant->color) }}"
+                                               class="mt-1 block w-full border-gray-300 rounded-md shadow-sm">
+                                    </div>
+                                    <div>
+                                        <label for="variants[{{ $loop->index }}][material_variant]" class="block text-sm font-medium text-gray-700">Material:</label>
+                                        <input type="text" name="variants[{{ $loop->index }}][material_variant]" id="variants[{{ $loop->index }}][material_variant]" value="{{ old('variants.' . $loop->index . '.material_variant', $variant->material_variant) }}"
+                                               class="mt-1 block w-full border-gray-300 rounded-md shadow-sm">
+                                    </div>
+                                    <div>
+                                        <label for="variants[{{ $loop->index }}][precio]" class="block text-sm font-medium text-gray-700">Precio:</label>
+                                        <input type="number" name="variants[{{ $loop->index }}][precio]" id="variants[{{ $loop->index }}][precio]" step="0.01" value="{{ old('variants.' . $loop->index . '.precio', $variant->precio) }}"
+                                               class="mt-1 block w-full border-gray-300 rounded-md shadow-sm" required>
+                                    </div>
+                                    <div>
+                                        <label for="variants[{{ $loop->index }}][stock]" class="block text-sm font-medium text-gray-700">Stock:</label>
+                                        <input type="number" name="variants[{{ $loop->index }}][stock]" id="variants[{{ $loop->index }}][stock]" value="{{ old('variants.' . $loop->index . '.stock', $variant->stock) }}"
+                                               class="mt-1 block w-full border-gray-300 rounded-md shadow-sm">
+                                    </div>
+                                    <div class="col-span-full">
+                                        <label for="variants[{{ $loop->index }}][description_variant]" class="block text-sm font-medium text-gray-700">Descripción de la Variante:</label>
+                                        <textarea name="variants[{{ $loop->index }}][description_variant]" id="variants[{{ $loop->index }}][description_variant]" rows="2"
+                                                  class="mt-1 block w-full border-gray-300 rounded-md shadow-sm">{{ old('variants.' . $loop->index . '.description_variant', $variant->description_variant) }}</textarea>
+                                    </div>
+                                    <div>
+                                        <label for="variants[{{ $loop->index }}][tipo_embalaje_id]" class="block text-sm font-medium text-gray-700">Tipo de Embalaje:</label>
+                                        <select name="variants[{{ $loop->index }}][tipo_embalaje_id]" id="variants[{{ $loop->index }}][tipo_embalaje_id]"
+                                                class="mt-1 block w-full border-gray-300 rounded-md shadow-sm">
+                                            <option value="">Seleccione un embalaje</option>
+                                            @foreach ($tipos_embalaje as $tipo)
+                                                <option value="{{ $tipo->id }}" {{ old('variants.' . $loop->index . '.tipo_embalaje_id', $variant->tipo_embalaje_id) == $tipo->id ? 'selected' : '' }}>
+                                                    {{ $tipo->nombre }}
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                    <div class="flex items-center">
+                                        <input type="checkbox" name="variants[{{ $loop->index }}][is_active]" value="1"
+                                               class="rounded border-gray-300 text-indigo-600 shadow-sm" {{ old('variants.' . $loop->index . '.is_active', $variant->is_active) ? 'checked' : '' }}>
+                                        <label class="ml-2 block text-sm font-medium text-gray-700">Activa</label>
+                                    </div>
+                                </div>
+                                {{-- Sección de imágenes existentes de la variante --}}
+                                <div class="col-span-full mt-4">
+                                    <h5 class="text-sm font-medium text-gray-800">Imágenes de la Variante Existentes</h5>
+                                    <div class="mt-2 grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                                        @foreach(($variant->imagen_variant) as $variantImageUrl)
+                                            <div class="relative group">
+                                                <img src="{{ asset('storage/' . str_replace('storage/', '', $variantImageUrl)) }}" alt="Imagen de variante" class="w-full h-auto object-cover rounded-md shadow">
+                                                <div class="absolute inset-0 bg-red-500 opacity-0 group-hover:opacity-75 transition-opacity duration-300 flex items-center justify-center rounded-md">
+                                                    <label class="text-white text-sm font-bold cursor-pointer">
+                                                        Eliminar
+                                                        <input type="checkbox" name="delete_variant_images[{{ $variant->id }}][]" value="{{ $variantImageUrl }}" class="hidden">
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        @endforeach
+                                    </div>
+                                </div>
+                                {{-- Input para subir nuevas imágenes a esta variante --}}
+                                <div class="col-span-full mt-4">
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Subir Nuevas Imágenes a esta Variante:</label>
+                                    <input type="file" name="variants[{{ $loop->index }}][new_variant_images][]" multiple
+                                           class="w-full text-sm border-gray-300 rounded-md shadow-sm">
+                                </div>
                             </div>
-                        @else
-                            <p class="mt-2 text-gray-500">No hay imágenes adicionales subidas.</p>
-                        @endif
-          
-                        <label for="imagen_adicionales" class="block text-sm font-medium text-gray-700 mt-4">Añadir/Reemplazar Imágenes Adicionales:</label>
-                        <input type="file" name="imagen_adicionales[]" id="imagen_adicionales" multiple
-                               class="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100">
-                        <p class="mt-1 text-sm text-gray-500">Selecciona nuevos archivos para añadir o reemplazar los existentes.</p>
-                        @error('imagen_adicionales')
-                            <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
-                        @enderror
-                        @error('imagen_adicionales.*')
-                            <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
-                        @enderror
-                    </div>
+                        @endforeach
 
-                    <div class="mt-8 flex justify-end space-x-4 border-t pt-6">
-                        <a href="{{ route('admin.artesanias.index') }}" class="inline-flex items-center px-4 py-2 bg-gray-200 border border-transparent rounded-md font-semibold text-xs text-gray-700 uppercase tracking-widest hover:bg-gray-300 focus:bg-gray-300 active:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150">
-                            Cancelar
-                        </a>
-                        <button type="submit" class="inline-flex items-center px-4 py-2 bg-indigo-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-indigo-700 focus:bg-indigo-700 active:bg-indigo-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150">
+                        {{-- Aquí se añadirán las nuevas variantes dinámicamente --}}
+                    </div>
+                    
+                    <div class="flex justify-end mt-6">
+                        <button type="submit" class="px-6 py-2 bg-indigo-600 text-white font-semibold rounded-md shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
                             Actualizar Artesanía
                         </button>
                     </div>
                 </form>
+
             </div>
         </div>
     </div>
-@section('js')
-<script>
-    function eliminarImagen(imgElement, imageUrl, index) {
-        // Oculta visualmente la imagen
-        imgElement.closest('.group').remove();
+    
+    @push('scripts')
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const variantsContainer = document.getElementById('variants-container');
+            const addVariantButton = document.getElementById('add-variant');
+            let variantIndex = {{ $artesania->variants->count() }};
+            const tiposEmbalaje = @json($tipos_embalaje);
 
-        // Crea un input hidden para marcar la imagen como eliminada
-        const input = document.createElement('input');
-        input.type = 'hidden';
-        input.name = `variants[${index}][delete_additional_images_urls][]`;
-        input.value = imageUrl;
-        document.querySelector('form').appendChild(input);
-    }
-</script>
+            addVariantButton.addEventListener('click', function () {
+                const embalajeOptions = tiposEmbalaje.map(tipo => `<option value="${tipo.id}">${tipo.nombre}</option>`).join('');
 
-@endsection
+                const variantHtml = `
+                    <div class="variant-item p-4 border rounded-md shadow-sm mb-4 bg-gray-50">
+                        <div class="flex justify-end mb-2">
+                             <button type="button" class="remove-new-variant text-red-500 hover:text-red-700 text-sm">
+                                Eliminar Variante
+                            </button>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                            {{-- ... Campos de la nueva variante ... --}}
+                            <div>
+                                <label for="variants[${variantIndex}][sku]" class="block text-sm font-medium text-gray-700">SKU:</label>
+                                <input type="text" name="variants[${variantIndex}][sku]" id="variants[${variantIndex}][sku]"
+                                       class="mt-1 block w-full border-gray-300 rounded-md shadow-sm" required>
+                            </div>
+                            <div>
+                                <label for="variants[${variantIndex}][variant_name]" class="block text-sm font-medium text-gray-700">Nombre de la Variante:</label>
+                                <input type="text" name="variants[${variantIndex}][variant_name]" id="variants[${variantIndex}][variant_name]"
+                                       class="mt-1 block w-full border-gray-300 rounded-md shadow-sm">
+                            </div>
+                            <div>
+                                <label for="variants[${variantIndex}][size]" class="block text-sm font-medium text-gray-700">Talla:</label>
+                                <input type="text" name="variants[${variantIndex}][size]" id="variants[${variantIndex}][size]"
+                                       class="mt-1 block w-full border-gray-300 rounded-md shadow-sm">
+                            </div>
+                            <div>
+                                <label for="variants[${variantIndex}][color]" class="block text-sm font-medium text-gray-700">Color:</label>
+                                <input type="text" name="variants[${variantIndex}][color]" id="variants[${variantIndex}][color]"
+                                       class="mt-1 block w-full border-gray-300 rounded-md shadow-sm">
+                            </div>
+                            <div>
+                                <label for="variants[${variantIndex}][material_variant]" class="block text-sm font-medium text-gray-700">Material:</label>
+                                <input type="text" name="variants[${variantIndex}][material_variant]" id="variants[${variantIndex}][material_variant]"
+                                       class="mt-1 block w-full border-gray-300 rounded-md shadow-sm">
+                            </div>
+                            <div>
+                                <label for="variants[${variantIndex}][precio]" class="block text-sm font-medium text-gray-700">Precio:</label>
+                                <input type="number" name="variants[${variantIndex}][precio]" id="variants[${variantIndex}][precio]" step="0.01"
+                                       class="mt-1 block w-full border-gray-300 rounded-md shadow-sm" required>
+                            </div>
+                            <div>
+                                <label for="variants[${variantIndex}][stock]" class="block text-sm font-medium text-gray-700">Stock:</label>
+                                <input type="number" name="variants[${variantIndex}][stock]" id="variants[${variantIndex}][stock]"
+                                       class="mt-1 block w-full border-gray-300 rounded-md shadow-sm">
+                            </div>
+                            <div class="col-span-full">
+                                <label for="variants[${variantIndex}][description_variant]" class="block text-sm font-medium text-gray-700">Descripción de la Variante:</label>
+                                <textarea name="variants[${variantIndex}][description_variant]" id="variants[${variantIndex}][description_variant]" rows="2"
+                                          class="mt-1 block w-full border-gray-300 rounded-md shadow-sm"></textarea>
+                            </div>
+                            <div>
+                                <label for="variants[${variantIndex}][tipo_embalaje_id]" class="block text-sm font-medium text-gray-700">Tipo de Embalaje:</label>
+                                <select name="variants[${variantIndex}][tipo_embalaje_id]" id="variants[${variantIndex}][tipo_embalaje_id]"
+                                        class="mt-1 block w-full border-gray-300 rounded-md shadow-sm">
+                                    <option value="">Seleccione un embalaje</option>
+                                    ${embalajeOptions}
+                                </select>
+                            </div>
+                            <div class="flex items-center">
+                                <input type="checkbox" name="variants[${variantIndex}][is_active]" value="1"
+                                       class="rounded border-gray-300 text-indigo-600 shadow-sm" checked>
+                                <label class="ml-2 block text-sm font-medium text-gray-700">Activa</label>
+                            </div>
+                            <div class="col-span-full mt-4">
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Imágenes de la Variante (Principal y Adicionales)</label>
+                                <input type="file" name="variants[${variantIndex}][new_variant_images][]" multiple
+                                       class="w-full text-sm border-gray-300 rounded-md shadow-sm">
+                            </div>
+                        </div>
+                    </div>
+                `;
+                variantsContainer.insertAdjacentHTML('beforeend', variantHtml);
+                variantIndex++;
+            });
+            
+            // Lógica para eliminar variantes nuevas
+            variantsContainer.addEventListener('click', function (e) {
+                if (e.target.classList.contains('remove-new-variant')) {
+                    e.target.closest('.variant-item').remove();
+                }
+            });
+            
+            // Lógica para marcar variantes existentes para eliminación
+            document.querySelectorAll('.remove-existing-variant').forEach(button => {
+                button.addEventListener('click', function() {
+                    const variantId = this.dataset.variantId;
+                    const confirmation = confirm('¿Estás seguro de que quieres eliminar esta variante? Esto no se puede deshacer.');
+                    if (confirmation) {
+                        // Puedes enviar una solicitud AJAX aquí o marcar un input hidden para que el controlador lo procese.
+                        // Por simplicidad, aquí lo ocultamos y lo marcamos para que el controlador lo elimine.
+                        const variantItem = this.closest('.variant-item');
+                        variantItem.style.display = 'none';
+                        variantItem.innerHTML += `<input type="hidden" name="variants_to_delete[]" value="${variantId}">`;
+                    }
+                });
+            });
+        });
+    </script>
+    @endpush
 </x-app-layout>

@@ -1,14 +1,11 @@
 <?php
 
-/**
- * Created by Reliese Model.
- */
-
 namespace App\Models;
 
-use Carbon\Carbon;
-use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
  * Class ArtesaniaVariant
@@ -21,56 +18,75 @@ use Illuminate\Database\Eloquent\Model;
  * @property string|null $size
  * @property string|null $color
  * @property string|null $material_variant
- * @property float $price_adjustment
+ * @property float $precio
  * @property int $stock
- * @property string|null $image
- * @property array|null $additional_images_urls // Changed to array for JSON column
- * @property bool $is_main
+ * @property string|null $imagen_variant
+ * @property int|null $tipo_embalaje_id
  * @property bool $is_active
- * @property Carbon|null $created_at
- * @property Carbon|null $updated_at
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
  *
  * @property Artesania $artesania
- * @property Collection|CartItem[] $cart_items
- *
- * @package App\Models
+ * @property TipoEmbalaje|null $tipoEmbalaje
+ * @property \Illuminate\Database\Eloquent\Collection|AtributoArtesaniaVariant[] $atributos
  */
 class ArtesaniaVariant extends Model
 {
-    protected $table = 'artesania_variants';
+    use HasFactory;
 
-    protected $casts = [
-        'artesania_id' => 'int',
-        'price_adjustment' => 'float',
-        'stock' => 'int',
-        'additional_images_urls' => 'array', // Crucial for JSON column
-        'is_main' => 'boolean',
-        'is_active' => 'boolean',
-    ];
+    protected $table = 'artesania_variants';
 
     protected $fillable = [
         'artesania_id',
         'sku',
-        'variant_name', // Added from migration
-        'description_variant', // Added from migration
+        'variant_name',
+        'description_variant',
         'size',
         'color',
         'material_variant',
-        'price_adjustment',
+        'precio',
         'stock',
-        'image',
-        'additional_images_urls', // Crucial: Added to fillable
-        'is_main', // Added from migration
-        'is_active', // Added from migration
+        'imagen_variant',
+        'tipo_embalaje_id',
+        'is_active',
     ];
 
-    public function artesania()
+    protected $casts = [
+        'is_active' => 'boolean',
+        'precio' => 'float',
+        'stock' => 'integer',
+        'imagen_variant' => 'array',
+    ];
+
+    /**
+     * Get the artesania that owns the variant.
+     */
+    public function artesania(): BelongsTo
     {
         return $this->belongsTo(Artesania::class);
     }
 
-    public function cart_items()
+    /**
+     * Get the packaging type for the variant.
+     */
+    public function tipoEmbalaje(): BelongsTo
     {
-        return $this->hasMany(CartItem::class);
+        return $this->belongsTo(TipoEmbalaje::class);
+    }
+
+    /**
+     * Get the custom attributes for the variant.
+     */
+    public function atributos(): HasMany
+    {
+        return $this->hasMany(AtributoArtesaniaVariant::class);
+    }
+
+    /**
+     * Accessor to get the first image from the imagen_variant array.
+     */
+    public function getImagenPrincipalAttribute()
+    {
+        return $this->imagen_variant[0] ?? null;
     }
 }

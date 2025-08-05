@@ -20,8 +20,9 @@
                 @foreach ($artesanias as $artesania)
                     <div class="bg-oaxaca-card-bg rounded-xl shadow-lg overflow-hidden transform transition-all duration-300 hover:scale-105 hover:shadow-xl group border border-oaxaca-primary border-opacity-10">
                         <a href="{{ route('artesanias.show', $artesania->slug) }}">
-                            @if ($artesania->imagen_principal)
-                                <img src="{{ asset('storage/' . $artesania->imagen_principal) }}" alt="{{ $artesania->nombre }}"
+                            {{-- Corrección aquí: Acceder a la relación y luego a la propiedad 'ruta' --}}
+                            @if ($artesania->imagenPrincipal)
+                                <img src="{{ asset('storage/' . $artesania->imagenPrincipal->ruta) }}" alt="{{ $artesania->nombre }}"
                                      class="w-full h-64 object-cover object-center group-hover:opacity-90 transition-opacity duration-300">
                             @else
                                 <img src="{{ asset('storage/images/artesanias/placeholder-alebrije.jpg') }}" alt="Imagen no disponible"

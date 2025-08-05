@@ -92,14 +92,14 @@ public function agregar(Request $request)
                         'artesania_id' => $artesania->id,
                         'artesania_variant_id' => $variant->id,
                         'quantity' => $quantity,
-                        'price' => $artesania->precio + $variant->price_adjustment,
+                        'price' => $variant->precio, // ✅ CORREGIDO: Usar el precio de la variante
                     ]);
                 }
 
             } else {
                 // 🪴 Sin variante
                 // Asegurarse de que no estamos añadiendo una variante nula si la artesanía tiene variantes
-                if ($artesania->artesania_variants->isNotEmpty()) {
+                if ($artesania->variants->isNotEmpty()) { // ✅ CORREGIDO: Usar el nombre de relación 'variants'
                     return back()->with('error', 'Por favor, selecciona una variante para esta artesanía.');
                 }
 
@@ -133,11 +133,6 @@ public function agregar(Request $request)
         });
     }
 
-    /**
-     * Muestra el contenido del carrito del usuario.
-     *
-     * @return \Illuminate\View\View|\Illuminate\Http\RedirectResponse
-     */
     public function mostrar()
     {
         if (!Auth::check()) {
@@ -146,7 +141,7 @@ public function agregar(Request $request)
 
         $cart = $this->getOrCreateCart();
         // Cargar las relaciones 'artesania' y 'artesania_variant'
-        $cartItems = $cart->cart_items()->with(['artesania', 'artesania_variant'])->get();
+        $cartItems = $cart->cart_items()->with(['artesania', 'artesania_variant'])->get(); // ✅ CORREGIDO: Eliminada la relación 'imagenPrincipal'
 
         $total = $cartItems->sum(function ($item) {
             // El precio del item de carrito ya incluye el ajuste de la variante

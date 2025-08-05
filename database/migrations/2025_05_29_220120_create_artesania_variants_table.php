@@ -11,26 +11,30 @@ return new class extends Migration
      */
     public function up(): void
     {
-         Schema::create('artesania_variants', function (Blueprint $table) {
-        $table->id();
-        $table->foreignId('artesania_id')->constrained()->onDelete('cascade'); // La variante pertenece a una artesanía principal
+        Schema::create('artesania_variants', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('artesania_id')->constrained('artesanias')->onDelete('cascade')->comment('Foreign key to the artesanias table (general product)');
 
-        $table->string('sku')->unique()->nullable()->comment('Stock Keeping Unit (Código de Identificación de la Variación)');
-        // --- Nuevos campos completos ---
-        $table->string('variant_name')->nullable()->comment('Nombre de la variante (ej. Playera Azul)');
-        $table->text('description_variant')->nullable()->comment('Descripción corta de la variante');
-        $table->string('size')->nullable()->comment('Talla (ej. S, M, L, XL)');
-        $table->string('color')->nullable()->comment('Color (ej. Rojo, Azul)');
-        $table->string('material_variant')->nullable()->comment('Material de la variante (ej. Algodón, Seda)');
-     $table->decimal('price_adjustment', 10, 2)->default(0.00)->comment('Ajuste de precio para esta variante');
-        $table->integer('stock')->default(0)->comment('Inventario específico para esta variante');
-        $table->string('image')->nullable()->comment('Imagen específica para esta variante');
-        $table->json('additional_images_urls')->nullable()->comment('URLs de imágenes adicionales para esta variante');
-        $table->boolean('is_main')->default(false)->comment('Indica si esta variante es la principal');
-        $table->boolean('is_active')->default(true)->comment('Indica si la variante está activa');
+            $table->string('sku')->unique()->comment('Unique SKU code for this specific variant');
+            $table->string('variant_name')->nullable()->comment('Descriptive name of the variant (e.g., White Guayabera Size M)');
+            $table->text('description_variant')->nullable()->comment('Short specific description of this variant');
 
-        $table->timestamps();
-    });
+            // Fixed and common attributes for variants
+            $table->string('size')->nullable()->comment('Size of the variant (e.g., S, M, L, 28, 30)');
+            $table->string('color')->nullable()->comment('Color of the variant (e.g., Blue, Red, Natural)');
+            $table->string('material_variant')->nullable()->comment('Main material of this variant (e.g., Cotton, Linen, Leather)');
+
+            $table->decimal('precio', 10, 2)->comment('Specific price of this variant');
+            $table->integer('stock')->default(0)->comment('Specific inventory for this variant');
+            $table->json('imagen_variant')->nullable()->comment('URL of the main image of this variant');
+            // --- ADJUSTED SHIPPING FIELDS ---
+            $table->foreignId('tipo_embalaje_id')->nullable()->constrained('tipos_embalaje')->onDelete('set null')->comment('ID of the predefined packaging type for this variant');
+            $table->decimal('peso_item_kg', 8, 2)->default(0.00)->comment('Weight of the craft item without packaging in KG'); // 
+
+            $table->boolean('is_active')->default(true)->comment('Indicates if the variant is active');
+
+            $table->timestamps();
+        });
     }
 
     /**
@@ -40,4 +44,5 @@ return new class extends Migration
     {
         Schema::dropIfExists('artesania_variants');
     }
+
 };

@@ -4,10 +4,11 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use App\Models\Artesania;
+use App\Models\ArtesaniaVariant;
 use App\Models\Categoria;
 use App\Models\Ubicacion;
-// Si tienes un modelo Artesano, asegúrate de importarlo
-// use App\Models\Artesano;
+use App\Models\TipoEmbalaje;
+use Illuminate\Support\Str; // Importar la clase Str para generar slugs
 
 class ArtesaniaSeeder extends Seeder
 {
@@ -16,134 +17,170 @@ class ArtesaniaSeeder extends Seeder
      */
     public function run(): void
     {
-        // Asegúrate de que los seeders de Categoria y Ubicacion se ejecuten antes.
-        // Ejemplo: $this->call(CategoriaSeeder::class);
-        // $this->call(UbicacionSeeder::class);
-
-        // Obtener IDs de categorías y ubicaciones existentes
+        // Obtener IDs de las dependencias por nombre. Esto es más seguro que usar IDs fijos.
         $alebrijesCat = Categoria::where('nombre', 'Alebrijes')->first();
         $barroNegroCat = Categoria::where('nombre', 'Barro Negro')->first();
-        $textilesCat = Categoria::where('nombre', 'Textiles')->first();
         $barroRojoCat = Categoria::where('nombre', 'Barro Rojo')->first();
+        $textilesCat = Categoria::where('nombre', 'Textiles')->first();
+        $calzadosCat = Categoria::where('nombre', 'Calzados')->first();
 
-        $tilcajeteUbi = Ubicacion::where('nombre', 'San Martín Tilcajete')->first();
-        $coyotepecUbi = Ubicacion::where('nombre', 'San Bartolo Coyotepec')->first();
-        $teotitlanUbi = Ubicacion::where('nombre', 'Teotitlán del Valle')->first();
-        $oaxacaJuarezUbi = Ubicacion::where('nombre', 'Oaxaca de Juárez')->first();
+        $sanMartin = Ubicacion::where('nombre', 'San Martín Tilcajete')->first();
+        $coyotepec = Ubicacion::where('nombre', 'San Bartolo Coyotepec')->first();
+        $oaxaca = Ubicacion::where('nombre', 'Oaxaca de Juárez')->first();
+        $teotitlan = Ubicacion::where('nombre', 'Teotitlán del Valle')->first();
 
-        // Validar que las categorías y ubicaciones existen antes de usarlas
-        if (!$alebrijesCat || !$barroNegroCat || !$textilesCat || !$barroRojoCat ||
-            !$tilcajeteUbi || !$coyotepecUbi || !$teotitlanUbi || !$oaxacaJuarezUbi) {
-            $this->command->warn('¡Advertencia! Asegúrate de que CategoriaSeeder y UbicacionSeeder se hayan ejecutado ANTES.');
-            $this->command->info('No se crearán artesanías porque faltan categorías o ubicaciones de referencia.');
-            return; // Detener la ejecución si faltan datos esenciales
+        $cajaMedianaBarro = TipoEmbalaje::where('nombre', 'Caja Mediana para Barro')->first();
+        $cajaGrandeBarro = TipoEmbalaje::where('nombre', 'Caja Grande para Barro')->first();
+        $sobreGuayabera = TipoEmbalaje::where('nombre', 'Sobre para Guayabera')->first();
+        $cajaPequenaCalzado = TipoEmbalaje::where('nombre', 'Caja Pequeña para Calzado')->first();
+
+        // Validar que todas las dependencias existen antes de continuar
+        if (!$alebrijesCat || !$barroNegroCat || !$barroRojoCat || !$textilesCat || !$calzadosCat ||
+            !$sanMartin || !$coyotepec || !$oaxaca || !$teotitlan ||
+            !$cajaMedianaBarro || !$cajaGrandeBarro || !$sobreGuayabera || !$cajaPequenaCalzado
+        ) {
+            $this->command->warn('¡Advertencia! Faltan categorías, ubicaciones o tipos de embalaje de referencia. El ArtesaniaSeeder se ha detenido.');
+            return;
         }
 
-
-        // NOTA IMPORTANTE:
-        // Asegúrate de que las dimensiones (weight, length, width, height)
-        // ya incluyan el embalaje individual para cada artesanía.
-        // Si la columna 'tecnica_empleada' no existe en tu tabla 'artesanias',
-        // necesitarás una migración para añadirla.
-
-        Artesania::firstOrCreate(
-            ['nombre' => 'Alebrije de Nahual'], // Criterio para buscar y evitar duplicados
+        // Alebrijes
+        $nahualArtesania = Artesania::firstOrCreate(
+            ['nombre' => 'Alebrije de Nahual'],
             [
-            'descripcion' => 'Impresionante figura de nahual tallada en copal y pintada a mano con intrincados detalles y colores vivos.',
-            'precio' => 1250.00,
-            'stock' => 5,
-            'imagen_principal' => 'images/artesanias/placeholder-alebrije.jpg',
-            'imagen_adicionales' => json_encode([
-                'images/artesanias/alebrije-nahual-lado.jpg',
-                'images/artesanias/alebrije-nahual-detalle.jpg',
-            ]),
-            'materiales' => 'Madera de copal, pigmentos naturales',
-            'historia_piezas' => 'Inspirado en la cosmovisión zapoteca sobre los nahuales.',
-            'categoria_id' => $alebrijesCat->id,
-            'ubicacion_id' => $tilcajeteUbi->id,
-            //'tecnica_empleada' => 'Talla en madera y pintura a mano',
-            // --- DATOS DE DIMENSIONES Y PESO (CON EMBALAJE) ---
-            'weight' => 1.0, // Peso en KG
-            'length' => 30.0, // Largo en CM
-            'width' => 20.0, // Ancho en CM
-            'height' => 25.0, // Alto en CM
-            // -------------------------------------------------
-            // 'artesano_id' => $artesano1->id, // Descomentar si tienes artesanos
-        ]);
+                'slug' => Str::slug('Alebrije de Nahual'),
+                'descripcion' => 'Impresionante figura de nahual tallada en copal y pintada a mano con intrincados detalles y colores vivos.',
+                'imagen_artesanias' => 'images/artesanias/general/alebrije_nahual_general_1.jpg',
+                'historia_piezas_general' => 'Inspirado en la cosmovisión zapoteca sobre los nahuales, cada pieza es única.',
+                'precio' => 1500.00, // Precio base
+                'weight' => 0.5,
+                'length' => 20.0,
+                'width' => 15.0,
+                'height' => 30.0,
+                'categoria_id' => $alebrijesCat->id,
+                'ubicacion_id' => $sanMartin->id,
+            ]
+        );
 
-        Artesania::firstOrCreate(
+        ArtesaniaVariant::firstOrCreate(
+            ['sku' => 'ALE-NAH-001'],
+            [
+                'artesania_id' => $nahualArtesania->id,
+                'variant_name' => 'Alebrije de Nahual - Grande',
+                'description_variant' => 'Nahual de gran tamaño con colores vibrantes.',
+                'size' => 'Grande',
+                'color' => 'Multicolor',
+                'material_variant' => 'Madera de Copal',
+                'precio' => 1500.00,
+                'stock' => 5,
+                'imagen_variant' => 'images/artesanias/variantes/alebrije_nahual_1_principal.jpg',
+                'tipo_embalaje_id' => $cajaMedianaBarro->id,
+                'is_active' => true,
+            ]
+        );
+
+        // Barro Negro
+        $cantaroArtesania = Artesania::firstOrCreate(
             ['nombre' => 'Cántaro de Barro Negro'],
             [
-            'descripcion' => 'Elegante cántaro de barro negro, pulido a mano para lograr su característico brillo metálico y detalles grabados.',
-            'precio' => 450.00,
-            'stock' => 10,
-            'imagen_principal' => 'images/artesanias/barro_placeholder.jpg',
-            'imagen_adicionales' => json_encode([
-                'images/artesanias/cantaro-barro-negro-pulido.jpg',
-                'images/artesanias/cantaro-barro-negro-textura.jpg',
-            ]),
-            'materiales' => 'Barro negro',
-            'historia_piezas' => 'Pieza tradicional de San Bartolo Coyotepec, elaborada con técnicas ancestrales.',
-            'categoria_id' => $barroNegroCat->id,
-            'ubicacion_id' => $coyotepecUbi->id,
-            //'tecnica_empleada' => 'Modelado y pulido de barro',
-            // --- DATOS DE DIMENSIONES Y PESO (CON EMBALAJE) ---
-            'weight' => 1.5, // Peso en KG
-            'length' => 20.0, // Largo en CM
-            'width' => 20.0, // Ancho en CM
-            'height' => 25.0, // Alto en CM
-            // -------------------------------------------------
-            // 'artesano_id' => $artesano2->id, // Descomentar si tienes artesanos
-        ]);
+                'slug' => Str::slug('Cántaro de Barro Negro'),
+                'descripcion' => 'Cántaro tradicional de barro negro pulido, con grabados de flores y grecas.',
+                'imagen_artesanias' => 'images/artesanias/general/cantaro_barro_negro_general_1.jpg',
+                'historia_piezas_general' => 'Hecho en San Bartolo Coyotepec, esta técnica data de tiempos prehispánicos y se caracteriza por su brillo metálico.',
+                'precio' => 850.00,
+                'weight' => 1.2,
+                'length' => 18.0,
+                'width' => 18.0,
+                'height' => 25.0,
+                'categoria_id' => $barroNegroCat->id,
+                'ubicacion_id' => $coyotepec->id,
+            ]
+        );
 
-        Artesania::firstOrCreate(
-            ['nombre' => 'Rebozo Zapoteca de Lana'],
+        ArtesaniaVariant::firstOrCreate(
+            ['sku' => 'BN-CAN-001'],
             [
-            'descripcion' => 'Rebozo de lana tejido en telar de cintura, con patrones zapotecas y tintes naturales a base de grana cochinilla y añil.',
-            'precio' => 980.00,
-            'stock' => 3,
-            'imagen_principal' => 'images/artesanias/textil_placeholder.jpg',
-            'imagen_adicionales' => json_encode([
-                'images/artesanias/rebozo-detalle-hilo.jpg',
-                'images/artesanias/rebozo-en-uso.jpg',
-            ]),
-            'materiales' => 'Lana de oveja, tintes naturales',
-            'historia_piezas' => 'Representa el arduo trabajo y la herencia textil de Teotitlán del Valle.',
-            'categoria_id' => $textilesCat->id,
-            'ubicacion_id' => $teotitlanUbi->id,
-           // 'tecnica_empleada' => 'Telar de cintura y tintes naturales',
-            // --- DATOS DE DIMENSIONES Y PESO (CON EMBALAJE) ---
-            'weight' => 0.6, // Peso en KG
-            'length' => 30.0, // Largo en CM
-            'width' => 25.0, // Ancho en CM
-            'height' => 5.0, // Alto en CM
-            // -------------------------------------------------
-            // 'artesano_id' => $artesano3->id, // Descomentar si tienes artesanos
-        ]);
+                'artesania_id' => $cantaroArtesania->id,
+                'variant_name' => 'Cántaro de Barro Negro - Grande',
+                'description_variant' => 'Cántaro grande con detalles intrincados.',
+                'size' => 'Grande',
+                'color' => 'Negro',
+                'material_variant' => 'Arcilla de Barro Negro',
+                'precio' => 850.00,
+                'stock' => 8,
+                'imagen_variant' => 'images/artesanias/variantes/cantaro_bn_1_principal.jpg',
+                'tipo_embalaje_id' => $cajaGrandeBarro->id,
+                'is_active' => true,
+            ]
+        );
+        
+        // Textiles
+        $huipilArtesania = Artesania::firstOrCreate(
+            ['nombre' => 'Huipil Tradicional de Teotitlán'],
+            [
+                'slug' => Str::slug('Huipil Tradicional de Teotitlán'),
+                'descripcion' => 'Huipil de algodón tejido en telar de cintura, con bordados de flores y fauna local.',
+                'imagen_artesanias' => 'images/artesanias/general/huipil_teotitlan_general_1.jpg',
+                'historia_piezas_general' => 'Elaborado por maestras tejedoras de Teotitlán del Valle, cada huipil cuenta una historia de la comunidad.',
+                'precio' => 1200.00,
+                'weight' => 0.4,
+                'length' => 50.0,
+                'width' => 35.0,
+                'height' => 5.0,
+                'categoria_id' => $textilesCat->id,
+                'ubicacion_id' => $teotitlan->id,
+            ]
+        );
 
-        Artesania::firstOrCreate(
-            ['nombre' => 'Vajilla de Barro Rojo (4 Piezas)'],
+        ArtesaniaVariant::firstOrCreate(
+            ['sku' => 'TEX-HUI-001'],
             [
-            'descripcion' => 'Set de platos y tazas de barro rojo, cocidos a altas temperaturas, ideales para dar un toque rústico y auténtico a tu mesa.',
-            'precio' => 720.00,
-            'stock' => 7,
-            'imagen_principal' => 'images/artesanias/barro_placeholder.jpg',
-            'imagen_adicionales' => json_encode([
-                'images/artesanias/vajilla-vista-superior.jpg',
-                'images/artesanias/vajilla-copal.jpg',
-            ]),
-            'materiales' => 'Barro rojo',
-            'historia_piezas' => 'Elaborado por alfareros oaxaqueños con tradición en el arte del barro rojo.',
-            'categoria_id' => $barroRojoCat->id,
-            'ubicacion_id' => $oaxacaJuarezUbi->id,
-            //'tecnica_empleada' => 'Alfarería de barro rojo',
-            // --- DATOS DE DIMENSIONES Y PESO (CON EMBALAJE) ---
-            'weight' => 3.0, // Peso en KG
-            'length' => 35.0, // Largo en CM
-            'width' => 30.0, // Ancho en CM
-            'height' => 20.0, // Alto en CM
-            // -------------------------------------------------
-            // 'artesano_id' => $artesano4->id, // Descomentar si tienes artesanos
-        ]);
+                'artesania_id' => $huipilArtesania->id,
+                'variant_name' => 'Huipil Rojo con Flores',
+                'description_variant' => 'Huipil con fondo rojo intenso y bordados multicolor.',
+                'size' => 'Unitalla',
+                'color' => 'Rojo',
+                'material_variant' => 'Algodón',
+                'precio' => 1200.00,
+                'stock' => 12,
+                'imagen_variant' => 'images/artesanias/variantes/huipil_rojo_1_principal.jpg',
+                'tipo_embalaje_id' => $sobreGuayabera->id,
+                'is_active' => true,
+            ]
+        );
+
+        // Calzados
+        $huaracheArtesania = Artesania::firstOrCreate(
+            ['nombre' => 'Huarache de Cuero Bordado'],
+            [
+                'slug' => Str::slug('Huarache de Cuero Bordado'),
+                'descripcion' => 'Huarache de cuero genuino con correas bordadas a mano, perfectos para cualquier ocasión.',
+                'imagen_artesanias' => 'images/artesanias/general/huarache_bordado_general_1.jpg',
+                'historia_piezas_general' => 'Este tipo de calzado ha sido parte de la tradición oaxaqueña por generaciones, combinando comodidad y arte.',
+                'precio' => 450.00,
+                'weight' => 0.8,
+                'length' => 30.0,
+                'width' => 12.0,
+                'height' => 10.0,
+                'categoria_id' => $calzadosCat->id,
+                'ubicacion_id' => $oaxaca->id,
+            ]
+        );
+
+        ArtesaniaVariant::firstOrCreate(
+            ['sku' => 'CAL-HUA-001'],
+            [
+                'artesania_id' => $huaracheArtesania->id,
+                'variant_name' => 'Huarache Talla 25',
+                'description_variant' => 'Huarache con bordado rojo, talla 25.',
+                'size' => '25',
+                'color' => 'Café/Rojo',
+                'material_variant' => 'Cuero/Hilo de algodón',
+                'precio' => 450.00,
+                'stock' => 15,
+                'imagen_variant' => 'images/artesanias/variantes/huarache_25_principal.jpg',
+                'tipo_embalaje_id' => $cajaPequenaCalzado->id,
+                'is_active' => true,
+            ]
+        );
     }
 }

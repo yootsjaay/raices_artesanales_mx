@@ -3,8 +3,8 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
-use App\Models\User; // <-- Asegúrate de que esta línea esté presente
-use Illuminate\Support\Facades\Hash; // <-- Asegúrate de que esta línea esté presente
+use App\Models\User;
+use Illuminate\Support\Facades\Hash;
 
 class DatabaseSeeder extends Seeder
 {
@@ -13,21 +13,23 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-   // Crear un usuario administrador específico
-       $this->call(RolesAndPermissionsSeeder::class);
+        // 1. Ejecutar seeders de dependencias primero (roles, ubicaciones, categorías, tipos de embalaje)
+        // Esto asegura que los datos referenciados existan antes de que se creen las artesanías.
+        $this->call(RolesAndPermissionsSeeder::class); // Si los roles son una dependencia para los usuarios
+        $this->call(UbicacionSeeder::class);
+        $this->call(CategoriaSeeder::class);
+        $this->call(TipoEmbalajeSeeder::class); // ¡Asegúrate de que este seeder exista!
 
-        $this->call([
-            UbicacionSeeder::class,
-            CategoriaSeeder::class,
-            ArtesaniaSeeder::class,
-        ]);
+        // 2. Ejecutar el seeder de Artesanías (que depende de los anteriores)
+        $this->call(ArtesaniaSeeder::class);
 
-          // Usuario Administrador (que también es el vendedor principal)
+        // 3. Crear usuarios (después de que los roles estén definidos, si RolesAndPermissionsSeeder los crea)
+        // Usuario Administrador (que también es el vendedor principal)
         $adminUser = User::firstOrCreate(
             ['email' => 'admin@example.com'], // Busca por email para evitar duplicados
             [
                 'name' => 'Admin Vendedor',
-                'password' => bcrypt('password'), 
+                'password' => Hash::make('password'), // Usa Hash::make() para bcrypt
                 'email_verified_at' => now(),
             ]
         );
@@ -38,7 +40,7 @@ class DatabaseSeeder extends Seeder
             ['email' => 'comprador1@example.com'],
             [
                 'name' => 'Comprador Uno',
-                'password' => bcrypt('password'), // 
+                'password' => Hash::make('password'), // Usa Hash::make() para bcrypt
                 'email_verified_at' => now(),
             ]
         );
@@ -49,12 +51,10 @@ class DatabaseSeeder extends Seeder
             ['email' => 'comprador2@example.com'],
             [
                 'name' => 'Comprador Dos',
-                'password' => bcrypt('password'), 
+                'password' => Hash::make('password'), // Usa Hash::make() para bcrypt
                 'email_verified_at' => now(),
             ]
         );
         $buyer2->assignRole('comprador'); // Le asignamos el rol 'comprador'
-
-      
     }
 }

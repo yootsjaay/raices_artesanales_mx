@@ -23,11 +23,16 @@
                                 @php
                                     // Determinar la imagen a mostrar (variante o principal)
                                     $itemImage = null;
-                                    if ($item->artesania_variant && $item->artesania_variant->image) {
-                                        $itemImage = asset('storage/' . $item->artesania_variant->image);
-                                    } elseif ($item->artesania->imagen_principal) {
-                                        $itemImage = asset('storage/' . $item->artesania->imagen_principal);
-                                    } else {
+                                    // Primero, intentar obtener la imagen principal de la VARIANTE
+                                    if ($item->artesania_variant && $item->artesania_variant->imagenPrincipal) {
+                                        $itemImage = asset('storage/' . $item->artesania_variant->imagenPrincipal->ruta);
+                                    }
+                                    // Si no hay imagen de variante, intentar obtener la imagen principal de la ARTESANÍA
+                                    elseif ($item->artesania->imagenPrincipal) {
+                                        $itemImage = asset('storage/' . $item->artesania->imagenPrincipal->ruta);
+                                    }
+                                    // Si no hay ninguna imagen, usar un placeholder
+                                    else {
                                         $itemImage = asset('storage/images/artesanias/placeholder-alebrije.jpg');
                                     }
 

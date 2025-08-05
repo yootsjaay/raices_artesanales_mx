@@ -38,7 +38,10 @@ Auth::routes(['verify' => true]); // Esto habilita las rutas para la verificaciÃ
 // =================== ADMIN - SOLO VENDEDOR ===================
     Route::middleware(['role:admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('artesanias', [AdminArtesaniaController::class, 'index'])->name('artesanias.index');
-    Route::resource('artesanias', AdminArtesaniaController::class);
+Route::resource('artesanias', AdminArtesaniaController::class)
+    ->parameters(['artesanias' => 'artesania:slug']);
+
+    
     Route::get('categorias', [AdminCategoriaController::class, 'index'])->name('categorias.index');
     Route::get('ubicacion', [AdminUbicacionController::class, 'index'])->name('ubicacion.index');
 
