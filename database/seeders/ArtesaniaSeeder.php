@@ -52,17 +52,13 @@ class ArtesaniaSeeder extends Seeder
                 'imagen_artesanias' => 'images/artesanias/general/alebrije_nahual_general_1.jpg',
                 'historia_piezas_general' => 'Inspirado en la cosmovisión zapoteca sobre los nahuales, cada pieza es única.',
                 'precio' => 1500.00, // Precio base
-                'weight' => 0.5,
-                'length' => 20.0,
-                'width' => 15.0,
-                'height' => 30.0,
                 'categoria_id' => $alebrijesCat->id,
                 'ubicacion_id' => $sanMartin->id,
             ]
         );
 
         ArtesaniaVariant::firstOrCreate(
-            ['sku' => 'ALE-NAH-001'],
+            ['sku' => ''],
             [
                 'artesania_id' => $nahualArtesania->id,
                 'variant_name' => 'Alebrije de Nahual - Grande',
@@ -87,17 +83,13 @@ class ArtesaniaSeeder extends Seeder
                 'imagen_artesanias' => 'images/artesanias/general/cantaro_barro_negro_general_1.jpg',
                 'historia_piezas_general' => 'Hecho en San Bartolo Coyotepec, esta técnica data de tiempos prehispánicos y se caracteriza por su brillo metálico.',
                 'precio' => 850.00,
-                'weight' => 1.2,
-                'length' => 18.0,
-                'width' => 18.0,
-                'height' => 25.0,
                 'categoria_id' => $barroNegroCat->id,
                 'ubicacion_id' => $coyotepec->id,
             ]
         );
 
         ArtesaniaVariant::firstOrCreate(
-            ['sku' => 'BN-CAN-001'],
+            ['sku' => ''],
             [
                 'artesania_id' => $cantaroArtesania->id,
                 'variant_name' => 'Cántaro de Barro Negro - Grande',
@@ -122,17 +114,13 @@ class ArtesaniaSeeder extends Seeder
                 'imagen_artesanias' => 'images/artesanias/general/huipil_teotitlan_general_1.jpg',
                 'historia_piezas_general' => 'Elaborado por maestras tejedoras de Teotitlán del Valle, cada huipil cuenta una historia de la comunidad.',
                 'precio' => 1200.00,
-                'weight' => 0.4,
-                'length' => 50.0,
-                'width' => 35.0,
-                'height' => 5.0,
                 'categoria_id' => $textilesCat->id,
                 'ubicacion_id' => $teotitlan->id,
             ]
         );
 
         ArtesaniaVariant::firstOrCreate(
-            ['sku' => 'TEX-HUI-001'],
+            ['sku' => ''],
             [
                 'artesania_id' => $huipilArtesania->id,
                 'variant_name' => 'Huipil Rojo con Flores',
@@ -157,17 +145,13 @@ class ArtesaniaSeeder extends Seeder
                 'imagen_artesanias' => 'images/artesanias/general/huarache_bordado_general_1.jpg',
                 'historia_piezas_general' => 'Este tipo de calzado ha sido parte de la tradición oaxaqueña por generaciones, combinando comodidad y arte.',
                 'precio' => 450.00,
-                'weight' => 0.8,
-                'length' => 30.0,
-                'width' => 12.0,
-                'height' => 10.0,
                 'categoria_id' => $calzadosCat->id,
                 'ubicacion_id' => $oaxaca->id,
             ]
         );
 
         ArtesaniaVariant::firstOrCreate(
-            ['sku' => 'CAL-HUA-001'],
+            ['sku' => ''],
             [
                 'artesania_id' => $huaracheArtesania->id,
                 'variant_name' => 'Huarache Talla 25',

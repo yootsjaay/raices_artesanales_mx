@@ -14,49 +14,73 @@
             {{-- Título de la artesanía --}}
             <h1 class="text-4xl md:text-5xl font-display font-bold text-oaxaca-primary mb-6 leading-tight">{{ $artesania->nombre }}</h1>
 
+            @php
+                // Función para obtener ruta completa de imágenes
+                function getImagePath($path) {
+                    if (!$path) return asset('images/default-image.jpg');
+                    return asset($path);
+                }
+
+                // Unificar la artesanía base y sus variantes activas en una sola colección.
+                $allVariants = collect();
+
+                // Añadir la artesanía base solo si está activa
+                if ($artesania->is_active) {
+                    $allVariants->push((object) [
+                        'id' => 'base',
+                        'size' => $artesania->size ?? null,
+                        'color' => $artesania->color ?? null,
+                        'material_variant' => $artesania->materiales ?? null,
+                        'precio' => $artesania->precio,
+                        'stock' => $artesania->stock,
+                        'imagen_variant' => is_array($artesania->imagen_artesanias) ? $artesania->imagen_artesanias : [$artesania->imagen_artesanias],
+                        'is_base' => true,
+                        'variant_name' => $artesania->nombre,
+                    ]);
+                }
+
+                // Concatenar las variantes activas (ya filtradas por el controlador)
+                $allVariants = $allVariants->concat($artesania->variants->map(function($variant) {
+                    $variant->is_base = false;
+                    return $variant;
+                }))->keyBy('id');
+
+                // Determinar la variante inicial de manera más robusta
+                $initialVariantId = 'base';
+                $initialVariant = $allVariants->get('base');
+                
+                // Si la variante base no tiene stock, busca la primera variante activa con stock
+                if ($initialVariant && $initialVariant->stock <= 0) {
+                    $firstActiveWithStock = $artesania->variants->firstWhere('stock', '>', 0);
+                    if ($firstActiveWithStock) {
+                        $initialVariantId = $firstActiveWithStock->id;
+                        $initialVariant = $allVariants->get($initialVariantId);
+                    }
+                }
+
+                // Fallback si no hay variantes disponibles (esto es un caso extremo)
+                if (!$initialVariant) {
+                    $initialVariant = (object) ['id' => null, 'imagen_variant' => [], 'precio' => 0, 'stock' => 0, 'color' => null, 'size' => null, 'material_variant' => null];
+                }
+
+                $initialImage = !empty($initialVariant->imagen_variant) && !empty($initialVariant->imagen_variant[0])
+                                ? getImagePath($initialVariant->imagen_variant[0])
+                                : getImagePath(null); // Fallback
+
+                $initialPrice = $initialVariant->precio;
+                $initialStock = $initialVariant->stock;
+
+                // Extraer atributos únicos para los botones de selección
+                $colors = $allVariants->pluck('color')->filter()->unique()->values();
+                $sizes = $allVariants->pluck('size')->filter()->unique()->values();
+                $materials = $allVariants->pluck('material_variant')->filter()->unique()->values();
+
+            @endphp
+
             <div class="grid grid-cols-1 md:grid-cols-2 gap-10 mb-8 items-start">
                 {{-- Sección de imagen principal y galería --}}
                 <div>
-                    @php
-                        // Función para obtener ruta completa de imágenes
-                        function getImagePath($path) {
-                            if (!$path) return asset('images/default-image.jpg');
-                            return asset('storage/' . $path);
-                        }
-
-                        // Determinar imagen inicial
-                        $initialImage = '';
-                        $initialPrice = $artesania->precio;
-                        $initialStock = $artesania->stock;
-                        $variantImages = [];
-
-                        if ($selectedVariant) {
-                            // Manejar imágenes de variante
-                            $variantImages = is_array($selectedVariant->imagen_variant) 
-                                ? $selectedVariant->imagen_variant 
-                                : [$selectedVariant->imagen_variant];
-                            
-                            if (!empty($variantImages[0])) {
-                                $initialImage = getImagePath($variantImages[0]);
-                            }
-                            $initialPrice = $selectedVariant->precio;
-                            $initialStock = $selectedVariant->stock;
-                        }
-
-                        // Si no hay imagen de variante, usar imagen base
-                        $baseImages = is_array($artesania->imagen_artesanias) 
-                            ? $artesania->imagen_artesanias 
-                            : [];
-                        
-                        if (!$initialImage && !empty($baseImages[0])) {
-                            $initialImage = getImagePath($baseImages[0]);
-                        }
-
-                        // Fallback si no hay ninguna imagen
-                        if (!$initialImage) {
-                            $initialImage = asset('images/default-image.jpg');
-                        }
-                    @endphp
+                    {{-- Imagen principal con enlace para Lightbox --}}
                     <div id="main-image-container">
                         <a href="{{ $initialImage }}" data-lightbox="artesania-gallery" data-title="{{ $artesania->nombre }}">
                             <img src="{{ $initialImage }}" alt="{{ $artesania->nombre }}" class="w-full h-96 object-cover rounded-lg shadow-md" id="product-main-image">
@@ -64,34 +88,20 @@
                     </div>
                     
                     {{-- Miniaturas de galería --}}
-                    @if (count($baseImages) > 0 || $artesania->variants->count() > 0)
+                    @if ($allVariants->count() > 0)
                         <h3 class="text-lg font-semibold text-oaxaca-primary mt-4 mb-2">Galería de Imágenes</h3>
                         <div class="flex flex-wrap gap-2 overflow-x-auto scrollbar-hide" id="thumbnail-container">
-                            {{-- Miniaturas de la artesanía base --}}
-                            @foreach ($baseImages as $image)
-                                <button type="button" class="thumbnail-button p-1 rounded-lg border-2 border-gray-300 hover:border-oaxaca-accent transition-colors"
-                                    data-image-src="{{ getImagePath($image) }}" 
-                                    data-image-title="{{ $artesania->nombre }}" 
-                                    data-variant-id="base-{{ $loop->index }}">
-                                    <img src="{{ getImagePath($image) }}" alt="Miniatura de {{ $artesania->nombre }}" class="w-20 h-20 object-cover rounded">
-                                </button>
-                            @endforeach
-                            
-                            {{-- Miniaturas de las variantes --}}
-                            @foreach ($artesania->variants as $variant)
-                                @if ($variant->imagen_variant)
-                                    @php
-                                        $images = is_array($variant->imagen_variant) 
-                                            ? $variant->imagen_variant 
-                                            : [$variant->imagen_variant];
-                                    @endphp
-                                    @foreach ($images as $image)
+                            @foreach ($allVariants as $variant)
+                                @if (is_array($variant->imagen_variant) && count($variant->imagen_variant) > 0)
+                                    @foreach ($variant->imagen_variant as $image)
                                         @if ($image)
-                                            <button type="button" class="thumbnail-button p-1 rounded-lg border-2 border-gray-300 hover:border-oaxaca-accent transition-colors"
+                                            <button type="button" class="thumbnail-button p-1 rounded-lg border-2 border-gray-300 hover:border-oaxaca-accent transition-colors {{ ($initialVariantId == $variant->id) ? '' : 'hidden' }}"
                                                 data-image-src="{{ getImagePath($image) }}"
-                                                data-image-title="{{ $artesania->nombre }} ({{ $variant->variant_name ?? 'Variante' }})"
+                                                data-image-title="{{ $artesania->nombre }} {{ isset($variant->variant_name) ? '('.$variant->variant_name.')' : '' }}"
                                                 data-variant-id="{{ $variant->id }}">
-                                                <img src="{{ getImagePath($image) }}" alt="Miniatura de la variante {{ $variant->variant_name }}" class="w-20 h-20 object-cover rounded">
+                                                <a href="{{ getImagePath($image) }}" data-lightbox="artesania-gallery" data-title="{{ $artesania->nombre }} {{ isset($variant->variant_name) ? '('.$variant->variant_name.')' : '' }}">
+                                                    <img src="{{ getImagePath($image) }}" alt="Miniatura de {{ $artesania->nombre }} {{ isset($variant->variant_name) ? 'de la variante '.$variant->variant_name : '' }}" class="w-20 h-20 object-cover rounded">
+                                                </a>
                                             </button>
                                         @endif
                                     @endforeach
@@ -122,16 +132,16 @@
                         {{-- Stock dinámico --}}
                         <p><strong>Stock:</strong> <span id="artesania-stock" class="{{ $initialStock > 0 ? 'text-green-600' : 'text-red-600' }} font-semibold">{{ $initialStock > 0 ? ($initialStock . ' disponibles') : 'Agotado' }}</span></p>
                         <p><strong>Materiales:</strong> {{ $artesania->materiales ?? 'N/A' }}</p>
-
+                        
                         {{-- Detalles de la variante seleccionada --}}
-                        <p id="variant-color-display" class="{{ ($selectedVariant && $selectedVariant->color) ? '' : 'hidden' }}">
-                            <strong>Color:</strong> <span id="current-color-value">{{ $selectedVariant->color ?? '' }}</span>
+                        <p id="variant-color-display" class="{{ ($initialVariant->color) ? '' : 'hidden' }}">
+                            <strong>Color:</strong> <span id="current-color-value">{{ $initialVariant->color ?? '' }}</span>
                         </p>
-                        <p id="variant-size-display" class="{{ ($selectedVariant && $selectedVariant->size) ? '' : 'hidden' }}">
-                            <strong>Talla:</strong> <span id="current-size-value">{{ $selectedVariant->size ?? '' }}</span>
+                        <p id="variant-size-display" class="{{ ($initialVariant->size) ? '' : 'hidden' }}">
+                            <strong>Talla:</strong> <span id="current-size-value">{{ $initialVariant->size ?? '' }}</span>
                         </p>
-                        <p id="variant-material-display" class="{{ ($selectedVariant && $selectedVariant->material_variant) ? '' : 'hidden' }}">
-                            <strong>Material Variante:</strong> <span id="current-material-value">{{ $selectedVariant->material_variant ?? '' }}</span>
+                        <p id="variant-material-display" class="{{ ($initialVariant->material_variant) ? '' : 'hidden' }}">
+                            <strong>Material Variante:</strong> <span id="current-material-value">{{ $initialVariant->material_variant ?? '' }}</span>
                         </p>
                     </div>
 
@@ -140,25 +150,26 @@
                     <p class="text-oaxaca-text-dark leading-relaxed mb-6">{{ $artesania->historia_pieza ?? 'No hay una historia específica para esta pieza aún.' }}</p>
 
                     {{-- Sección de selección de variantes --}}
-                    @if ($artesania->variants->count())
+                    @if ($allVariants->count() > 1)
                         <div class="mb-6 space-y-4">
-                            @php
-                                $colors = $artesania->variants->pluck('color')->filter()->unique();
-                                $sizes = $artesania->variants->pluck('size')->filter()->unique();
-                                $materials = $artesania->variants->pluck('material_variant')->filter()->unique();
-                            @endphp
-
                             @if ($colors->isNotEmpty())
                                 <div>
                                     <h4 class="font-semibold text-oaxaca-primary mb-2">Color:</h4>
                                     <div class="flex flex-wrap gap-2" id="color-options">
                                         @foreach ($colors as $color)
+                                            @php
+                                                $variantWithColor = $allVariants->firstWhere('color', $color);
+                                                $imagePathForColor = ($variantWithColor && is_array($variantWithColor->imagen_variant) && !empty($variantWithColor->imagen_variant[0]))
+                                                                    ? getImagePath($variantWithColor->imagen_variant[0])
+                                                                    : getImagePath(null);
+                                            @endphp
                                             <button type="button"
-                                                class="variant-option color-option p-1 rounded-full border-2 {{ ($selectedVariant && $selectedVariant->color === $color) ? 'border-oaxaca-tertiary shadow-md' : 'border-gray-300 hover:border-oaxaca-accent' }} transition-all duration-200"
+                                                class="variant-option color-option p-1 rounded-full border-2 {{ ($initialVariant->color === $color) ? 'border-oaxaca-tertiary shadow-md' : 'border-gray-300 hover:border-oaxaca-accent' }} transition-all duration-200"
                                                 data-attribute="color"
                                                 data-value="{{ $color }}"
+                                                data-variant-id="{{ $variantWithColor->id ?? '' }}"
                                                 title="{{ $color }}">
-                                                <div class="w-10 h-10 rounded-full object-cover" style="background-color: {{ $color }};"></div>
+                                                <img src="{{ $imagePathForColor }}" alt="Color {{ $color }}" class="w-10 h-10 rounded-full object-cover">
                                             </button>
                                         @endforeach
                                     </div>
@@ -171,7 +182,7 @@
                                     <div class="flex flex-wrap gap-2" id="size-options">
                                         @foreach ($sizes as $size)
                                             <button type="button"
-                                                class="variant-option size-option px-4 py-2 rounded-lg border-2 {{ ($selectedVariant && $selectedVariant->size === $size) ? 'border-oaxaca-tertiary bg-oaxaca-tertiary bg-opacity-20 text-oaxaca-primary font-bold' : 'border-gray-300 text-oaxaca-text-dark hover:border-oaxaca-accent' }} transition-all duration-200"
+                                                class="variant-option size-option px-4 py-2 rounded-lg border-2 {{ ($initialVariant->size === $size) ? 'border-oaxaca-tertiary bg-oaxaca-tertiary bg-opacity-20 text-oaxaca-primary font-bold' : 'border-gray-300 text-oaxaca-text-dark hover:border-oaxaca-accent' }} transition-all duration-200"
                                                 data-attribute="size"
                                                 data-value="{{ $size }}">
                                                 {{ $size }}
@@ -182,19 +193,7 @@
                             @endif
 
                             @if ($materials->isNotEmpty())
-                                <div>
-                                    <h4 class="font-semibold text-oaxaca-primary mb-2">Material Variante:</h4>
-                                    <div class="flex flex-wrap gap-2" id="material-options">
-                                        @foreach ($materials as $material)
-                                            <button type="button"
-                                                class="variant-option material-option px-4 py-2 rounded-lg border-2 {{ ($selectedVariant && $selectedVariant->material_variant === $material) ? 'border-oaxaca-tertiary bg-oaxaca-tertiary bg-opacity-20 text-oaxaca-primary font-bold' : 'border-gray-300 text-oaxaca-text-dark hover:border-oaxaca-accent' }} transition-all duration-200"
-                                                data-attribute="material_variant"
-                                                data-value="{{ $material }}">
-                                                {{ $material }}
-                                            </button>
-                                        @endforeach
-                                    </div>
-                                </div>
+                                
                             @endif
                         </div>
                     @endif
@@ -203,15 +202,14 @@
                     <form method="POST" action="{{ route('carrito.agregar') }}" class="flex flex-col sm:flex-row items-center gap-3 flex-wrap">
                         @csrf
                         <input type="hidden" name="artesania_id" value="{{ $artesania->id }}">
-                        <input type="hidden" name="variant_id" id="selected_variant_id" value="{{ $selectedVariant->id ?? '' }}">
+                        <input type="hidden" name="variant_id" id="selected_variant_id" value="{{ $initialVariantId }}">
 
                         <input type="number" name="cantidad" min="1" value="1"
                             class="w-24 p-3 border border-oaxaca-primary border-opacity-30 rounded-lg focus:outline-none focus:ring-2 focus:ring-oaxaca-tertiary text-oaxaca-text-dark text-lg"
                             required max="{{ $initialStock }}">
 
                         @php
-                            $isAddToCartDisabled = ($artesania->variants->isEmpty() && $artesania->stock <= 0) || 
-                                                  ($selectedVariant && $selectedVariant->stock <= 0);
+                            $isAddToCartDisabled = ($initialStock <= 0);
                         @endphp
                         
                         <button type="submit" id="add-to-cart-btn"
@@ -316,232 +314,116 @@
 @push('scripts')
 <script>
     document.addEventListener('DOMContentLoaded', function () {
-        const artesaniaData = @json($artesania->toArray());
-        const selectedVariantData = @json($selectedVariant ? $selectedVariant->toArray() : null);
-        const variants = artesaniaData.variants || [];
-        
-        // Elementos DOM
-        const mainImage = document.getElementById('product-main-image');
         const mainImageLink = document.querySelector('#main-image-container a');
-        const artesaniaPrice = document.getElementById('artesania-price');
-        const artesaniaStock = document.getElementById('artesania-stock');
-        const quantityInput = document.querySelector('input[name="cantidad"]');
-        const addToCartButton = document.getElementById('add-to-cart-btn');
-        const selectedVariantInput = document.getElementById('selected_variant_id');
+        const mainImage = document.getElementById('product-main-image');
         const thumbnailContainer = document.getElementById('thumbnail-container');
         const variantOptions = document.querySelectorAll('.variant-option');
         
-        // Elementos para mostrar atributos de variante
-        const variantDisplayElements = {
-            color: document.getElementById('variant-color-display'),
-            size: document.getElementById('variant-size-display'),
-            material_variant: document.getElementById('variant-material-display'),
-        };
-        
-        const currentVariantValues = {
-            color: document.getElementById('current-color-value'),
-            size: document.getElementById('current-size-value'),
-            material_variant: document.getElementById('current-material-value'),
-        };
-        
-        // Atributos seleccionados
-        let selectedAttributes = {
-            color: selectedVariantData ? selectedVariantData.color : null,
-            size: selectedVariantData ? selectedVariantData.size : null,
-            material_variant: selectedVariantData ? selectedVariantData.material_variant : null,
-        };
+        const allVariants = @json($allVariants);
+        let thumbnails = Array.from(thumbnailContainer.querySelectorAll('.thumbnail-button'));
 
-        // Función para obtener ruta de imagen
-        function getImagePath(imagePath) {
-            if (!imagePath) return '';
-            return `/storage/${imagePath}`;
-        }
-        
-        // Función para actualizar los atributos visibles de la variante
-        function updateVariantAttributes(item) {
-            const attributes = ['color', 'size', 'material_variant'];
+        // Función para actualizar la imagen principal y la miniatura activa
+        function updateMainImage(button) {
+            if (!button) return;
+            const newImageSrc = button.getAttribute('data-image-src');
             
-            attributes.forEach(attr => {
-                const displayElement = variantDisplayElements[attr];
-                const valueElement = currentVariantValues[attr];
-                
-                if (item && item[attr]) {
-                    displayElement.classList.remove('hidden');
-                    valueElement.textContent = item[attr];
-                } else {
-                    displayElement.classList.add('hidden');
-                    valueElement.textContent = '';
-                }
-            });
-        }
-        
-        // Función para actualizar toda la UI
-        function updateUI(variant) {
-            const currentItem = variant || artesaniaData;
-            const isVariant = variant !== null;
+            mainImage.src = newImageSrc;
+            mainImageLink.href = newImageSrc;
+            mainImageLink.setAttribute('data-title', button.getAttribute('data-image-title'));
 
-            // Actualizar precio y stock
-            artesaniaPrice.textContent = `$${currentItem.precio.toFixed(2)} MXN`;
-            artesaniaStock.textContent = currentItem.stock > 0 
-                ? `${currentItem.stock} disponibles` 
-                : 'Agotado';
-                
-            artesaniaStock.className = currentItem.stock > 0 
-                ? 'text-green-600 font-semibold' 
-                : 'text-red-600 font-semibold';
-            
-            // Actualizar controles de cantidad y carrito
-            quantityInput.max = currentItem.stock;
-            quantityInput.value = Math.min(1, currentItem.stock);
-            addToCartButton.disabled = currentItem.stock <= 0;
-            addToCartButton.querySelector('span').textContent = 
-                currentItem.stock <= 0 ? 'Agotado' : 'Añadir al Carrito';
-                
-            selectedVariantInput.value = isVariant ? currentItem.id : '';
+            // Actualizar el estado activo de la miniatura
+            thumbnails.forEach(btn => btn.classList.remove('border-oaxaca-accent', 'ring', 'ring-offset-2', 'active'));
+            button.classList.add('border-oaxaca-accent', 'ring', 'ring-offset-2', 'active');
+        }
 
-            // Actualizar imagen principal
-            let imagePath = '';
-            
-            if (isVariant && currentItem.imagen_variant && currentItem.imagen_variant.length > 0) {
-                imagePath = getImagePath(currentItem.imagen_variant[0]);
-            } else if (artesaniaData.imagen_artesanias && artesaniaData.imagen_artesanias.length > 0) {
-                imagePath = getImagePath(artesaniaData.imagen_artesanias[0]);
-            } else {
-                imagePath = "{{ asset('images/default-image.jpg') }}";
-            }
-            
-            mainImage.src = imagePath;
-            mainImageLink.href = imagePath;
-            mainImage.alt = currentItem.variant_name || artesaniaData.nombre;
-            mainImageLink.dataset.title = currentItem.variant_name || artesaniaData.nombre;
-            
-            // Actualizar atributos específicos de la variante
-            updateVariantAttributes(currentItem);
-            
-            // Resaltar miniatura activa
-            highlightActiveThumbnail(isVariant ? currentItem.id : 'base-0');
-        }
-        
-        // Función para resaltar miniatura activa
-        function highlightActiveThumbnail(variantId) {
-            document.querySelectorAll('.thumbnail-button').forEach(btn => {
-                btn.classList.remove('border-oaxaca-tertiary', 'border-2');
-                
-                if (btn.dataset.variantId == variantId) {
-                    btn.classList.add('border-oaxaca-tertiary', 'border-2');
-                }
-            });
-        }
-        
-        // Función para inicializar selección de botones
-        function initializeButtonSelection() {
-            variantOptions.forEach(btn => {
-                const attribute = btn.dataset.attribute;
-                const value = btn.dataset.value;
-                
-                // Resetear clases
-                btn.classList.remove(
-                    'border-oaxaca-tertiary', 
-                    'shadow-md', 
-                    'bg-oaxaca-tertiary', 
-                    'bg-opacity-20', 
-                    'text-oaxaca-primary', 
-                    'font-bold'
-                );
-                
-                btn.classList.add(
-                    'border-gray-300', 
-                    'text-oaxaca-text-dark', 
-                    'hover:border-oaxaca-accent'
-                );
-                
-                // Aplicar clases si está seleccionado
-                if (selectedAttributes[attribute] === value) {
-                    btn.classList.add(
-                        'border-oaxaca-tertiary', 
-                        'shadow-md', 
-                        'bg-oaxaca-tertiary', 
-                        'bg-opacity-20', 
-                        'text-oaxaca-primary', 
-                        'font-bold'
-                    );
-                    
-                    btn.classList.remove(
-                        'border-gray-300', 
-                        'text-oaxaca-text-dark', 
-                        'hover:border-oaxaca-accent'
-                    );
-                }
-            });
-        }
-        
-        // Manejar clic en miniaturas
+        // Event listener para las miniaturas
         thumbnailContainer.addEventListener('click', function(event) {
             const button = event.target.closest('.thumbnail-button');
-            if (!button) return;
-
-            // Actualizar imagen principal
-            mainImage.src = button.dataset.imageSrc;
-            mainImageLink.href = button.dataset.imageSrc;
-
-            // Resaltar miniatura activa
-            highlightActiveThumbnail(button.dataset.variantId);
-            
-            // Si es una variante, actualizar atributos
-            if (!button.dataset.variantId.startsWith('base-')) {
-                const variantId = button.dataset.variantId;
-                const variant = variants.find(v => v.id == variantId);
-                
-                if (variant) {
-                    // Actualizar atributos seleccionados
-                    selectedAttributes = {
-                        color: variant.color || null,
-                        size: variant.size || null,
-                        material_variant: variant.material_variant || null,
-                    };
-                    
-                    initializeButtonSelection();
-                    updateUI(variant);
-                }
-            } else {
-                // Si es imagen base, resetear
-                selectedAttributes = { color: null, size: null, material_variant: null };
-                initializeButtonSelection();
-                updateUI(null);
+            if (button) {
+                updateMainImage(button);
             }
         });
-        
-        // Manejar clic en opciones de variante
+
+        // Event listeners para las variantes
         variantOptions.forEach(button => {
-            button.addEventListener('click', function() {
-                const attribute = this.dataset.attribute;
-                const value = this.dataset.value;
-                
-                // Toggle selección
-                selectedAttributes[attribute] = 
-                    selectedAttributes[attribute] === value ? null : value;
-                
-                initializeButtonSelection();
-                
-                // Buscar variante que coincida con los atributos seleccionados
-                const matchingVariant = variants.find(v => {
-                    return Object.entries(selectedAttributes).every(([attr, val]) => 
-                        val === null || v[attr] === val
-                    );
+            button.addEventListener('click', function () {
+                const attribute = this.getAttribute('data-attribute');
+                const value = this.getAttribute('data-value');
+                const selectedVariantId = this.getAttribute('data-variant-id');
+                const matchingVariant = allVariants[selectedVariantId];
+
+                // Actualizar el estado activo para los botones de variante
+                document.querySelectorAll(`.${attribute}-option`).forEach(btn => {
+                    btn.classList.remove('border-oaxaca-tertiary', 'bg-oaxaca-tertiary', 'bg-opacity-20', 'text-oaxaca-primary', 'font-bold', 'shadow-md');
+                    btn.classList.add('border-gray-300', 'text-oaxaca-text-dark', 'hover:border-oaxaca-accent');
                 });
-                
-                updateUI(matchingVariant);
+                this.classList.remove('border-gray-300', 'text-oaxaca-text-dark', 'hover:border-oaxaca-accent');
+                this.classList.add('border-oaxaca-tertiary', 'shadow-md');
+                if (attribute !== 'color') {
+                    this.classList.add('bg-oaxaca-tertiary', 'bg-opacity-20', 'text-oaxaca-primary', 'font-bold');
+                }
+
+                // Ocultar todas las miniaturas primero
+                thumbnails.forEach(thumb => thumb.classList.add('hidden'));
+
+                if (matchingVariant) {
+                    // Mostrar las miniaturas correspondientes a la variante
+                    thumbnails.forEach(thumb => {
+                        const thumbVariantId = thumb.getAttribute('data-variant-id');
+                        if (thumbVariantId == matchingVariant.id) {
+                            thumb.classList.remove('hidden');
+                        }
+                    });
+
+                    // Si hay imágenes de la variante, actualizar la principal
+                    const variantImagePaths = matchingVariant.imagen_variant;
+                    if (variantImagePaths && variantImagePaths.length > 0) {
+                         const firstThumb = thumbnails.find(thumb => thumb.getAttribute('data-variant-id') == matchingVariant.id);
+                         if (firstThumb) {
+                             updateMainImage(firstThumb);
+                         }
+                    } else {
+                        const defaultImageSrc = `{{ asset('images/default-image.jpg') }}`;
+                        mainImage.src = defaultImageSrc;
+                        mainImageLink.href = defaultImageSrc;
+                        mainImageLink.setAttribute('data-title', '{{ $artesania->nombre }}');
+                    }
+
+                    // Actualizar precio, stock, etc.
+                    document.getElementById('artesania-price').textContent = `$${parseFloat(matchingVariant.precio).toFixed(2)} MXN`;
+                    document.getElementById('artesania-stock').textContent = matchingVariant.stock > 0 ? `${matchingVariant.stock} disponibles` : 'Agotado';
+                    document.getElementById('selected_variant_id').value = matchingVariant.id;
+
+                    // Actualizar estado del botón de añadir al carrito
+                    const addToCartBtn = document.getElementById('add-to-cart-btn');
+                    const quantityInput = document.querySelector('input[name="cantidad"]');
+                    if (matchingVariant.stock <= 0) {
+                        addToCartBtn.disabled = true;
+                        addToCartBtn.querySelector('span').textContent = 'Agotado';
+                        quantityInput.max = 0;
+                    } else {
+                        addToCartBtn.disabled = false;
+                        addToCartBtn.querySelector('span').textContent = 'Añadir al Carrito';
+                        quantityInput.max = matchingVariant.stock;
+                    }
+
+                    // Actualizar detalles de variante
+                    document.getElementById('current-color-value').textContent = matchingVariant.color || '';
+                    document.getElementById('variant-color-display').classList.toggle('hidden', !matchingVariant.color);
+                    document.getElementById('current-size-value').textContent = matchingVariant.size || '';
+                    document.getElementById('variant-size-display').classList.toggle('hidden', !matchingVariant.size);
+                    document.getElementById('current-material-value').textContent = matchingVariant.material_variant || '';
+                    document.getElementById('variant-material-display').classList.toggle('hidden', !matchingVariant.material_variant);
+                }
             });
         });
         
-        // Inicializar UI
-        if (selectedVariantData) {
-            updateUI(selectedVariantData);
-            initializeButtonSelection();
-            highlightActiveThumbnail(selectedVariantData.id);
-        } else {
-            updateUI(null);
-            highlightActiveThumbnail('base-0');
+        // Configuración inicial al cargar la página
+        if (thumbnails.length > 0) {
+            const initialThumb = thumbnails.find(thumb => thumb.getAttribute('data-variant-id') == '{{ $initialVariantId }}');
+            if (initialThumb) {
+                 updateMainImage(initialThumb);
+            }
         }
     });
 </script>

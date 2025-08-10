@@ -112,6 +112,10 @@ public function comments()
 {
     return $this->hasMany(Comment::class)->where('content', 'rating');
 }
+public function getImagenPrincipalAttribute()
+{
+    return $this->imagen_artesanias[0] ?? null;
+}
 
 
     
@@ -132,5 +136,7 @@ public function comments()
             }
         });
     }
+
+    
 }
 

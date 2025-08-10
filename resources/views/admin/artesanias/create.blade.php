@@ -29,17 +29,6 @@
                             @enderror
                         </div>
 
-                        {{-- Campo: Slug (opcional, se puede dejar para que se genere automáticamente) --}}
-                        {{-- Si prefieres que el usuario no lo edite, no lo incluyas aquí y genéralo en el controlador --}}
-                        {{-- <div class="col-span-1">
-                            <label for="slug" class="block text-sm font-medium text-gray-700">Slug:</label>
-                            <input type="text" name="slug" id="slug" value="{{ old('slug') }}"
-                                   class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 @error('slug') border-red-500 @enderror">
-                            @error('slug')
-                                <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
-                            @enderror
-                        </div> --}}
-
                         {{-- Campo: Categoría --}}
                         <div>
                             <label for="categoria_id" class="block text-sm font-medium text-gray-700">Categoría:</label>
@@ -73,16 +62,8 @@
                                 <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                             @enderror
                         </div>
-                    </div>
-
-                    {{-- Agregado: Campos de Precio, Peso y Dimensiones --}}
-                    <div class="mb-6 border-b pb-4">
-                        <h3 class="text-lg font-medium text-gray-900">Precio y Dimensiones Generales</h3>
-                        <p class="mt-1 text-sm text-gray-600">Define el precio base, peso y dimensiones para la artesanía general. Estos pueden ser sobrescritos por las variantes.</p>
-                    </div>
-
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-6">
-                        {{-- Campo: Precio Base --}}
+                        
+                         {{-- Campo: Precio Base --}}
                         <div>
                             <label for="precio" class="block text-sm font-medium text-gray-700">Precio Base:</label>
                             <input type="number" name="precio" id="precio" step="0.01" value="{{ old('precio') }}"
@@ -91,67 +72,18 @@
                                 <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                             @enderror
                         </div>
-
-                        {{-- Campo: Peso (KG) --}}
-                        <div>
-                            <label for="weight" class="block text-sm font-medium text-gray-700">Peso (KG):</label>
-                            <input type="number" name="weight" id="weight" step="0.01" value="{{ old('weight', 0.00) }}"
-                                   class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 @error('weight') border-red-500 @enderror">
-                            @error('weight')
-                                <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
-                            @enderror
-                        </div>
-
-                        {{-- Campo: Largo (CM) --}}
-                        <div>
-                            <label for="length" class="block text-sm font-medium text-gray-700">Largo (CM):</label>
-                            <input type="number" name="length" id="length" step="0.01" value="{{ old('length', 0.00) }}"
-                                   class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 @error('length') border-red-500 @enderror">
-                            @error('length')
-                                <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
-                            @enderror
-                        </div>
-
-                        {{-- Campo: Ancho (CM) --}}
-                        <div>
-                            <label for="width" class="block text-sm font-medium text-gray-700">Ancho (CM):</label>
-                            <input type="number" name="width" id="width" step="0.01" value="{{ old('width', 0.00) }}"
-                                   class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 @error('width') border-red-500 @enderror">
-                            @error('width')
-                                <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
-                            @enderror
-                        </div>
-
-                        {{-- Campo: Alto (CM) --}}
-                        <div>
-                            <label for="height" class="block text-sm font-medium text-gray-700">Alto (CM):</label>
-                            <input type="number" name="height" id="height" step="0.01" value="{{ old('height', 0.00) }}"
-                                   class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 @error('height') border-red-500 @enderror">
-                            @error('height')
-                                <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
-                            @enderror
-                        </div>
                     </div>
-                    
-                    <div class="col-span-full">
-                        <label for="descripcion" class="block text-sm font-medium text-gray-700">Descripción General del Tipo de Artesanía:</label>
+
+                    <div class="mb-6">
+                         <label for="descripcion" class="block text-sm font-medium text-gray-700">Descripción General del Tipo de Artesanía:</label>
                         <textarea name="descripcion" id="descripcion" rows="3"
                                   class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 @error('descripcion') border-red-500 @enderror">{{ old('descripcion') }}</textarea>
                         @error('descripcion')
                             <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                         @enderror
                     </div>
-
-                    <div class="col-span-full">
-                        <label for="historia_piezas_general" class="block text-sm font-medium text-gray-700">Historia o Contexto Cultural General:</label>
-                        <textarea name="historia_piezas_general" id="historia_piezas_general" rows="3"
-                                  class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 @error('historia_piezas_general') border-red-500 @enderror">{{ old('historia_piezas_general') }}</textarea>
-                        @error('historia_piezas_general')
-                            <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
-                        @enderror
-                    </div>
-
-                    <div class="col-span-full mt-4">
+                    
+                    <div class="mb-6">
                         <label class="block text-sm font-medium text-gray-700 mb-1">Imágenes Generales de la Artesanía (Tipo)</label>
                         <input type="file" name="imagenes_artesanias[]" multiple
                                class="w-full text-sm border-gray-300 rounded-md shadow-sm @error('imagenes_artesanias.*') border-red-500 @enderror">
@@ -175,15 +107,7 @@
                             @foreach(old('variants') as $variantIndex => $oldVariant)
                                 <div class="variant-item p-4 border rounded-md shadow-sm mb-4 bg-gray-50">
                                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                                        {{-- Campo: SKU --}}
-                                        <div>
-                                            <label for="variants[{{ $variantIndex }}][sku]" class="block text-sm font-medium text-gray-700">SKU:</label>
-                                            <input type="text" name="variants[{{ $variantIndex }}][sku]" id="variants[{{ $variantIndex }}][sku]" value="{{ $oldVariant['sku'] }}"
-                                                   class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 @error('variants.' . $variantIndex . '.sku') border-red-500 @enderror" required>
-                                            @error('variants.' . $variantIndex . '.sku')
-                                                <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
-                                            @enderror
-                                        </div>
+                                      
 
                                         {{-- Campo: Nombre de Variante --}}
                                         <div>
@@ -292,8 +216,8 @@
                                                 <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                                             @enderror
                                         </div>
-
-                                        <div class="flex items-end md:col-span-full lg:col-span-1">
+                                        
+                                        <div class="flex items-end col-span-full">
                                             <button type="button" class="remove-variant text-red-500 hover:text-red-700 text-sm">Eliminar Variante</button>
                                         </div>
                                     </div>
@@ -324,13 +248,7 @@
                 const variantHtml = `
                     <div class="variant-item p-4 border rounded-md shadow-sm mb-4 bg-gray-50">
                         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                            {{-- Campo: SKU --}}
-                            <div>
-                                <label for="variants[${variantIndex}][sku]" class="block text-sm font-medium text-gray-700">SKU:</label>
-                                <input type="text" name="variants[${variantIndex}][sku]" id="variants[${variantIndex}][sku]"
-                                       class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500" required>
-                            </div>
-
+                            
                             {{-- Campo: Nombre de Variante --}}
                             <div>
                                 <label for="variants[${variantIndex}][variant_name]" class="block text-sm font-medium text-gray-700">Nombre de la Variante:</label>
@@ -408,7 +326,7 @@
                                        class="w-full text-sm border-gray-300 rounded-md shadow-sm">
                             </div>
 
-                            <div class="flex items-end md:col-span-full lg:col-span-1">
+                            <div class="flex items-end col-span-full">
                                 <button type="button" class="remove-variant text-red-500 hover:text-red-700 text-sm">Eliminar Variante</button>
                             </div>
                         </div>

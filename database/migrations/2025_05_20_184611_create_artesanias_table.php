@@ -21,13 +21,10 @@ return new class extends Migration
             
             // Campos de precio, peso y dimensiones para la artesanía general
             $table->decimal('precio', 10, 2)->nullable()->comment('Precio base de la artesanía (puede ser anulable si solo las variantes tienen precio)');
-            $table->decimal('weight', 8, 2)->default(0.00)->comment('Peso de la artesanía general en KG');
-            $table->decimal('length', 8, 2)->default(0.00)->comment('Largo de la artesanía general en CM');
-            $table->decimal('width', 8, 2)->default(0.00)->comment('Ancho de la artesanía general en CM');
-            $table->decimal('height', 8, 2)->default(0.00)->comment('Alto de la artesanía general en CM');
-
+          
             $table->foreignId('categoria_id')->constrained('categorias')->onDelete('cascade')->comment('ID of the category this type of craft belongs to');
             $table->foreignId('ubicacion_id')->nullable()->constrained('ubicaciones')->onDelete('set null')->comment('ID of the origin or sales location for this type of craft');
+            $table->boolean('is_active')->default(true)->comment('indica si la artesanía está activa o no');
 
             $table->timestamps();
         });

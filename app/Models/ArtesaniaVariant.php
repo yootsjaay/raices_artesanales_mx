@@ -86,7 +86,9 @@ class ArtesaniaVariant extends Model
      * Accessor to get the first image from the imagen_variant array.
      */
     public function getImagenPrincipalAttribute()
-    {
-        return $this->imagen_variant[0] ?? null;
-    }
+{
+    return $this->imagen_variant[0] ?? null;
+}
+
+
 }
