@@ -18,7 +18,9 @@
                     @csrf
                     @method('PUT')
 
+                    {{-- Sección de Información General de la Artesanía (Producto Padre) --}}
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                        {{-- Campo: Nombre General --}}
                         <div>
                             <label for="nombre" class="block text-sm font-medium text-gray-700">Nombre General:</label>
                             <input type="text" name="nombre" id="nombre" value="{{ old('nombre', $artesania->nombre) }}"
@@ -28,6 +30,7 @@
                             @enderror
                         </div>
 
+                        {{-- Campo: Categoría --}}
                         <div>
                             <label for="categoria_id" class="block text-sm font-medium text-gray-700">Categoría:</label>
                             <select name="categoria_id" id="categoria_id" required
@@ -44,6 +47,7 @@
                             @enderror
                         </div>
 
+                        {{-- Campo: Ubicación --}}
                         <div>
                             <label for="ubicacion_id" class="block text-sm font-medium text-gray-700">Ubicación de Origen/Venta:</label>
                             <select name="ubicacion_id" id="ubicacion_id"
@@ -60,6 +64,7 @@
                             @enderror
                         </div>
 
+                        {{-- Campo: Precio Base --}}
                         <div>
                             <label for="precio" class="block text-sm font-medium text-gray-700">Precio Base:</label>
                             <input type="number" name="precio" id="precio" step="0.01" value="{{ old('precio', $artesania->precio) }}"
@@ -70,6 +75,7 @@
                         </div>
                     </div>
                     
+                    {{-- Campo: Descripción --}}
                     <div class="mb-6">
                         <label for="descripcion" class="block text-sm font-medium text-gray-700">Descripción General del Tipo de Artesanía:</label>
                         <textarea name="descripcion" id="descripcion" rows="3"
@@ -79,6 +85,7 @@
                         @enderror
                     </div>
 
+                    {{-- Campo: Historia/Contexto --}}
                     <div class="mb-6">
                         <label for="historia_piezas_general" class="block text-sm font-medium text-gray-700">Historia o Contexto Cultural General:</label>
                         <textarea name="historia_piezas_general" id="historia_piezas_general" rows="3"
@@ -88,6 +95,7 @@
                         @enderror
                     </div>
 
+                    {{-- Sección para imágenes generales --}}
                     <div class="mb-6">
                         <h5 class="text-sm font-medium text-gray-800">Imágenes Generales Existentes</h5>
                         <div class="mt-2 grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
@@ -118,6 +126,7 @@
                     
                     <hr class="my-6">
 
+                    {{-- Sección de Variantes --}}
                     <div class="flex items-center justify-between mb-4">
                         <h3 class="text-lg font-medium text-gray-900">Variantes de la Artesanía</h3>
                         <button type="button" id="add-variant" class="px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
@@ -128,6 +137,7 @@
                     <div id="variants-container">
                         @foreach($artesania->variants as $variant)
                             <div class="variant-item p-4 border rounded-md shadow-sm mb-4 bg-gray-50" data-variant-id="{{ $variant->id }}">
+                                {{-- Input hidden para el ID de la variante existente --}}
                                 <input type="hidden" name="variants[{{ $loop->index }}][id]" value="{{ $variant->id }}">
                                 
                                 <div class="flex justify-end mb-2">
@@ -147,21 +157,7 @@
                                         <input type="text" name="variants[{{ $loop->index }}][variant_name]" id="variants[{{ $loop->index }}][variant_name]" value="{{ old('variants.' . $loop->index . '.variant_name', $variant->variant_name) }}"
                                                 class="mt-1 block w-full border-gray-300 rounded-md shadow-sm">
                                     </div>
-                                    <div>
-                                        <label for="variants[{{ $loop->index }}][size]" class="block text-sm font-medium text-gray-700">Talla:</label>
-                                        <input type="text" name="variants[{{ $loop->index }}][size]" id="variants[{{ $loop->index }}][size]" value="{{ old('variants.' . $loop->index . '.size', $variant->size) }}"
-                                                class="mt-1 block w-full border-gray-300 rounded-md shadow-sm">
-                                    </div>
-                                    <div>
-                                        <label for="variants[{{ $loop->index }}][color]" class="block text-sm font-medium text-gray-700">Color:</label>
-                                        <input type="text" name="variants[{{ $loop->index }}][color]" id="variants[{{ $loop->index }}][color]" value="{{ old('variants.' . $loop->index . '.color', $variant->color) }}"
-                                                class="mt-1 block w-full border-gray-300 rounded-md shadow-sm">
-                                    </div>
-                                    <div>
-                                        <label for="variants[{{ $loop->index }}][material_variant]" class="block text-sm font-medium text-gray-700">Material:</label>
-                                        <input type="text" name="variants[{{ $loop->index }}][material_variant]" id="variants[{{ $loop->index }}][material_variant]" value="{{ old('variants.' . $loop->index . '.material_variant', $variant->material_variant) }}"
-                                                class="mt-1 block w-full border-gray-300 rounded-md shadow-sm">
-                                    </div>
+                                    
                                     <div>
                                         <label for="variants[{{ $loop->index }}][precio]" class="block text-sm font-medium text-gray-700">Precio:</label>
                                         <input type="number" name="variants[{{ $loop->index }}][precio]" id="variants[{{ $loop->index }}][precio]" step="0.01" value="{{ old('variants.' . $loop->index . '.precio', $variant->precio) }}"
@@ -180,11 +176,7 @@
                                             <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                                         @enderror
                                     </div>
-                                    <div class="col-span-full">
-                                        <label for="variants[{{ $loop->index }}][description_variant]" class="block text-sm font-medium text-gray-700">Descripción de la Variante:</label>
-                                        <textarea name="variants[{{ $loop->index }}][description_variant]" id="variants[{{ $loop->index }}][description_variant]" rows="2"
-                                                    class="mt-1 block w-full border-gray-300 rounded-md shadow-sm">{{ old('variants.' . $loop->index . '.description_variant', $variant->description_variant) }}</textarea>
-                                    </div>
+                                    
                                     <div>
                                         <label for="variants[{{ $loop->index }}][tipo_embalaje_id]" class="block text-sm font-medium text-gray-700">Tipo de Embalaje:</label>
                                         <select name="variants[{{ $loop->index }}][tipo_embalaje_id]" id="variants[{{ $loop->index }}][tipo_embalaje_id]"
@@ -226,7 +218,40 @@
                                     <input type="file" name="variants[{{ $loop->index }}][new_variant_images][]" multiple
                                             class="w-full text-sm border-gray-300 rounded-md shadow-sm new-variant-image-input">
                                     <div class="mt-2 grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4 image-preview-container">
-                                        </div>
+                                    </div>
+                                </div>
+                                {{-- Sección para atributos de la variante --}}
+                                <div class="mt-4">
+                                    <h5 class="text-sm font-medium text-gray-800 flex items-center justify-between">
+                                        Atributos de la Variante
+                                        <button type="button" class="add-attribute-button text-sm px-2 py-1 bg-gray-200 rounded-md" data-variant-index="{{ $loop->index }}">
+                                            + Atributo
+                                        </button>
+                                    </h5>
+                                    <div class="attributes-container mt-2" id="attributes-container-{{ $loop->index }}">
+                                        @foreach($variant->atributos as $attribute)
+                                            <div class="flex gap-2 items-center attribute-item">
+                                                <input type="hidden" name="variants[{{ $loop->parent->index }}][attributes][{{ $loop->index }}][id]" value="{{ $attribute->id }}">
+                                                <div>
+                                                    <label class="block text-xs font-medium text-gray-500">Atributo Existente</label>
+                                                    <select name="variants[{{ $loop->parent->index }}][attributes][{{ $loop->index }}][atributo_id]" class="block w-full border-gray-300 rounded-md shadow-sm text-sm">
+                                                        <option value="">Selecciona</option>
+                                                        @foreach ($atributos as $attr)
+                                                            <option value="{{ $attr->id }}" {{ old('variants.' . $loop->parent->index . '.attributes.' . $loop->index . '.atributo_id', $attribute->atributo_id) == $attr->id ? 'selected' : '' }}>
+                                                                {{ $attr->nombre }}
+                                                            </option>
+                                                        @endforeach
+                                                    </select>
+                                                </div>
+                                                <div>
+                                                    <label class="block text-xs font-medium text-gray-500">Valor</label>
+                                                    <input type="text" name="variants[{{ $loop->parent->index }}][attributes][{{ $loop->index }}][valor]" placeholder="Valor"
+                                                        value="{{ old('variants.' . $loop->parent->index . '.attributes.' . $loop->index . '.valor', $attribute->valor) }}" class="block w-full border-gray-300 rounded-md shadow-sm text-sm" required>
+                                                </div>
+                                                <button type="button" class="remove-attribute-button text-red-400 hover:text-red-600 text-xs self-center mt-4">X</button>
+                                            </div>
+                                        @endforeach
+                                    </div>
                                 </div>
                             </div>
                         @endforeach
@@ -247,14 +272,41 @@
         document.addEventListener('DOMContentLoaded', function () {
             const variantsContainer = document.getElementById('variants-container');
             const addVariantButton = document.getElementById('add-variant');
+            
+            // Inicializar el índice de la variante basado en las variantes existentes
             let variantIndex = {{ $artesania->variants->count() }};
             const tiposEmbalaje = @json($tipos_embalaje);
+            const atributosExistentes = @json($atributos);
+            
+            // Función para generar el HTML de un nuevo atributo
+            function createAttributeHtml(currentVariantIndex, attributeIndex) {
+                const existingAttributesOptions = atributosExistentes.map(attr => `<option value="${attr.id}">${attr.nombre}</option>`).join('');
+                return `
+                    <div class="flex gap-2 items-center attribute-item">
+                        <input type="hidden" name="variants[${currentVariantIndex}][attributes][${attributeIndex}][id]" value="">
+                        <div>
+                            <label class="block text-xs font-medium text-gray-500">Atributo Existente</label>
+                            <select name="variants[${currentVariantIndex}][attributes][${attributeIndex}][atributo_id]" class="block w-full border-gray-300 rounded-md shadow-sm text-sm">
+                                <option value="">Selecciona</option>
+                                ${existingAttributesOptions}
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-gray-500">Valor</label>
+                            <input type="text" name="variants[${currentVariantIndex}][attributes][${attributeIndex}][valor]" placeholder="Valor"
+                                class="block w-full border-gray-300 rounded-md shadow-sm text-sm" required>
+                        </div>
+                        <button type="button" class="remove-attribute-button text-red-400 hover:text-red-600 text-xs self-center mt-4">X</button>
+                    </div>
+                `;
+            }
 
-            addVariantButton.addEventListener('click', function () {
-                const embalajeOptions = tiposEmbalaje.map(tipo => `<option value="${tipo.id}">${tipo.nombre}</option>`).join('');
-
-                const variantHtml = `
+            // Función para generar el HTML de una nueva variante
+            function createVariantHtml(index) {
+                const embalajeOptionsHtml = tiposEmbalaje.map(tipo => `<option value="${tipo.id}">${tipo.nombre}</option>`).join('');
+                return `
                     <div class="variant-item p-4 border rounded-md shadow-sm mb-4 bg-gray-50">
+                        <input type="hidden" name="variants[${index}][id]" value="">
                         <div class="flex justify-end mb-2">
                             <button type="button" class="remove-variant text-red-500 hover:text-red-700 text-sm">
                                 Eliminar Variante
@@ -262,84 +314,99 @@
                         </div>
                         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                             <div>
-                                <label for="variants[${variantIndex}][sku]" class="block text-sm font-medium text-gray-700">SKU:</label>
-                                <input type="text" name="variants[${variantIndex}][sku]" id="variants[${variantIndex}][sku]"
-                                        class="mt-1 block w-full border-gray-300 rounded-md shadow-sm">
+                                <label for="variants[${index}][sku]" class="block text-sm font-medium text-gray-700">SKU:</label>
+                                <input type="text" name="variants[${index}][sku]" id="variants[${index}][sku]"
+                                    class="mt-1 block w-full border-gray-300 rounded-md shadow-sm">
                             </div>
                             <div>
-                                <label for="variants[${variantIndex}][variant_name]" class="block text-sm font-medium text-gray-700">Nombre de la Variante:</label>
-                                <input type="text" name="variants[${variantIndex}][variant_name]" id="variants[${variantIndex}][variant_name]"
-                                        class="mt-1 block w-full border-gray-300 rounded-md shadow-sm">
+                                <label for="variants[${index}][variant_name]" class="block text-sm font-medium text-gray-700">Nombre de la Variante:</label>
+                                <input type="text" name="variants[${index}][variant_name]" id="variants[${index}][variant_name]"
+                                    class="mt-1 block w-full border-gray-300 rounded-md shadow-sm">
                             </div>
                             <div>
-                                <label for="variants[${variantIndex}][size]" class="block text-sm font-medium text-gray-700">Talla:</label>
-                                <input type="text" name="variants[${variantIndex}][size]" id="variants[${variantIndex}][size]"
-                                        class="mt-1 block w-full border-gray-300 rounded-md shadow-sm">
+                                <label for="variants[${index}][precio]" class="block text-sm font-medium text-gray-700">Precio:</label>
+                                <input type="number" name="variants[${index}][precio]" id="variants[${index}][precio]" step="0.01" value="0.00"
+                                    class="mt-1 block w-full border-gray-300 rounded-md shadow-sm" required>
                             </div>
                             <div>
-                                <label for="variants[${variantIndex}][color]" class="block text-sm font-medium text-gray-700">Color:</label>
-                                <input type="text" name="variants[${variantIndex}][color]" id="variants[${variantIndex}][color]"
-                                        class="mt-1 block w-full border-gray-300 rounded-md shadow-sm">
+                                <label for="variants[${index}][stock]" class="block text-sm font-medium text-gray-700">Stock:</label>
+                                <input type="number" name="variants[${index}][stock]" id="variants[${index}][stock]" value="0"
+                                    class="mt-1 block w-full border-gray-300 rounded-md shadow-sm">
                             </div>
                             <div>
-                                <label for="variants[${variantIndex}][material_variant]" class="block text-sm font-medium text-gray-700">Material:</label>
-                                <input type="text" name="variants[${variantIndex}][material_variant]" id="variants[${variantIndex}][material_variant]"
-                                        class="mt-1 block w-full border-gray-300 rounded-md shadow-sm">
+                                <label for="variants[${index}][peso_item_kg]" class="block text-sm font-medium text-gray-700">Peso del Item (KG):</label>
+                                <input type="number" name="variants[${index}][peso_item_kg]" id="variants[${index}][peso_item_kg]" step="0.01" value="0.00"
+                                    class="mt-1 block w-full border-gray-300 rounded-md shadow-sm">
                             </div>
                             <div>
-                                <label for="variants[${variantIndex}][precio]" class="block text-sm font-medium text-gray-700">Precio:</label>
-                                <input type="number" name="variants[${variantIndex}][precio]" id="variants[${variantIndex}][precio]" step="0.01"
-                                        class="mt-1 block w-full border-gray-300 rounded-md shadow-sm" required>
-                            </div>
-                            <div>
-                                <label for="variants[${variantIndex}][stock]" class="block text-sm font-medium text-gray-700">Stock:</label>
-                                <input type="number" name="variants[${variantIndex}][stock]" id="variants[${variantIndex}][stock]"
-                                        class="mt-1 block w-full border-gray-300 rounded-md shadow-sm">
-                            </div>
-                            <div>
-                                <label for="variants[${variantIndex}][peso_item_kg]" class="block text-sm font-medium text-gray-700">Peso del Item (KG):</label>
-                                <input type="number" name="variants[${variantIndex}][peso_item_kg]" id="variants[${variantIndex}][peso_item_kg]" step="0.01"
-                                        class="mt-1 block w-full border-gray-300 rounded-md shadow-sm">
-                            </div>
-                            <div class="col-span-full">
-                                <label for="variants[${variantIndex}][description_variant]" class="block text-sm font-medium text-gray-700">Descripción de la Variante:</label>
-                                <textarea name="variants[${variantIndex}][description_variant]" id="variants[${variantIndex}][description_variant]" rows="2"
-                                            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm"></textarea>
-                            </div>
-                            <div>
-                                <label for="variants[${variantIndex}][tipo_embalaje_id]" class="block text-sm font-medium text-gray-700">Tipo de Embalaje:</label>
-                                <select name="variants[${variantIndex}][tipo_embalaje_id]" id="variants[${variantIndex}][tipo_embalaje_id]"
-                                        class="mt-1 block w-full border-gray-300 rounded-md shadow-sm">
+                                <label for="variants[${index}][tipo_embalaje_id]" class="block text-sm font-medium text-gray-700">Tipo de Embalaje:</label>
+                                <select name="variants[${index}][tipo_embalaje_id]" id="variants[${index}][tipo_embalaje_id]"
+                                    class="mt-1 block w-full border-gray-300 rounded-md shadow-sm">
                                     <option value="">Seleccione un embalaje</option>
-                                    ${embalajeOptions}
+                                    ${embalajeOptionsHtml}
                                 </select>
                             </div>
                             <div class="flex items-center">
-                                <input type="checkbox" name="variants[${variantIndex}][is_active]" value="1"
-                                        class="rounded border-gray-300 text-indigo-600 shadow-sm" checked>
+                                <input type="checkbox" name="variants[${index}][is_active]" value="1" checked
+                                    class="rounded border-gray-300 text-indigo-600 shadow-sm">
                                 <label class="ml-2 block text-sm font-medium text-gray-700">Activa</label>
                             </div>
                         </div>
                         <div class="col-span-full mt-4">
                             <label class="block text-sm font-medium text-gray-700 mb-1">Subir Nuevas Imágenes a esta Variante:</label>
-                            <input type="file" name="variants[${variantIndex}][new_variant_images][]" multiple
-                                    class="w-full text-sm border-gray-300 rounded-md shadow-sm new-variant-image-input">
+                            <input type="file" name="variants[${index}][new_variant_images][]" multiple
+                                class="w-full text-sm border-gray-300 rounded-md shadow-sm new-variant-image-input">
                             <div class="mt-2 grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4 image-preview-container">
-                                </div>
+                            </div>
+                        </div>
+                        {{-- Sección de atributos para la variante --}}
+                        <div class="mt-4">
+                            <h5 class="text-sm font-medium text-gray-800 flex items-center justify-between">
+                                Atributos de la Variante
+                                <button type="button" class="add-attribute-button text-sm px-2 py-1 bg-gray-200 rounded-md" data-variant-index="${index}">
+                                    + Atributo
+                                </button>
+                            </h5>
+                            <div class="attributes-container mt-2" id="attributes-container-${index}">
+                            </div>
                         </div>
                     </div>
                 `;
-                variantsContainer.insertAdjacentHTML('beforeend', variantHtml);
+            }
+
+            // Event listener para añadir una variante
+            addVariantButton.addEventListener('click', function () {
+                variantsContainer.insertAdjacentHTML('beforeend', createVariantHtml(variantIndex));
                 variantIndex++;
             });
             
+            // Event listener delegada para manejar la eliminación de variantes y atributos
             variantsContainer.addEventListener('click', function (e) {
+                // Eliminar variante
                 if (e.target.classList.contains('remove-variant')) {
-                    e.target.closest('.variant-item').remove();
+                    const variantItem = e.target.closest('.variant-item');
+                    if (variantItem) {
+                        variantItem.remove();
+                    }
+                // Añadir atributo
+                } else if (e.target.classList.contains('add-attribute-button')) {
+                    const variantIdx = e.target.getAttribute('data-variant-index');
+                    const containerId = `attributes-container-${variantIdx}`;
+                    const attributesContainer = document.getElementById(containerId);
+                    if (attributesContainer) {
+                        const attributeCount = attributesContainer.children.length;
+                        attributesContainer.insertAdjacentHTML('beforeend', createAttributeHtml(variantIdx, attributeCount));
+                    }
+                // Eliminar atributo
+                } else if (e.target.classList.contains('remove-attribute-button')) {
+                    const attributeItem = e.target.closest('.attribute-item');
+                    if (attributeItem) {
+                        attributeItem.remove();
+                    }
                 }
             });
 
-            // Event listener para la previsualización y eliminación de imágenes en nuevas variantes
+            // Event listener para la previsualización de imágenes en nuevas variantes
             variantsContainer.addEventListener('change', function (e) {
                 if (e.target.classList.contains('new-variant-image-input')) {
                     const input = e.target;
@@ -366,13 +433,14 @@
                 }
             });
 
+            // Event listener delegada para eliminar las previsualizaciones de nuevas imágenes
             variantsContainer.addEventListener('click', function (e) {
                 const removeBtn = e.target.closest('.remove-preview-image');
                 if (removeBtn) {
                     const previewItem = removeBtn.closest('.relative.group');
                     const previewContainer = previewItem.closest('.image-preview-container');
                     const input = previewContainer.previousElementSibling;
-                    const fileIndex = parseInt(previewItem.dataset.fileIndex);
+                    const fileIndex = parseInt(previewItem.dataset.file-index);
                     
                     // Crear una nueva lista de archivos sin la imagen eliminada
                     const dataTransfer = new DataTransfer();

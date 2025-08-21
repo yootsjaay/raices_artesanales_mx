@@ -59,10 +59,7 @@ class Artesania extends Model
         'slug',
         'ubicacion_id',
         'precio',
-        'weight',
-        'length',
-        'width',
-        'height',
+        
     ];
 
     /**
@@ -74,10 +71,7 @@ class Artesania extends Model
         
         'imagen_artesanias' => 'array',
         'precio' => 'float',
-        'weight' => 'float',
-        'length' => 'float',
-        'width' => 'float',
-        'height' => 'float',
+       
     ];
 
     /**
@@ -103,19 +97,19 @@ class Artesania extends Model
     {
         return $this->hasMany(ArtesaniaVariant::class, 'artesania_id');
     }
-    public function getRouteKeyName()
-{
-    return 'slug';
-}
+        public function getRouteKeyName()
+    {
+        return 'slug';
+    }
 
-public function comments()
-{
-    return $this->hasMany(Comment::class)->where('content', 'rating');
-}
-public function getImagenPrincipalAttribute()
-{
-    return $this->imagen_artesanias[0] ?? null;
-}
+    public function comments()
+    {
+        return $this->hasMany(Comment::class)->where('content', 'rating');
+    }
+    public function getImagenPrincipalAttribute()
+    {
+        return $this->imagen_artesanias[0] ?? null;
+    }
 
 
     

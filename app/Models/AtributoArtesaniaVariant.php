@@ -1,5 +1,8 @@
 <?php
+
 namespace App\Models;
+
+
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -8,7 +11,7 @@ class AtributoArtesaniaVariant extends Model
 {
     use HasFactory;
 
-    protected $table = 'atributos_artesania_variant';
+    protected $table = 'atributo_artesania_variant';
 
     protected $fillable = [
         'artesania_variant_id',
@@ -17,7 +20,7 @@ class AtributoArtesaniaVariant extends Model
     ];
 
     /**
-     * Get the artesania variant that owns the attribute.
+     * Relación con la variante de artesanía.
      */
     public function artesaniaVariant(): BelongsTo
     {
@@ -25,16 +28,10 @@ class AtributoArtesaniaVariant extends Model
     }
 
     /**
-     * Get the attribute associated with this variant.
+     * Relación con el atributo. (Renombrada de "atributos" a "atributo")
      */
     public function atributo(): BelongsTo
     {
         return $this->belongsTo(Atributo::class, 'atributo_id');
-    }
-
-    public function getTotalShippingWeightAttribute(): float
-    {
-        $baseWeight = $this->artesaniaVariant ? $this->artesaniaVariant->tipoEmbalaje->peso_base_kg : 0.00;
-        return $this->artesaniaVariant->peso_item_kg + $baseWeight;
     }
 }

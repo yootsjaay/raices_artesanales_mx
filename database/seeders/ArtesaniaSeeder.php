@@ -8,19 +8,17 @@ use App\Models\ArtesaniaVariant;
 use App\Models\Categoria;
 use App\Models\Ubicacion;
 use App\Models\TipoEmbalaje;
-use Illuminate\Support\Str; // Importar la clase Str para generar slugs
+use App\Models\Atributo;
+use App\Models\AtributoArtesaniaVariant;
+use Illuminate\Support\Str;
 
 class ArtesaniaSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
     public function run(): void
     {
-        // Obtener IDs de las dependencias por nombre. Esto es más seguro que usar IDs fijos.
+        // --- Categorías, Ubicaciones, Tipos de embalaje ---
         $alebrijesCat = Categoria::where('nombre', 'Alebrijes')->first();
         $barroNegroCat = Categoria::where('nombre', 'Barro Negro')->first();
-        $barroRojoCat = Categoria::where('nombre', 'Barro Rojo')->first();
         $textilesCat = Categoria::where('nombre', 'Textiles')->first();
         $calzadosCat = Categoria::where('nombre', 'Calzados')->first();
 
@@ -34,137 +32,133 @@ class ArtesaniaSeeder extends Seeder
         $sobreGuayabera = TipoEmbalaje::where('nombre', 'Sobre para Guayabera')->first();
         $cajaPequenaCalzado = TipoEmbalaje::where('nombre', 'Caja Pequeña para Calzado')->first();
 
-        // Validar que todas las dependencias existen antes de continuar
-        if (!$alebrijesCat || !$barroNegroCat || !$barroRojoCat || !$textilesCat || !$calzadosCat ||
+        if (!$alebrijesCat || !$barroNegroCat || !$textilesCat || !$calzadosCat ||
             !$sanMartin || !$coyotepec || !$oaxaca || !$teotitlan ||
             !$cajaMedianaBarro || !$cajaGrandeBarro || !$sobreGuayabera || !$cajaPequenaCalzado
         ) {
-            $this->command->warn('¡Advertencia! Faltan categorías, ubicaciones o tipos de embalaje de referencia. El ArtesaniaSeeder se ha detenido.');
+            $this->command->warn('¡Advertencia! Faltan categorías, ubicaciones o tipos de embalaje.');
             return;
         }
 
-        // Alebrijes
-        $nahualArtesania = Artesania::firstOrCreate(
-            ['nombre' => 'Alebrije de Nahual'],
-            [
-                'slug' => Str::slug('Alebrije de Nahual'),
-                'descripcion' => 'Impresionante figura de nahual tallada en copal y pintada a mano con intrincados detalles y colores vivos.',
-                'imagen_artesanias' => 'images/artesanias/general/alebrije_nahual_general_1.jpg',
-                'historia_piezas_general' => 'Inspirado en la cosmovisión zapoteca sobre los nahuales, cada pieza es única.',
-                'precio' => 1500.00, // Precio base
-                'categoria_id' => $alebrijesCat->id,
-                'ubicacion_id' => $sanMartin->id,
-            ]
-        );
+        // --- Crear atributos si no existen ---
+        $tallaAttr = Atributo::firstOrCreate(['nombre' => 'Talla']);
+        $colorAttr = Atributo::firstOrCreate(['nombre' => 'Color']);
+        $materialAttr = Atributo::firstOrCreate(['nombre' => 'Material']);
 
-        ArtesaniaVariant::firstOrCreate(
-            ['sku' => ''],
+        // --- Productos ---
+        $productos = [
             [
-                'artesania_id' => $nahualArtesania->id,
-                'variant_name' => 'Alebrije de Nahual - Grande',
-                'description_variant' => 'Nahual de gran tamaño con colores vibrantes.',
-                'size' => 'Grande',
-                'color' => 'Multicolor',
-                'material_variant' => 'Madera de Copal',
+                'nombre' => 'Alebrije de Nahual',
+                'descripcion' => 'Figura de nahual en copal pintada a mano.',
+                'imagen_general' => 'images/artesanias/general/alebrije_nahual_general_1.jpg',
+                'historia' => 'Inspirado en la cosmovisión zapoteca.',
                 'precio' => 1500.00,
+                'categoria' => $alebrijesCat,
+                'ubicacion' => $sanMartin,
+                'variant_name' => 'Alebrije de Nahual - Grande',
+                'sku' => Str::upper(Str::random(8)),
                 'stock' => 5,
                 'imagen_variant' => 'images/artesanias/variantes/alebrije_nahual_1_principal.jpg',
-                'tipo_embalaje_id' => $cajaMedianaBarro->id,
-                'is_active' => true,
-            ]
-        );
-
-        // Barro Negro
-        $cantaroArtesania = Artesania::firstOrCreate(
-            ['nombre' => 'Cántaro de Barro Negro'],
+                'tipo_embalaje' => $cajaMedianaBarro,
+                'atributos' => [
+                    ['atributo' => $tallaAttr, 'valor' => 'Grande'],
+                    ['atributo' => $colorAttr, 'valor' => 'Multicolor'],
+                    ['atributo' => $materialAttr, 'valor' => 'Madera de Copal'],
+                ]
+            ],
             [
-                'slug' => Str::slug('Cántaro de Barro Negro'),
-                'descripcion' => 'Cántaro tradicional de barro negro pulido, con grabados de flores y grecas.',
-                'imagen_artesanias' => 'images/artesanias/general/cantaro_barro_negro_general_1.jpg',
-                'historia_piezas_general' => 'Hecho en San Bartolo Coyotepec, esta técnica data de tiempos prehispánicos y se caracteriza por su brillo metálico.',
+                'nombre' => 'Cántaro de Barro Negro',
+                'descripcion' => 'Cántaro tradicional de barro negro pulido.',
+                'imagen_general' => 'images/artesanias/general/cantaro_barro_negro_general_1.jpg',
+                'historia' => 'Hecho en San Bartolo Coyotepec.',
                 'precio' => 850.00,
-                'categoria_id' => $barroNegroCat->id,
-                'ubicacion_id' => $coyotepec->id,
-            ]
-        );
-
-        ArtesaniaVariant::firstOrCreate(
-            ['sku' => ''],
-            [
-                'artesania_id' => $cantaroArtesania->id,
+                'categoria' => $barroNegroCat,
+                'ubicacion' => $coyotepec,
                 'variant_name' => 'Cántaro de Barro Negro - Grande',
-                'description_variant' => 'Cántaro grande con detalles intrincados.',
-                'size' => 'Grande',
-                'color' => 'Negro',
-                'material_variant' => 'Arcilla de Barro Negro',
-                'precio' => 850.00,
+                'sku' => Str::upper(Str::random(8)),
                 'stock' => 8,
                 'imagen_variant' => 'images/artesanias/variantes/cantaro_bn_1_principal.jpg',
-                'tipo_embalaje_id' => $cajaGrandeBarro->id,
-                'is_active' => true,
-            ]
-        );
-        
-        // Textiles
-        $huipilArtesania = Artesania::firstOrCreate(
-            ['nombre' => 'Huipil Tradicional de Teotitlán'],
+                'tipo_embalaje' => $cajaGrandeBarro,
+                'atributos' => [
+                    ['atributo' => $tallaAttr, 'valor' => 'Grande'],
+                    ['atributo' => $colorAttr, 'valor' => 'Negro'],
+                    ['atributo' => $materialAttr, 'valor' => 'Arcilla de Barro Negro'],
+                ]
+            ],
             [
-                'slug' => Str::slug('Huipil Tradicional de Teotitlán'),
-                'descripcion' => 'Huipil de algodón tejido en telar de cintura, con bordados de flores y fauna local.',
-                'imagen_artesanias' => 'images/artesanias/general/huipil_teotitlan_general_1.jpg',
-                'historia_piezas_general' => 'Elaborado por maestras tejedoras de Teotitlán del Valle, cada huipil cuenta una historia de la comunidad.',
+                'nombre' => 'Huipil Tradicional de Teotitlán',
+                'descripcion' => 'Huipil de algodón tejido en telar de cintura.',
+                'imagen_general' => 'images/artesanias/general/huipil_teotitlan_general_1.jpg',
+                'historia' => 'Elaborado por maestras tejedoras de Teotitlán del Valle.',
                 'precio' => 1200.00,
-                'categoria_id' => $textilesCat->id,
-                'ubicacion_id' => $teotitlan->id,
-            ]
-        );
-
-        ArtesaniaVariant::firstOrCreate(
-            ['sku' => ''],
-            [
-                'artesania_id' => $huipilArtesania->id,
+                'categoria' => $textilesCat,
+                'ubicacion' => $teotitlan,
                 'variant_name' => 'Huipil Rojo con Flores',
-                'description_variant' => 'Huipil con fondo rojo intenso y bordados multicolor.',
-                'size' => 'Unitalla',
-                'color' => 'Rojo',
-                'material_variant' => 'Algodón',
-                'precio' => 1200.00,
+                'sku' => Str::upper(Str::random(8)),
                 'stock' => 12,
                 'imagen_variant' => 'images/artesanias/variantes/huipil_rojo_1_principal.jpg',
-                'tipo_embalaje_id' => $sobreGuayabera->id,
-                'is_active' => true,
-            ]
-        );
-
-        // Calzados
-        $huaracheArtesania = Artesania::firstOrCreate(
-            ['nombre' => 'Huarache de Cuero Bordado'],
+                'tipo_embalaje' => $sobreGuayabera,
+                'atributos' => [
+                    ['atributo' => $tallaAttr, 'valor' => 'Unitalla'],
+                    ['atributo' => $colorAttr, 'valor' => 'Rojo'],
+                    ['atributo' => $materialAttr, 'valor' => 'Algodón'],
+                ]
+            ],
             [
-                'slug' => Str::slug('Huarache de Cuero Bordado'),
-                'descripcion' => 'Huarache de cuero genuino con correas bordadas a mano, perfectos para cualquier ocasión.',
-                'imagen_artesanias' => 'images/artesanias/general/huarache_bordado_general_1.jpg',
-                'historia_piezas_general' => 'Este tipo de calzado ha sido parte de la tradición oaxaqueña por generaciones, combinando comodidad y arte.',
+                'nombre' => 'Huarache de Cuero Bordado',
+                'descripcion' => 'Huarache de cuero genuino con correas bordadas a mano.',
+                'imagen_general' => 'images/artesanias/general/huarache_bordado_general_1.jpg',
+                'historia' => 'Parte de la tradición oaxaqueña.',
                 'precio' => 450.00,
-                'categoria_id' => $calzadosCat->id,
-                'ubicacion_id' => $oaxaca->id,
-            ]
-        );
-
-        ArtesaniaVariant::firstOrCreate(
-            ['sku' => ''],
-            [
-                'artesania_id' => $huaracheArtesania->id,
+                'categoria' => $calzadosCat,
+                'ubicacion' => $oaxaca,
                 'variant_name' => 'Huarache Talla 25',
-                'description_variant' => 'Huarache con bordado rojo, talla 25.',
-                'size' => '25',
-                'color' => 'Café/Rojo',
-                'material_variant' => 'Cuero/Hilo de algodón',
-                'precio' => 450.00,
+                'sku' => Str::upper(Str::random(8)),
                 'stock' => 15,
                 'imagen_variant' => 'images/artesanias/variantes/huarache_25_principal.jpg',
-                'tipo_embalaje_id' => $cajaPequenaCalzado->id,
-                'is_active' => true,
+                'tipo_embalaje' => $cajaPequenaCalzado,
+                'atributos' => [
+                    ['atributo' => $tallaAttr, 'valor' => '25'],
+                    ['atributo' => $colorAttr, 'valor' => 'Café/Rojo'],
+                    ['atributo' => $materialAttr, 'valor' => 'Cuero/Hilo de algodón'],
+                ]
             ]
-        );
+        ];
+
+        foreach ($productos as $prod) {
+            $artesania = Artesania::firstOrCreate(
+                ['nombre' => $prod['nombre']],
+                [
+                    'slug' => Str::slug($prod['nombre']),
+                    'descripcion' => $prod['descripcion'],
+                    'imagen_artesanias' => $prod['imagen_general'],
+                    'historia_piezas_general' => $prod['historia'],
+                    'precio' => $prod['precio'],
+                    'categoria_id' => $prod['categoria']->id,
+                    'ubicacion_id' => $prod['ubicacion']->id,
+                ]
+            );
+
+            $variant = ArtesaniaVariant::firstOrCreate(
+                ['artesania_id' => $artesania->id, 'variant_name' => $prod['variant_name']],
+                [
+                    'sku' => $prod['sku'],
+                    'precio' => $prod['precio'],
+                    'stock' => $prod['stock'],
+                    'imagen_variant' => $prod['imagen_variant'],
+                    'tipo_embalaje_id' => $prod['tipo_embalaje']->id,
+                    'is_active' => true,
+                ]
+            );
+
+            // Insertar atributos
+            foreach ($prod['atributos'] as $attr) {
+                AtributoArtesaniaVariant::firstOrCreate([
+                    'artesania_variant_id' => $variant->id,
+                    'atributo_id' => $attr['atributo']->id,
+                    'valor' => $attr['valor'],
+                ]);
+            }
+        }
     }
 }
