@@ -56,10 +56,9 @@ class Artesania extends Model
         'imagen_artesanias',
         'historia_piezas_general',
         'categoria_id',
-        'slug',
         'ubicacion_id',
         'precio',
-        
+        'slug',
     ];
 
     /**
@@ -97,7 +96,7 @@ class Artesania extends Model
     {
         return $this->hasMany(ArtesaniaVariant::class, 'artesania_id');
     }
-        public function getRouteKeyName()
+    public function getRouteKeyName()
     {
         return 'slug';
     }
@@ -106,9 +105,14 @@ class Artesania extends Model
     {
         return $this->hasMany(Comment::class)->where('content', 'rating');
     }
+
+    /**
+     * Get the principal image for the Artesania, or a placeholder if none exists.
+     * This is an accessor that will be used in the view.
+     */
     public function getImagenPrincipalAttribute()
     {
-        return $this->imagen_artesanias[0] ?? null;
+        return $this->imagen_artesanias[0] ?? 'https://placehold.co/48x48/CCCCCC/666666?text=N/A';
     }
 
 
@@ -130,7 +134,4 @@ class Artesania extends Model
             }
         });
     }
-
-    
 }
-

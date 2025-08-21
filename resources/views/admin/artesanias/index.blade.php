@@ -25,7 +25,7 @@
                             <span class="block sm:inline">{{ session('success') }}</span>
                         </div>
                     @endif
-                  
+                    
                     @if ($artesanias->isEmpty())
                         <p class="text-gray-600">No hay artesanías registradas aún.</p>
                     @else
@@ -33,7 +33,6 @@
                             <table class="min-w-full divide-y divide-gray-200">
                                 <thead class="bg-gray-50">
                                     <tr>
-                                        
                                         <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                             Imagen
                                         </th>
@@ -44,9 +43,6 @@
                                             Precio
                                         </th>
                                         <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                            Stock
-                                        </th>
-                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                             Categoría
                                         </th>
                                         <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -55,34 +51,21 @@
                                         <th scope="col" class="relative px-6 py-3">
                                             <span class="sr-only">Acciones</span>
                                         </th>
-                                       
                                     </tr>
                                 </thead>
                                 <tbody class="bg-white divide-y divide-gray-200">
                                     @foreach ($artesanias as $artesania)
                                         <tr>
-                                           
-                                           <td class="px-6 py-4 whitespace-nowrap">
-                                           @if (is_array($artesania->imagen_artesanias) && count($artesania->imagen_artesanias) > 0)
-                                                <img src="{{ asset($artesania->imagen_artesanias[0]) }}"
-                                                    alt="{{ $artesania->nombre }}"
-                                                    class="h-12 w-12 object-cover rounded-full">
-                                            @else
-                                                <img src="https://placehold.co/48x48/CCCCCC/666666?text=N/A"
-                                                    alt="Sin imagen"
-                                                    class="h-12 w-12 object-cover rounded-full bg-gray-200">
-                                            @endif
-
-                                        </td>
-
+                                            <td class="px-6 py-4 whitespace-nowrap">
+                                                <img src="{{ asset($artesania->imagen_principal) }}"
+                                                     alt="{{ $artesania->nombre }}"
+                                                     class="h-12 w-12 object-cover rounded-full">
+                                            </td>
                                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                                                 {{ $artesania->nombre }}
                                             </td>
                                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                                 ${{ number_format($artesania->precio, 2) }}
-                                            </td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                                {{ $artesania->stock }}
                                             </td>
                                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                                 {{ $artesania->categoria->nombre ?? 'N/A' }}
