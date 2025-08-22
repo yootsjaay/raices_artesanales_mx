@@ -38,7 +38,7 @@ return [
         'public_key'=> 'MP_ACCESS_TOKEN'
     ],
  'envia' => [
-        'base_url' => env('ENVIA_BASE_URL', 'https://api.envia.com/ship/v2'), // Siempre es bueno
+        'base_url' => env('ENVIA_BASE_URL'), // Siempre es bueno
         'api_key' => env('ENVIA_API_KEY'),
         'origin_address_id' => env('ENVIA_ORIGIN_ID'),
 

@@ -46,92 +46,92 @@ class CarritoController extends Controller
  
 
 public function agregar(Request $request)
-    {
-        if (!Auth::check()) {
-            return redirect()->route('login')->with('error', 'Debes iniciar sesión para añadir productos al carrito.');
-        }
+{
+    if (!Auth::check()) {
+        return redirect()->route('login')->with('error', 'Debes iniciar sesión para añadir productos al carrito.');
+    }
 
-        $request->validate([
-            'artesania_id' => 'required|exists:artesanias,id',
-            'cantidad' => 'required|integer|min:1',
-            'variant_id' => 'nullable|exists:artesania_variants,id',
-        ]);
+    $request->validate([
+        'artesania_id' => 'required|exists:artesanias,id',
+        'cantidad' => 'required|integer|min:1',
+        'variant_id' => 'nullable|exists:artesania_variants,id',
+    ]);
 
-        $artesania = Artesania::findOrFail($request->artesania_id);
-        $quantity = $request->cantidad;
-        $variantId = $request->variant_id;
+    $artesania = Artesania::findOrFail($request->artesania_id);
+    $quantity = $request->cantidad;
+    $variantId = $request->variant_id;
 
-        $cart = $this->getOrCreateCart();
+    $cart = $this->getOrCreateCart();
 
-        // Usamos una transacción para asegurar la atomicidad de la operación
-        return DB::transaction(function () use ($artesania, $quantity, $variantId, $cart) {
-            if ($variantId) {
-                // 🧬 Con variante
-                $variant = ArtesaniaVariant::where('id', $variantId)
-                    ->where('artesania_id', $artesania->id)
-                    ->firstOrFail(); // Asegura que la variante existe y pertenece a la artesanía
+    return DB::transaction(function () use ($artesania, $quantity, $variantId, $cart) {
+        if ($variantId) {
+            // 🧬 Con variante
+            $variant = ArtesaniaVariant::where('id', $variantId)
+                ->where('artesania_id', $artesania->id)
+                ->firstOrFail();
 
-                if ($variant->stock < $quantity) {
-                    return back()->with('error', 'No hay suficiente stock para esta variante. Solo quedan ' . $variant->stock . ' unidades.');
-                }
-
-                $cartItem = $cart->cart_items()
-                    ->where('artesania_id', $artesania->id)
-                    ->where('artesania_variant_id', $variant->id)
-                    ->first();
-
-                if ($cartItem) {
-                    $newQuantity = $cartItem->quantity;
-                    if ($variant->stock < $newQuantity) {
-                        return back()->with('error', 'No puedes añadir más, solo hay ' . $variant->stock . ' unidades disponibles para esta variante.');
-                    }
-                    $cartItem->quantity = $newQuantity;
-                    $cartItem->save();
-                } else {
-                    $cart->cart_items()->create([
-                        'artesania_id' => $artesania->id,
-                        'artesania_variant_id' => $variant->id,
-                        'quantity' => $quantity,
-                        'price' => $variant->precio, // ✅ CORREGIDO: Usar el precio de la variante
-                    ]);
-                }
-
-            } else {
-                // 🪴 Sin variante
-                // Asegurarse de que no estamos añadiendo una variante nula si la artesanía tiene variantes
-                if ($artesania->variants->isNotEmpty()) { // ✅ CORREGIDO: Usar el nombre de relación 'variants'
-                    return back()->with('error', 'Por favor, selecciona una variante para esta artesanía.');
-                }
-
-                if ($artesania->stock < $quantity) {
-                    return back()->with('error', 'No hay suficiente stock para este producto. Solo quedan ' . $artesania->stock . ' unidades.');
-                }
-
-                $cartItem = $cart->cart_items()
-                    ->where('artesania_id', $artesania->id)
-                    ->whereNull('artesania_variant_id') // Importante para distinguir
-                    ->first();
-
-                if ($cartItem) {
-                    $newQuantity = $cartItem->quantity + $quantity;
-                    if ($artesania->stock < $newQuantity) {
-                        return back()->with('error', 'No puedes añadir más, solo hay ' . $artesania->stock . ' unidades disponibles para este producto.');
-                    }
-                    $cartItem->quantity = $newQuantity;
-                    $cartItem->save();
-                } else {
-                    $cart->cart_items()->create([
-                        'artesania_id' => $artesania->id,
-                        'artesania_variant_id' => null, // Explícitamente nulo
-                        'quantity' => $quantity,
-                        'price' => $artesania->precio,
-                    ]);
-                }
+            if ($variant->stock < $quantity) {
+                return back()->with('error', 'No hay suficiente stock para esta variante. Solo quedan ' . $variant->stock . ' unidades.');
             }
 
-            return redirect()->route('carrito.mostrar')->with('success', 'Producto añadido correctamente.');
-        });
-    }
+            $cartItem = $cart->cart_items()
+                ->where('artesania_id', $artesania->id)
+                ->where('artesania_variant_id', $variant->id)
+                ->first();
+
+            if ($cartItem) {
+                $newQuantity = $cartItem->quantity + $quantity; // ✅ sumamos la cantidad nueva
+                if ($variant->stock < $newQuantity) {
+                    return back()->with('error', 'No puedes añadir más, solo hay ' . $variant->stock . ' unidades disponibles para esta variante.');
+                }
+                $cartItem->quantity = $newQuantity;
+                $cartItem->save();
+            } else {
+                $cart->cart_items()->create([
+                    'artesania_id' => $artesania->id,
+                    'artesania_variant_id' => $variant->id,
+                    'quantity' => $quantity,
+                    'price' => $variant->precio,
+                ]);
+            }
+
+        } else {
+            // 🪴 Sin variante
+            if ($artesania->variants->isNotEmpty()) {
+                return back()->with('error', 'Por favor, selecciona una variante para esta artesanía.');
+            }
+
+            // ⚠️ Solo si tu tabla artesanias tiene campo `stock`, si no hay que quitar esto
+            if (isset($artesania->stock) && $artesania->stock < $quantity) {
+                return back()->with('error', 'No hay suficiente stock para este producto. Solo quedan ' . $artesania->stock . ' unidades.');
+            }
+
+            $cartItem = $cart->cart_items()
+                ->where('artesania_id', $artesania->id)
+                ->whereNull('artesania_variant_id')
+                ->first();
+
+            if ($cartItem) {
+                $newQuantity = $cartItem->quantity + $quantity; // ✅ sumamos
+                if (isset($artesania->stock) && $artesania->stock < $newQuantity) {
+                    return back()->with('error', 'No puedes añadir más, solo hay ' . $artesania->stock . ' unidades disponibles para este producto.');
+                }
+                $cartItem->quantity = $newQuantity;
+                $cartItem->save();
+            } else {
+                $cart->cart_items()->create([
+                    'artesania_id' => $artesania->id,
+                    'artesania_variant_id' => null,
+                    'quantity' => $quantity,
+                    'price' => $artesania->precio,
+                ]);
+            }
+        }
+
+        return redirect()->route('carrito.mostrar')->with('success', 'Producto añadido correctamente.');
+    });
+}
+
 
     public function mostrar()
     {

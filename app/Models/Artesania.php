@@ -96,6 +96,8 @@ class Artesania extends Model
     {
         return $this->hasMany(ArtesaniaVariant::class, 'artesania_id');
     }
+
+    
     public function getRouteKeyName()
     {
         return 'slug';
@@ -106,15 +108,7 @@ class Artesania extends Model
         return $this->hasMany(Comment::class)->where('content', 'rating');
     }
 
-    /**
-     * Get the principal image for the Artesania, or a placeholder if none exists.
-     * This is an accessor that will be used in the view.
-     */
-    public function getImagenPrincipalAttribute()
-    {
-        return $this->imagen_artesanias[0] ?? 'https://placehold.co/48x48/CCCCCC/666666?text=N/A';
-    }
-
+  
 
     
     /**

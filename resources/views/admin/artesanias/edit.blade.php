@@ -166,7 +166,26 @@
                                         <label for="variants[{{ $loop->index }}][stock]" class="block text-sm font-medium text-gray-700">Stock:</label>
                                         <input type="number" name="variants[{{ $loop->index }}][stock]" id="variants[{{ $loop->index }}][stock]" value="{{ old('variants.' . $loop->index . '.stock', $variant->stock) }}" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm">
                                     </div>
-                                    {{-- ... otros campos de la variante --}}
+                                    
+                                    <div>
+                                        <label for="variants[{{ $loop->index }}][tipo_embalaje_id]" class="block text-sm font-medium text-gray-700">Tipo de Embalaje:</label>
+                                        <select name="variants[{{ $loop->index }}][tipo_embalaje_id]" id="variants[{{ $loop->index }}][tipo_embalaje_id]"
+                                            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                            <option value="">Seleccione un embalaje</option>
+                                            @foreach ($tipos_embalaje as $tipo)
+                                                <option value="{{ $tipo->id }}" {{ old('variants.' . $loop->index . '.tipo_embalaje_id', $variant->tipo_embalaje_id) == $tipo->id ? 'selected' : '' }}>
+                                                    {{ $tipo->nombre }}
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+
+                                    <div class="flex items-center self-end">
+                                        <input type="checkbox" name="variants[{{ $loop->index }}][is_active]" value="1"
+                                            class="rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500"
+                                            {{ old('variants.' . $loop->index . '.is_active', $variant->is_active) ? 'checked' : '' }}>
+                                        <label class="ml-2 block text-sm font-medium text-gray-700">Activa</label>
+                                    </div>
                                 </div>
 
                                 {{-- Sección para imágenes de la variante --}}
@@ -206,12 +225,17 @@
                                     </div>
                                     <div id="attributes-container-{{ $loop->index }}" class="space-y-2">
                                         @foreach($variant->atributos as $attribute)
-                                            <div class="attribute-item grid grid-cols-2 gap-2">
-                                                {{-- Se han actualizado los nombres de los campos --}}
-                                                <input type="text" name="variants[{{ $loop->parent->index }}][attributes][{{ $loop->index }}][name]" value="{{ old('variants.' . $loop->parent->index . '.attributes.' . $loop->index . '.name', $attribute->atributo->nombre) }}" placeholder="Nombre del Atributo" class="block w-full text-sm border-gray-300 rounded-md shadow-sm">
+                                            <div class="attribute-item grid grid-cols-1 md:grid-cols-2 gap-4">
                                                 <div class="flex items-center space-x-2">
-                                                    {{-- Se han actualizado los nombres de los campos --}}
-                                                    <input type="text" name="variants[{{ $loop->parent->index }}][attributes][{{ $loop->index }}][value]" value="{{ old('variants.' . $loop->parent->index . '.attributes.' . $loop->index . '.value', $attribute->valor) }}" placeholder="Valor del Atributo" class="block w-full text-sm border-gray-300 rounded-md shadow-sm">
+                                                    <select name="variants[{{ $loop->parent->index }}][attributes][{{ $loop->index }}][id]" class="block w-full text-sm border-gray-300 rounded-md shadow-sm">
+                                                        @foreach($atributos as $attr)
+                                                            <option value="{{ $attr->id }}" {{ $attribute->atributo_id == $attr->id ? 'selected' : '' }}>
+                                                                {{ $attr->nombre }}
+                                                            </option>
+                                                        @endforeach
+                                                    </select>
+                                                    
+                                                    <input type="text" name="variants[{{ $loop->parent->index }}][attributes][{{ $loop->index }}][valor]" value="{{ old('variants.' . $loop->parent->index . '.attributes.' . $loop->index . '.valor', $attribute->valor) }}" placeholder="Valor del Atributo" class="block w-full text-sm border-gray-300 rounded-md shadow-sm">
                                                     <button type="button" class="remove-attribute-button text-red-500 hover:text-red-700 text-sm">
                                                         &times;
                                                     </button>
@@ -244,6 +268,10 @@
             const variantsContainer = document.getElementById('variants-container');
             const addVariantButton = document.getElementById('add-variant');
             let variantIndex = variantsContainer.children.length;
+            
+            // Usamos esta variable para crear dinámicamente las opciones del select
+            const tiposEmbalaje = @json($tipos_embalaje);
+            const embalajeOptionsHtml = tiposEmbalaje.map(tipo => `<option value="${tipo.id}">${tipo.nombre}</option>`).join('');
 
             /**
              * Genera el HTML para un nuevo campo de variante.
@@ -275,17 +303,22 @@
                                 <label for="variants[${index}][stock]" class="block text-sm font-medium text-gray-700">Stock:</label>
                                 <input type="number" name="variants[${index}][stock]" id="variants[${index}][stock]" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm">
                             </div>
+                            
                             <div>
-                                <label for="variants[${index}][is_active]" class="block text-sm font-medium text-gray-700">Estado:</label>
-                                <select name="variants[${index}][is_active]" id="variants[${index}][is_active]" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm">
-                                    <option value="1">Activo</option>
-                                    <option value="0">Inactivo</option>
+                                <label for="variants[${index}][tipo_embalaje_id]" class="block text-sm font-medium text-gray-700">Tipo de Embalaje:</label>
+                                <select name="variants[${index}][tipo_embalaje_id]" id="variants[${index}][tipo_embalaje_id]"
+                                    class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                    <option value="">Seleccione un embalaje</option>
+                                    ${embalajeOptionsHtml}
                                 </select>
                             </div>
-                            <div class="md:col-span-2">
-                                <label for="variants[${index}][description_variant]" class="block text-sm font-medium text-gray-700">Descripción:</label>
-                                <textarea name="variants[${index}][description_variant]" id="variants[${index}][description_variant]" rows="2" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm"></textarea>
+                           
+                            <div class="flex items-center self-end">
+                                <input type="checkbox" name="variants[${index}][is_active]" value="1"
+                                    class="rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500" checked>
+                                <label class="ml-2 block text-sm font-medium text-gray-700">Activa</label>
                             </div>
+
                         </div>
                         <div class="mt-4">
                             <h6 class="text-sm font-medium text-gray-800">Imágenes de la Variante</h6>
@@ -315,11 +348,15 @@
              * @returns {string} El HTML como string.
              */
             function createAttributeHtml(variantIndex, attributeIndex) {
+                const atributosOptionsHtml = @json($atributos).map(attr => `<option value="${attr.id}">${attr.nombre}</option>`).join('');
                 return `
-                    <div class="attribute-item grid grid-cols-2 gap-2">
-                        <input type="text" name="variants[${variantIndex}][attributes][${attributeIndex}][name]" placeholder="Nombre del Atributo" class="block w-full text-sm border-gray-300 rounded-md shadow-sm">
+                    <div class="attribute-item grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div class="flex items-center space-x-2">
-                            <input type="text" name="variants[${variantIndex}][attributes][${attributeIndex}][value]" placeholder="Valor del Atributo" class="block w-full text-sm border-gray-300 rounded-md shadow-sm">
+                            <select name="variants[${variantIndex}][attributes][${attributeIndex}][id]" class="block w-full text-sm border-gray-300 rounded-md shadow-sm">
+                                <option value="">Seleccione un atributo</option>
+                                ${atributosOptionsHtml}
+                            </select>
+                            <input type="text" name="variants[${variantIndex}][attributes][${attributeIndex}][valor]" placeholder="Valor del Atributo" class="block w-full text-sm border-gray-300 rounded-md shadow-sm">
                             <button type="button" class="remove-attribute-button text-red-500 hover:text-red-700 text-sm">
                                 &times;
                             </button>
