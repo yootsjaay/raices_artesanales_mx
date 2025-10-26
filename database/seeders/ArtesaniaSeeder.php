@@ -27,14 +27,15 @@ class ArtesaniaSeeder extends Seeder
         $oaxaca = Ubicacion::where('nombre', 'Oaxaca de Juárez')->first();
         $teotitlan = Ubicacion::where('nombre', 'Teotitlán del Valle')->first();
 
-        $cajaMedianaBarro = TipoEmbalaje::where('nombre', 'Caja Mediana para Barro')->first();
-        $cajaGrandeBarro = TipoEmbalaje::where('nombre', 'Caja Grande para Barro')->first();
-        $sobreGuayabera = TipoEmbalaje::where('nombre', 'Sobre para Guayabera')->first();
-        $cajaPequenaCalzado = TipoEmbalaje::where('nombre', 'Caja Pequeña para Calzado')->first();
+        $sobrePequeno = TipoEmbalaje::where('nombre', 'Sobre pequeño')->first();
+        $cajaChica = TipoEmbalaje::where('nombre', 'Caja chica')->first();
+        $cajaMediana = TipoEmbalaje::where('nombre', 'Caja mediana')->first();
+        $cajaGrande = TipoEmbalaje::where('nombre', 'Caja grande')->first();
+        $cajaExtra = TipoEmbalaje::where('nombre', 'Caja extra')->first(); // Opcional, si lo vas a usar
 
         if (!$alebrijesCat || !$barroNegroCat || !$textilesCat || !$calzadosCat ||
             !$sanMartin || !$coyotepec || !$oaxaca || !$teotitlan ||
-            !$cajaMedianaBarro || !$cajaGrandeBarro || !$sobreGuayabera || !$cajaPequenaCalzado
+            !$cajaMediana || !$cajaGrande || !$sobrePequeno || !$cajaChica
         ) {
             $this->command->warn('¡Advertencia! Faltan categorías, ubicaciones o tipos de embalaje.');
             return;
@@ -59,7 +60,7 @@ class ArtesaniaSeeder extends Seeder
                 'sku' => Str::upper(Str::random(8)),
                 'stock' => 5,
                 'imagen_variant' => 'images/artesanias/variantes/alebrije_nahual_1_principal.jpg',
-                'tipo_embalaje' => $cajaMedianaBarro,
+                'tipo_embalaje' => $cajaMediana,
                 'atributos' => [
                     ['atributo' => $tallaAttr, 'valor' => 'Grande'],
                     ['atributo' => $colorAttr, 'valor' => 'Multicolor'],
@@ -78,7 +79,7 @@ class ArtesaniaSeeder extends Seeder
                 'sku' => Str::upper(Str::random(8)),
                 'stock' => 8,
                 'imagen_variant' => 'images/artesanias/variantes/cantaro_bn_1_principal.jpg',
-                'tipo_embalaje' => $cajaGrandeBarro,
+                'tipo_embalaje' => $cajaGrande,
                 'atributos' => [
                     ['atributo' => $tallaAttr, 'valor' => 'Grande'],
                     ['atributo' => $colorAttr, 'valor' => 'Negro'],
@@ -97,7 +98,7 @@ class ArtesaniaSeeder extends Seeder
                 'sku' => Str::upper(Str::random(8)),
                 'stock' => 12,
                 'imagen_variant' => 'images/artesanias/variantes/huipil_rojo_1_principal.jpg',
-                'tipo_embalaje' => $sobreGuayabera,
+                'tipo_embalaje' => $sobrePequeno,
                 'atributos' => [
                     ['atributo' => $tallaAttr, 'valor' => 'Unitalla'],
                     ['atributo' => $colorAttr, 'valor' => 'Rojo'],
@@ -116,7 +117,7 @@ class ArtesaniaSeeder extends Seeder
                 'sku' => Str::upper(Str::random(8)),
                 'stock' => 15,
                 'imagen_variant' => 'images/artesanias/variantes/huarache_25_principal.jpg',
-                'tipo_embalaje' => $cajaPequenaCalzado,
+                'tipo_embalaje' => $cajaChica,
                 'atributos' => [
                     ['atributo' => $tallaAttr, 'valor' => '25'],
                     ['atributo' => $colorAttr, 'valor' => 'Café/Rojo'],

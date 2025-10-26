@@ -1,10 +1,10 @@
 <?php
+
 namespace App\Models;
+
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Migrations\Migration;
-use Illuminate\Support\Facades\Schema;
-use Illuminate\Database\Eloquent\Releations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class TipoEmbalaje extends Model
 {
@@ -13,6 +13,7 @@ class TipoEmbalaje extends Model
     protected $table = 'tipos_embalaje';
 
     protected $fillable = [
+        'package_envia_id', // 👈 importante
         'nombre',
         'descripcion',
         'weight',
@@ -23,15 +24,16 @@ class TipoEmbalaje extends Model
     ];
 
     protected $casts = [
-        'weight' => 'decimal:2',
-        'length' => 'decimal:2',
-        'width' => 'decimal:2',
-        'height' => 'decimal:2',
+        'package_envia_id' => 'integer',
+        'weight' => 'float',
+        'length' => 'float',
+        'width' => 'float',
+        'height' => 'float',
         'is_active' => 'boolean',
     ];
 
     /**
-     * Get the artesania variants that use this packaging type.
+     * Relación con las variantes de artesanía que usan este tipo de embalaje.
      */
     public function artesaniaVariants(): HasMany
     {

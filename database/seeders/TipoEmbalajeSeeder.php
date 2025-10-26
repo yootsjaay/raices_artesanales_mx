@@ -4,63 +4,98 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use App\Models\TipoEmbalaje;
+use App\Services\EnviaService;
 
 class TipoEmbalajeSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
     public function run(): void
     {
-        // Se usan valores de ejemplo para peso y dimensiones.
-        // Se usa firstOrCreate para evitar duplicados si el seeder se ejecuta varias veces.
+        $envia = new EnviaService();
 
-        TipoEmbalaje::firstOrCreate(
-            ['nombre' => 'Sobre para Guayabera'],
+        $embalajes = [
+            // Sobres para ropa individual (camisas, blusas, vestidos, guayaberas)
+           [
+                "name" => "Sobre pequeño",
+                "content" => "Prendas individuales: camisas, blusas, guayaberas",
+                "insurance" => 10,
+                "height" => 2,
+                "length" => 30,
+                "width" => 25,
+                "weight" => 0.3,
+                "package_type_id" => 1, // Sobre
+                "weight_unit" => "KG",
+                "length_unit" => "CM"
+            ],
             [
-                'descripcion' => 'Sobre de empaque plano, ideal para textiles como rebozos o guayaberas.',
-                'weight' => 0.05,
-                'length' => 40.00,
-                'width' => 30.00,
-                'height' => 1.00,
-                'is_active' => true,
+                "name" => "Caja chica",
+                "content" => "Alebrijes chicos, accesorios artesanales",
+                "insurance" => 20,
+                "height" => 10,
+                "length" => 15,
+                "width" => 15,
+                "weight" => 0.5,
+                "package_type_id" => 1,
+                "weight_unit" => "KG",
+                "length_unit" => "CM"
+            ],
+            [
+                "name" => "Caja mediana",
+                "content" => "Textiles, blusas y artesanías medianas",
+                "insurance" => 50,
+                "height" => 15,
+                "length" => 30,
+                "width" => 25,
+                "weight" => 2,
+                "package_type_id" => 1,
+                "weight_unit" => "KG",
+                "length_unit" => "CM"
+            ],
+            [
+                "name" => "Caja grande",
+                "content" => "Surtido de huaraches y calzado",
+                "insurance" => 100,
+                "height" => 30,
+                "length" => 40,
+                "width" => 30,
+                "weight" => 6,
+                "package_type_id" => 1,
+                "weight_unit" => "KG",
+                "length_unit" => "CM"
+            ],
+            [
+                "name" => "Caja extra",
+                "content" => "Piezas de barro grandes: ollas, cántaros, platos",
+                "insurance" => 200,
+                "height" => 40,
+                "length" => 60,
+                "width" => 40,
+                "weight" => 12,
+                "package_type_id" => 1,
+                "weight_unit" => "KG",
+                "length_unit" => "CM"
             ]
-        );
+        ];
 
-        TipoEmbalaje::firstOrCreate(
-            ['nombre' => 'Caja Pequeña para Calzado'],
-            [
-                'descripcion' => 'Caja de cartón pequeña, adecuada para figuras de barro o calzado de peso ligero.',
-                'weight' => 0.20,
-                'length' => 25.00,
-                'width' => 15.00,
-                'height' => 10.00,
-                'is_active' => true,
-            ]
-        );
+        foreach ($embalajes as $item) {
+            $response = $envia->createPackage($item);
 
-        TipoEmbalaje::firstOrCreate(
-            ['nombre' => 'Caja Mediana para Barro'],
-            [
-                'descripcion' => 'Caja robusta de tamaño mediano, perfecta para cántaros o alebrijes medianos.',
-                'weight' => 0.50,
-                'length' => 35.00,
-                'width' => 25.00,
-                'height' => 20.00,
-                'is_active' => true,
-            ]
-        );
-        
-        TipoEmbalaje::firstOrCreate(
-            ['nombre' => 'Caja Grande para Barro'],
-            [
-                'descripcion' => 'Caja grande y reforzada, ideal para vajillas o piezas de barro más grandes.',
-                'weight' => 0.80,
-                'length' => 50.00,
-                'width' => 40.00,
-                'height' => 30.00,
-                'is_active' => true,
-            ]
-        );
+            if ($response && isset($response['package_id'])) {
+                TipoEmbalaje::updateOrCreate(
+                    ['nombre' => $item['name']],
+                    [
+                        'descripcion' => $item['content'],
+                        'weight' => $item['weight'],
+                        'length' => $item['length'],
+                        'width' => $item['width'],
+                        'height' => $item['height'],
+                        'is_active' => 1,
+                        'package_envia_id' => $response['package_id'],
+                    ]
+                );
+                $this->command->info("Embalaje '{$item['name']}' creado correctamente con ID {$response['package_id']}");
+            } else {
+                $this->command->error("Error creando {$item['name']} en Envia.com. Revisa el log para detalles.");
+            }
+        }
     }
 }

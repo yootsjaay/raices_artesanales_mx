@@ -2,159 +2,179 @@
 
 namespace App\Services;
 
-use MercadoPago\Client\Common\RequestOptions;
 use MercadoPago\Client\Preference\PreferenceClient;
-use MercadoPago\Client\Payment\PaymentClient; // <--- Importar PaymentClient
-use MercadoPago\Exceptions\MPApiException;
+use MercadoPago\Client\Payment\PaymentClient; // ✨ NECESARIO para consultar pagos en el webhook
 use MercadoPago\MercadoPagoConfig;
+use MercadoPago\Exceptions\MPApiException; // Para ser explícitos
 use Illuminate\Support\Facades\Log;
+use Illuminate\Http\Request;         // ✨ NECESARIO para handleWebhook
+use Illuminate\Support\Facades\DB;   // ✨ NECESARIO para la transacción
+use App\Models\Order;                // ✨ NECESARIO (Ajusta el namespace de tu modelo)
+use App\Jobs\ProcessMercadoPagoPayment; // ✨ OPCIONAL/RECOMENDADO: Para el procesamiento asíncrono
+use Exception;
 
-class MercadoPagoServices implements MercadoPagoInterface
-{
+class MercadoPagoServices { 
+
+    protected $preferenceClient; // ✍️ Renombrado para claridad
+    protected $paymentClient;    // ✨ NECESARIO: Cliente para consultar pagos
+
     public function __construct()
     {
-        MercadoPagoConfig::setAccessToken(env('MP_ACCESS_TOKEN'));
-        // Opcional: Para pruebas en local. Asegúrate de quitarlo en producción.
-        MercadoPagoConfig::setRuntimeEnviroment(MercadoPagoConfig::LOCAL);
+        // 🔑 Configuración del Access Token
+        MercadoPagoConfig::setAccessToken(config('mercadoservice.mercadopago.access_token'));
+        
+        // ✨ Inicialización de ambos clientes
+        $this->preferenceClient = new PreferenceClient(); 
+        $this->paymentClient = new PaymentClient();      
     }
 
-    public function crearPreferenciaDePago(array $items, array $backUrls, string $notificationUrl, string $externalReference, array $payerData, array $metadata = []): object
+    // -------------------------------------------------------------
+    // MÉTODO PARA CREAR LA PREFERENCIA DE PAGO
+    // -------------------------------------------------------------
+    public function createPreference($cart, $shippingAddress, $selectedQuote, $orderId)
     {
-        $client = new PreferenceClient();
-        // ... (Tu implementación existente para crear preferencias de Checkout Pro) ...
         try {
-            $preferenceRequest = [
-                "items" => $items,
-                "payer" => [
-                    "email" => $payerData['email'] ?? null,
-                    "name" => $payerData['name'] ?? null,
-                    "surname" => $payerData['surname'] ?? null,
-                ],
-                "back_urls" => $backUrls,
-                "notification_url" => $notificationUrl,
-                "external_reference" => $externalReference,
-                "auto_return" => "approved",
-                "metadata" => $metadata,
+            // 📝 Mapear los items del carrito para el formato de Mercado Pago
+            $items = $cart->cart_items->map(function ($item) {
+                // Asunción: Los modelos tienen las relaciones correctas
+                $product = $item->artesania_variant ?? $item->artesania; 
+                return [
+                    // Se incluye el ID, el título, descripción, cantidad y precio.
+                    "id" => (string) $product->id, // Recomendado asegurar que es string
+                    "title" => $product->name,
+                    "description" => $product->description,
+                    "quantity" => (int) $item->quantity, // Asegurar tipo
+                    "unit_price" => (float) $item->price, // Asegurar tipo
+                ];
+            })->toArray();
+            
+            // 📦 Agregar el costo de envío como un item separado
+            $shippingCost = $selectedQuote['totalPrice'] ?? 0;
+            $items[] = [
+                "title" => "Costo de Envío",
+                "description" => "Envío con {$selectedQuote['carrier']['name']} - {$selectedQuote['service']['name']}",
+                "quantity" => 1,
+                "unit_price" => (float) $shippingCost,
             ];
 
-            $request_options = new RequestOptions();
-            $request_options->setCustomHeaders([
-                "X-Idempotency-Key: " . uniqid("pref_", true)
-            ]);
+            // 👤 Preparar la información del comprador (payer)
+            $user = $cart->user;
+            $payer = [
+                "name" => $user->name,
+                "surname" => $user->last_name,
+                "email" => $user->email,
+                // 📞 Añadir el teléfono mejora la tasa de conversión
+                "phone" => [
+                    "area_code" => $shippingAddress->area_code ?? "DEFAULT", 
+                    "number" => $shippingAddress->phone_number,
+                ],
+                "address" => [
+                    "zip_code" => $shippingAddress->postal_code,
+                    "street_name" => $shippingAddress->street,
+                    "street_number" => $shippingAddress->number,
+                ],
+            ];
 
-            $preference = $client->create($preferenceRequest, $request_options);
+            // ⚙️ Crear la preferencia con datos dinámicos
+            $preference = $this->preferenceClient->create([ // Usar preferenceClient
+                "items" => $items,
+                "payer" => $payer,
+                "back_urls" => [
+                    // Usar helper 'route' de Laravel
+                    "success" => route('checkout.success'),
+                    "pending" => route('checkout.pending'),
+                    "failure" => route('checkout.failure'),
+                ],
+                "auto_return" => "approved",
+                "external_reference" => (string) $orderId, // Clave para el webhook
+                "notification_url" => route('mercadopago.webhook'), // URL pública del webhook
+            ]);
 
             return $preference;
 
-        } catch (MPApiException $e) {
-            Log::error("Error MercadoPago API al crear preferencia: " . $e->getMessage() . " Detalles: " . json_encode($e->getApiResponse()));
-            throw $e;
-        } catch (\Exception $e) {
-            Log::error("Error general MercadoPago al crear preferencia: " . $e->getMessage());
-            throw $e;
+        } catch (MPApiException $e) { // Excepción de la API de MP (Error de negocio)
+            $errorContent = $e->getApiResponse()->getContent();
+            Log::error('Error al crear preferencia de Mercado Pago: ' . json_encode($errorContent));
+            throw new Exception("Error al procesar el pago. Por favor, inténtalo de nuevo. Detalles: " . $errorContent['message'] ?? 'Error desconocido');
+
+        } catch (Exception $e) { // Excepción general (Error de código/conexión)
+            Log::error('Error inesperado en MercadoPagoService: ' . $e->getMessage());
+            throw new Exception("Error interno al procesar el pago. Por favor, contacta a soporte.");
         }
     }
 
-    /**
-     * Procesa un pago directo con token de tarjeta.
-     * Implementación del nuevo método.
-     */
-    public function procesarPagoDirecto(float $amount, string $token, array $payerData, string $description, int $installments, string $externalReference): object
+    // -------------------------------------------------------------
+    // MÉTODO PARA MANEJAR EL WEBHOOK DE NOTIFICACIONES
+    // -------------------------------------------------------------
+    public function handleWebhook(Request $request)
     {
-        $paymentClient = new PaymentClient(); // <--- Usamos PaymentClient para pagos directos
-
-        try {
-            $paymentRequest = [
-                "transaction_amount" => $amount,
-                "token" => $token,
-                "description" => $description,
-                "installments" => $installments,
-                // "payment_method_id" => "visa", // No es necesario si el token es válido, MP lo deduce
-                "payer" => [
-                    "email" => $payerData['email'] ?? null,
-                    "first_name" => $payerData['name'] ?? null,
-                    "last_name" => $payerData['surname'] ?? null,
-                    "identification" => [
-                        "type" => $payerData['identification_type'] ?? null,
-                        "number" => $payerData['identification_number'] ?? null,
-                    ],
-                ],
-                // Opcional: URL de notificación para webhooks de este pago directo
-                "notification_url" => route('mercadopago.webhook'), // Puedes usar el mismo webhook si tu handleWebhook es robusto
-                "external_reference" => $externalReference,
-                // Puedes añadir un statement_descriptor
-                // "statement_descriptor" => "RAICES ARTESANALES",
-            ];
-
-            $request_options = new RequestOptions();
-            $request_options->setCustomHeaders(["X-Idempotency-Key: " . uniqid("direct_pay_", true)]);
-
-            $payment = $paymentClient->create($paymentRequest, $request_options);
-
-            return $payment;
-
-        } catch (MPApiException $e) {
-            Log::error("Error MercadoPago API al procesar pago directo: " . $e->getMessage() . " Detalles: " . json_encode($e->getApiResponse()));
-            throw $e;
-        } catch (\Exception $e) {
-            Log::error("Error general al procesar pago directo: " . $e->getMessage());
-            throw $e;
+        $data = $request->all();
+        
+        // 1. Validar el tipo de evento y recurso
+        if (($data['type'] ?? null) !== 'payment') {
+            Log::info('Webhook ignorado (no es pago):', $data);
+            return; // Devuelve 200 OK para evitar reintentos de MP
         }
-    }
 
-    public function handleWebhook(array $data): bool
-    {
-        // ... (Tu implementación existente del handleWebhook) ...
-        Log::info('Webhook de Mercado Pago recibido en el servicio: ', $data);
-
-        $topic = $data['topic'] ?? null;
-        $id = $data['id'] ?? null;
-
-        if (!$topic || !$id) {
-            Log::warning('Webhook recibido sin topic o ID.');
-            return false;
+        $resourceId = $data['data']['id'] ?? null;
+        if (is_null($resourceId)) {
+            Log::error('Webhook recibido sin ID de recurso:', $data);
+            return; 
         }
 
         try {
-            if ($topic === 'payment') {
-                $paymentClient = new \MercadoPago\Client\Payment\PaymentClient();
-                $payment = $paymentClient->get($id);
+            // 2. Consultar el pago a la API de Mercado Pago para confirmar la validez
+            $payment = $this->paymentClient->get($resourceId);
 
-                if ($payment && isset($payment->external_reference)) {
-                    $order = \App\Models\Order::where('external_reference', $payment->external_reference)->first();
+            // 3. Obtener el ID de la orden
+            $orderId = $payment->external_reference;
+            $order = Order::find($orderId);
 
-                    if ($order) {
-                        Log::info("Webhook de pago para orden #{$order->id}. Estado MP: {$payment->status}");
-
-                        if ($payment->status === 'approved') {
-                            $order->status = 'completed';
-                            // Asegúrate de que el stock se reduce solo una vez, si no lo hiciste al crear la orden.
-                            // Si el stock se reduce al crear la orden, verifica que no se duplique aquí.
-                        } elseif ($payment->status === 'pending') {
-                            $order->status = 'pending_payment';
-                        } elseif ($payment->status === 'rejected') {
-                            $order->status = 'failed';
-                            // Revertir el stock si fue reducido al crear la orden.
-                        }
-                        $order->mp_payment_id = $payment->id;
-                        $order->save();
-                        return true;
-                    } else {
-                        Log::warning('Webhook de pago: Orden no encontrada con external_reference: ' . $payment->external_reference);
-                    }
-                }
+            if (!$order) {
+                Log::error("Orden no encontrada con external_reference: {$orderId} para el pago {$resourceId}");
+                return;
             }
-            // Puedes añadir lógica para 'merchant_order' u otros topics si es necesario.
-            // Para la compra directa, solo 'payment' suele ser relevante.
+
+            $newPaymentStatus = $payment->status;
+
+            // 4. Procesar solo si el estado es nuevo (evita reintentos o redundancia)
+            if ($order->payment_status !== $newPaymentStatus) {
+                
+                // ⚡️ RECOMENDACIÓN: Mover la lógica pesada a un Job Asíncrono
+                // Esto asegura que la respuesta HTTP 200 al webhook sea inmediata, 
+                // evitando reintentos de Mercado Pago.
+
+                DB::transaction(function () use ($order, $newPaymentStatus, $resourceId) {
+                    $order->update([
+                        'payment_id' => $resourceId, 
+                        'payment_status' => $newPaymentStatus,
+                    ]);
+
+                    if ($newPaymentStatus === 'approved') {
+                        // El pago fue aprobado. 
+                        // Mueve la lógica compleja (stock, carrito, email) a un Job o Evento.
+                        $order->update(['status' => 'processing']);
+                        // event(new PaymentApproved($order)); 
+                        
+                    } elseif ($newPaymentStatus === 'rejected') {
+                        $order->update(['status' => 'cancelled']);
+                        // Si se había reservado stock, aquí se liberaría.
+                    }
+                    
+                    Log::info("Orden {$order->id} actualizada a estado de pago: {$newPaymentStatus} (Pago MP: {$resourceId})");
+                });
+
+                // Si usas un Job (Mejor Práctica):
+                // ProcessMercadoPagoPayment::dispatch($order->id, $resourceId, $newPaymentStatus);
+
+            } else {
+                Log::info("Estado de pago para la orden {$orderId} ya es {$newPaymentStatus}. Procesamiento omitido.");
+            }
 
         } catch (MPApiException $e) {
-            Log::error("Error MercadoPago API al procesar webhook de pago: " . $e->getMessage() . " Detalles: " . json_encode($e->getApiResponse()));
-            return false;
-        } catch (\Exception $e) {
-            Log::error("Error general al procesar webhook: " . $e->getMessage());
-            return false;
+            Log::error('Error de API al consultar pago en Webhook: ' . json_encode($e->getApiResponse()->getContent()), ['resourceId' => $resourceId]);
+        } catch (Exception $e) {
+            Log::error('Error general al procesar Webhook:', ['message' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
         }
-
-        return false;
     }
 }

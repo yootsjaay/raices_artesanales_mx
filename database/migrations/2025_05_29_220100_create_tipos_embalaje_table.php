@@ -20,6 +20,7 @@ return new class extends Migration
             $table->decimal('width', 8, 2)->default(0.00)->comment('Ancho de la artesanía embalada en CM');
             $table->decimal('height', 8, 2)->default(0.00)->comment('Alto de la artesanía embalada en CM');
             $table->boolean('is_active')->default(true)->comment('Indicates if this packaging type is active for selection');
+            $table->unsignedBigInteger('package_envia_id')->nullable()->comment('ID del paquete en Envia.com');
             $table->timestamps();
         });
     }

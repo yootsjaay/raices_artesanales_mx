@@ -14,6 +14,7 @@ class EnviaService
     {
        $this->apiKey = config('services.envia.api_key');
         $this->baseUrl = config('services.envia.base_url');
+        $this->baseQueries= config('services.envia.base_queries');
 
     }
 
@@ -90,6 +91,34 @@ public function createShipment(array $data)
         ];
     }
 }
+    public function createPackage(array $data){
+    try {
+        $response = Http::withHeaders([
+            'Content-Type'  => 'application/json',
+            'Authorization' => 'Bearer ' . $this->apiKey,
+        ])->post("{$this->baseQueries}/packages", $data);
+
+        if ($response->successful()) {
+            Log::info('Paquete creado exitosamente', [
+                'response' => $response->json()
+            ]);
+            return $response->json();
+        } else {
+            Log::error('Error al crear paquete en Envia.com', [
+                'status'       => $response->status(),
+                'body'         => $response->body(),
+                'request_data' => $data,
+            ]);
+            return null;
+        }
+    } catch (\Exception $e) {
+        Log::error('Exception al crear paquete en Envia.com: ' . $e->getMessage(), [
+            'trace' => $e->getTraceAsString()
+        ]);
+        return null;
+    }
+}
+
 
     // Puedes agregar más métodos según las funcionalidades que necesites, siguiendo la misma estructura.
 }

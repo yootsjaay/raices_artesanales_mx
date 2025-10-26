@@ -10,7 +10,6 @@ use App\Http\Controllers\CommentController;
 use App\Http\Controllers\CarritoController;
 use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\ShippingController;
-use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\AddressController;
 use App\Http\Controllers\CompradorController;
 
@@ -22,7 +21,6 @@ use App\Http\Controllers\Admin\DashboardController;
 
 use Illuminate\Support\Facades\Auth;
 
-use App\Http\Controllers\Admin\CommentController as AdminCommentController;
 use App\Http\Controllers\PagoController;
 
 // routes/web.php
@@ -48,7 +46,6 @@ Route::resource('artesanias', AdminArtesaniaController::class)
     Route::get('artesanias/import', [AdminArtesaniaController::class, 'importForm'])->name('artesanias.import.form');
     Route::post('artesanias/import', [AdminArtesaniaController::class, 'import'])->name('artesanias.import');
 
-    Route::resource('comments', AdminCommentController::class)->except(['create', 'edit', 'store']);
     Route::resource('artesanias', AdminArtesaniaController::class);
     Route::resource('ubicacion', AdminUbicacionController::class);
     Route::resource('categorias', AdminCategoriaController::class);
@@ -60,55 +57,30 @@ Route::resource('artesanias', AdminArtesaniaController::class)
 
 });
 
-
-
 // =================== COMPRADOR - CARRITO, CHECKOUT, COMENTARIOS ===================
 Route::middleware(['auth', 'role:comprador'])->group(function () {
-    // Carrito
-    Route::get('/carrito', [CarritoController::class, 'mostrar'])->name('carrito.mostrar');
-    Route::post('/carrito/agregar', [CarritoController::class, 'agregar'])->name('carrito.agregar');
-    Route::put('/carrito/actualizar', [CarritoController::class, 'actualizar'])->name('carrito.actualizar');
-    Route::delete('/carrito/remover', [CarritoController::class, 'remover'])->name('carrito.remover');
-    Route::post('/carrito/vaciar', [CarritoController::class, 'vaciar'])->name('carrito.vaciar');
-
-    // Checkout
-    Route::get('/checkout', [CheckoutController::class, 'show'])->name('checkout.show');
-    Route::post('/checkout', [CheckoutController::class, 'checkout'])->name('checkout.process');
-    Route::get('/checkout/success', [CheckoutController::class, 'success'])->name('checkout.success');
-
-    // Comentarios
-    Route::post('artesanias/{artesania}/comments', [CommentController::class, 'store'])->name('artesanias.comments.store');
-     
-        // Paso 1: Dirección de Envío
-    // Muestra el formulario para ingresar/seleccionar la dirección de envío
-    Route::get('/checkout/shipping', [CheckoutController::class, 'showShippingForm'])->name('checkout.shipping');
-    // Procesa el envío del formulario de dirección y guarda la dirección
-    Route::post('/checkout/shipping', [CheckoutController::class, 'processShipping'])->name('checkout.process_shipping');
-
-    // Paso 2: Selección del Método de Envío (Aquí es donde se cotiza con Envia.com)
-    // Muestra las opciones de envío disponibles
-    Route::get('/checkout/shipping-method', [CheckoutController::class, 'showShippingMethodForm'])->name('checkout.shipping_method');
-    // Procesa la selección del método de envío por parte del cliente
-    Route::post('/checkout/shipping-method', [CheckoutController::class, 'processShippingMethod'])->name('checkout.process_shipping_method');
-        Route::post('/checkout/shipping', [CheckoutController::class, 'storeShippingAddress'])->name('checkout.storeShippingAddress');
-
-    Route::post('/checkout/shipping', [CheckoutController::class, 'processShipping'])->name('checkout.process_shipping');
-    // Paso 3: Resumen del Pedido y Pago
-    // Muestra el resumen final del pedido antes del pago
-    Route::get('/checkout/payment', [CheckoutController::class, 'showPaymentForm'])->name('checkout.payment');
-    // Procesa el pago y finaliza el pedido
-    Route::post('/checkout/payment', [CheckoutController::class, 'processPayment'])->name('checkout.process_payment');
-     Route::get('/checkout/review', function() {
-        return view('checkout.review'); // Create this view next
-    })->name('checkout.review');
-
-    // Paso 4: Confirmación del Pedido
-    // Muestra la página de confirmación después de un pedido exitoso
-    Route::get('/order/confirmation/{order}', [CheckoutController::class, 'confirmation'])->name('order.confirmation');
-
-
-
+   Route::prefix('carrito')->group(function () {
+    Route::get('/', [CarritoController::class, 'mostrar'])->name('carrito.mostrar');
+    Route::post('/agregar', [CarritoController::class, 'agregar'])->name('carrito.agregar');
+    Route::put('/actualizar', [CarritoController::class, 'actualizar'])->name('carrito.actualizar');
+    Route::delete('/remover', [CarritoController::class, 'remover'])->name('carrito.remover');
+    Route::post('/vaciar', [CarritoController::class, 'vaciar'])->name('carrito.vaciar');
 });
+
+    // Rutas de Checkout
+    Route::get('/checkout/shipping', [CheckoutController::class, 'showShippingForm'])->name('checkout.shipping');
+    Route::post('/checkout/shipping', [CheckoutController::class, 'processShippingAndQuote'])->name('checkout.process_shipping');
+    Route::get('/checkout/shipping-method', [CheckoutController::class, 'showShippingMethodForm'])->name('checkout.shipping_method');
+    Route::post('/checkout/payment', [CheckoutController::class, 'processPayment'])->name('checkout.payment'); 
+    Route::get('/checkout/payment/success', [CheckoutController::class, 'paymentSuccess'])->name('checkout.success');
+    Route::get('/checkout/payment/pending', [CheckoutController::class, 'paymentPending'])->name('checkout.pending');
+    Route::get('/checkout/payment/failure', [CheckoutController::class, 'paymentFailure'])->name('checkout.failure');
+    Route::get('/order/confirmation/{order}', [CheckoutController::class, 'confirmation'])->name('order.confirmation');
+    Route::post('mercadopago/webhook', [CheckoutController::class, 'handleMercadoPagoWebhook'])->name('mercadopago.webhook');
+});
+
+// Comentarios - si estos no requieren autenticación, sácalos del grupo 'auth'
+Route::post('artesanias/{artesania}/comments', [CommentController::class, 'store'])->name('artesanias.comments.store');
 
 
 // =================== PAGO / MERCADO PAGO ===================

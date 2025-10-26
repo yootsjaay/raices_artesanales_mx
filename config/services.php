@@ -40,6 +40,7 @@ return [
  'envia' => [
         'base_url' => env('ENVIA_BASE_URL'), // Siempre es bueno
         'api_key' => env('ENVIA_API_KEY'),
+        'base_queries' =>env('ENVIA_QUERIES_URL'),
         'origin_address_id' => env('ENVIA_ORIGIN_ID'),
 
  ],

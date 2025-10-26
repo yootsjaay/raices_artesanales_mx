@@ -25,23 +25,18 @@ class CarritoController extends Controller
 }
 
 
-    // CUIDADO: Hacemos este método público para que CheckoutController pueda usarlo
-    // Si prefieres un Servicio, esa es la opción más limpia a largo plazo.
+    
     public function getOrCreateCart()
     {
-        // Si el usuario no está logueado, lo redirigimos
+       
         if (!Auth::check()) {
-            // Podrías lanzar una excepción o redirigir directamente,
-            // pero para el contexto del carrito, es mejor manejarlo donde se llama
-            // o usar middleware para proteger las rutas.
-            return null; // Indicamos que no hay carrito si no está logueado
+           return null; // Indicamos que no hay carrito si no está logueado
         }
 
         // Usuario logueado: buscar su carrito o crear uno
         return Cart::firstOrCreate(['user_id' => Auth::id()]);
     }
 
-    // Ya no necesitamos syncGuestCart() si los invitados no tienen carrito persistente
 
  
 
@@ -101,7 +96,7 @@ public function agregar(Request $request)
                 return back()->with('error', 'Por favor, selecciona una variante para esta artesanía.');
             }
 
-            // ⚠️ Solo si tu tabla artesanias tiene campo `stock`, si no hay que quitar esto
+            // Solo si tu tabla artesanias tiene campo `stock`, si no hay que quitar esto
             if (isset($artesania->stock) && $artesania->stock < $quantity) {
                 return back()->with('error', 'No hay suficiente stock para este producto. Solo quedan ' . $artesania->stock . ' unidades.');
             }
